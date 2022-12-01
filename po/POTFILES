@@ -1,0 +1,6 @@
+data/org.gnome.Telex.desktop.in
+data/org.gnome.Telex.appdata.xml.in
+data/org.gnome.Telex.gschema.xml
+src/main.py
+src/window.py
+src/window.ui
