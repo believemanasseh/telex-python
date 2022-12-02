@@ -17,12 +17,12 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from gi.repository import Adw
-from gi.repository import Gtk
+from gi.repository import Adw, Gtk
 
-@Gtk.Template(resource_path='/org/gnome/Telex/window.ui')
-class TelexPythonWindow(Adw.ApplicationWindow):
-    __gtype_name__ = 'TelexPythonWindow'
+
+@Gtk.Template(resource_path='main.ui')
+class MainWindow(Adw.ApplicationWindow):
+    __gtype_name__ = 'MainWindow'
 
     label = Gtk.Template.Child()
 

@@ -28,7 +28,7 @@ configure_file(
 telex_python_sources = [
   '__init__.py',
   'main.py',
-  'window.py',
+  'windows.py',
 ]
 
 install_data(telex_python_sources, install_dir: moduledir)

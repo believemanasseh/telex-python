@@ -20,22 +20,24 @@
 import sys
 import gi
 
-gi.require_version('Gtk', '4.0')
-gi.require_version('Adw', '1')
+gi.require_version("Gtk", "4.0")
+gi.require_version("Adw", "1")
 
 from gi.repository import Gtk, Gio, Adw
-from .window import TelexPythonWindow
+from src.windows import MainWindow
 
 
-class Telex-pythonApplication(Adw.Application):
+class Telex(Adw.Application):
     """The main application singleton class."""
 
     def __init__(self):
-        super().__init__(application_id='org.gnome.Telex',
-                         flags=Gio.ApplicationFlags.FLAGS_NONE)
-        self.create_action('quit', self.quit, ['<primary>q'])
-        self.create_action('about', self.on_about_action)
-        self.create_action('preferences', self.on_preferences_action)
+        super().__init__(
+            application_id="org.gnome.Telex",
+            flags=Gio.ApplicationFlags.FLAGS_NONE,
+        )
+        self.create_action("quit", self.quit, ["<primary>q"])
+        self.create_action("about", self.on_about_action)
+        self.create_action("preferences", self.on_preferences_action)
 
     def do_activate(self):
         """Called when the application is activated.
@@ -45,23 +47,25 @@ class Telex-pythonApplication(Adw.Application):
         """
         win = self.props.active_window
         if not win:
-            win = TelexPythonWindow(application=self)
+            win = MainWindow(application=self)
         win.present()
 
     def on_about_action(self, widget, _):
         """Callback for the app.about action."""
-        about = Adw.AboutWindow(transient_for=self.props.active_window,
-                                application_name='telex-python',
-                                application_icon='org.gnome.Telex',
-                                developer_name='manasseh',
-                                version='0.1.0',
-                                developers=['manasseh'],
-                                copyright='© 2022 manasseh')
+        about = Adw.AboutWindow(
+            transient_for=self.props.active_window,
+            application_name="telex",
+            application_icon="org.gnome.Telex",
+            developer_name="manasseh",
+            version="0.1.0",
+            developers=["manasseh"],
+            copyright="© 2022 manasseh",
+        )
         about.present()
 
     def on_preferences_action(self, widget, _):
         """Callback for the app.preferences action."""
-        print('app.preferences action activated')
+        print("app.preferences action activated")
 
     def create_action(self, name, callback, shortcuts=None):
         """Add an application action.
@@ -81,5 +85,5 @@ class Telex-pythonApplication(Adw.Application):
 
 def main(version):
     """The application's entry point."""
-    app = Telex-pythonApplication()
+    app = Telex()
     return app.run(sys.argv)
