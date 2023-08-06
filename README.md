@@ -1,2 +1,2 @@
 # telex-python
-Python version of Telegram client
+Python version of Reddit client
