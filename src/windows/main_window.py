@@ -38,7 +38,7 @@ class MainWindow(Gtk.ApplicationWindow):
         self.register_btn = Gtk.Button(label="Register")
         self.box.append(self.login_btn)
         self.box.append(self.register_btn)
-        self.login_btn.connect("clicked", self.login)
+        self.login_btn.connect("clicked", self.logisn)
         self.register_btn.connect("clicked", self.register)
 
     def login(self, widget: Gtk.Button) -> None:
