@@ -20,11 +20,38 @@
 from gi.repository import Adw, Gtk
 
 
-@Gtk.Template(resource_path='main.ui')
-class MainWindow(Adw.ApplicationWindow):
+@Gtk.Template(resource_path="/org/gnome/Telex/main.ui")
+class MainWindow(Gtk.ApplicationWindow):
     __gtype_name__ = 'MainWindow'
 
     label = Gtk.Template.Child()
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.set_title("PyTelex")
+        self.set_default_size(300, 600)
+        Gtk.TextTag.background = 0000
+        self.box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        self.set_child(self.box)
+        self.box.set_margin_top(250)
+        self.login_btn = Gtk.Button(label="Login")
+        self.register_btn = Gtk.Button(label="Register")
+        self.box.append(self.login_btn)
+        self.box.append(self.register_btn)
+        self.login_btn.connect("clicked", self.login)
+        self.register_btn.connect("clicked", self.register)
+
+    def login(self, widget: Gtk.Button) -> None:
+        print("Logged in")
+        print(widget, "widget")
+        win = Gtk.AboutDialog(
+            version="1.0",
+            authors=["Believe Manasseh"],
+            program_name="PyTelex"
+        )
+        win.present()
+
+    def register(self, widget: Gtk.Button) -> None:
+        print("Signed up")
+
+

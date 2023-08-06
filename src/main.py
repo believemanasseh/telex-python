@@ -35,7 +35,7 @@ class Telex(Adw.Application):
             application_id="org.gnome.Telex",
             flags=Gio.ApplicationFlags.FLAGS_NONE,
         )
-        self.create_action("quit", self.quit, ["<primary>q"])
+        self.create_action("quit", self.on_quit_action, ["<primary>q"])
         self.create_action("about", self.on_about_action)
         self.create_action("preferences", self.on_preferences_action)
 
@@ -50,16 +50,14 @@ class Telex(Adw.Application):
             win = MainWindow(application=self)
         win.present()
 
+    def on_quit_action(self, _action, _pspec):
+        self.quit()
+
     def on_about_action(self, widget, _):
         """Callback for the app.about action."""
-        about = Adw.AboutWindow(
-            transient_for=self.props.active_window,
-            application_name="telex",
-            application_icon="org.gnome.Telex",
-            developer_name="manasseh",
-            version="0.1.0",
-            developers=["manasseh"],
-            copyright="© 2022 manasseh",
+        about = Gtk.AboutDialog(
+            version="1.0",
+            authors=["Believe Manasseh"]
         )
         about.present()
 
@@ -76,6 +74,7 @@ class Telex(Adw.Application):
               activated
             shortcuts: an optional list of accelerators
         """
+        print("second")
         action = Gio.SimpleAction.new(name, None)
         action.connect("activate", callback)
         self.add_action(action)
