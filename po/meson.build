@@ -1,1 +1,1 @@
-i18n.gettext('telex-python', preset: 'glib')
+i18n.gettext('telex', preset: 'glib')

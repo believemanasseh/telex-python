@@ -1,13 +1,5 @@
 pkgdatadir = join_paths(get_option('prefix'), get_option('datadir'), meson.project_name())
 moduledir = join_paths(pkgdatadir, 'telex_python')
-gnome = import('gnome')
-
-gnome.compile_resources('telex-python',
-  'telex-python.gresource.xml',
-  gresource_bundle: true,
-  install: true,
-  install_dir: pkgdatadir,
-)
 
 python = import('python')
 
@@ -19,7 +11,7 @@ conf.set('pkgdatadir', pkgdatadir)
 
 configure_file(
   input: 'telex-python.in',
-  output: 'telex-python',
+  output: 'telex',
   configuration: conf,
   install: true,
   install_dir: get_option('bindir')
@@ -28,7 +20,7 @@ configure_file(
 telex_python_sources = [
   '__init__.py',
   'main.py',
-  'windows.py',
+  'window.py',
 ]
 
 install_data(telex_python_sources, install_dir: moduledir)

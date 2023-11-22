@@ -18,13 +18,15 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import sys
+
 import gi
 
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 
-from gi.repository import Gtk, Gio, Adw
-from src.windows import MainWindow
+from gi.repository import Adw, Gio, Gtk
+
+from .window import Window
 
 
 class Telex(Adw.Application):
@@ -47,7 +49,7 @@ class Telex(Adw.Application):
         """
         win = self.props.active_window
         if not win:
-            win = MainWindow(application=self)
+            win = Window(application=self)
         win.present()
 
     def on_quit_action(self, _action, _pspec):
@@ -55,10 +57,7 @@ class Telex(Adw.Application):
 
     def on_about_action(self, widget, _):
         """Callback for the app.about action."""
-        about = Gtk.AboutDialog(
-            version="1.0",
-            authors=["Believe Manasseh"]
-        )
+        about = Gtk.AboutDialog(version="1.0", authors=["Believe Manasseh"])
         about.present()
 
     def on_preferences_action(self, widget, _):
@@ -74,7 +73,6 @@ class Telex(Adw.Application):
               activated
             shortcuts: an optional list of accelerators
         """
-        print("second")
         action = Gio.SimpleAction.new(name, None)
         action.connect("activate", callback)
         self.add_action(action)

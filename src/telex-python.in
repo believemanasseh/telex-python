@@ -38,9 +38,9 @@ gettext.install('telex-python', localedir)
 if __name__ == '__main__':
     import gi
 
-    from gi.repository import Gio
-    resource = Gio.Resource.load(os.path.join(pkgdatadir, 'telex-python.gresource'))
-    resource._register()
+    #from gi.repository import Gio
+    #resource = Gio.Resource.load(os.path.join(pkgdatadir, 'telex-python.gresource'))
+    #resource._register()
 
     from telex_python import main
     sys.exit(main.main(VERSION))

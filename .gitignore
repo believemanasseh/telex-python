@@ -1,3 +1,6 @@
 usr/
 __pycache__/
-.vscode/
+.vscode
+env/
+build/
+builddir/

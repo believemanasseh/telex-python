@@ -1,6 +1,6 @@
 [Desktop Entry]
-Name=telex-python
-Exec=telex-python
+Name=telex
+Exec=telex
 Icon=org.gnome.Telex
 Terminal=false
 Type=Application

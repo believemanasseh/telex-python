@@ -3,7 +3,7 @@
     "runtime": "org.gnome.Platform",
     "runtime-version": "43",
     "sdk": "org.gnome.Sdk",
-    "command": "telex-python",
+    "command": "telex",
     "finish-args": [
         "--share=network",
         "--share=ipc",
@@ -23,7 +23,7 @@
         "*.a"
     ],
     "modules": [{
-        "name": "telex-python",
+        "name": "telex",
         "builddir": true,
         "buildsystem": "meson",
         "sources": [{
