@@ -1,8 +1,8 @@
 #!@PYTHON@
 
-# telex-python.in
+# telex.in
 #
-# Copyright 2022 manasseh
+# Copyright 2022-2024 manasseh
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -31,16 +31,10 @@ localedir = '@localedir@'
 
 sys.path.insert(1, pkgdatadir)
 signal.signal(signal.SIGINT, signal.SIG_DFL)
-locale.bindtextdomain('telex-python', localedir)
-locale.textdomain('telex-python')
-gettext.install('telex-python', localedir)
+locale.bindtextdomain('telex', localedir)
+locale.textdomain('telex')
+gettext.install('telex', localedir)
 
 if __name__ == '__main__':
-    import gi
-
-    #from gi.repository import Gio
-    #resource = Gio.Resource.load(os.path.join(pkgdatadir, 'telex-python.gresource'))
-    #resource._register()
-
     from telex_python import main
     sys.exit(main.main(VERSION))

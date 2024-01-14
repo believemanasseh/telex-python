@@ -1,2 +1,2 @@
-# telex-python
-A Reddit desktop client for Linux, Windows and macOS
+# Telex
+Python implementation of a Reddit GUI client for Linux, Windows and macOS

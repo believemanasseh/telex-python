@@ -10,7 +10,7 @@ conf.set('localedir', join_paths(get_option('prefix'), get_option('localedir')))
 conf.set('pkgdatadir', pkgdatadir)
 
 configure_file(
-  input: 'telex-python.in',
+  input: 'telex.in',
   output: 'telex',
   configuration: conf,
   install: true,

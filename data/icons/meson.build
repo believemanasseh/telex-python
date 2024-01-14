@@ -1,4 +1,4 @@
-application_id = 'org.gnome.Telex'
+application_id = 'xyz.daimones.telex'
 
 scalable_dir = join_paths('hicolor', 'scalable', 'apps')
 install_data(

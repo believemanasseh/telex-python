@@ -1,6 +1,7 @@
-data/org.gnome.Telex.desktop.in
-data/org.gnome.Telex.appdata.xml.in
-data/org.gnome.Telex.gschema.xml
+data/xyz.daimones.telex.desktop.in
+data/xyz.daimones.telex.appdata.xml.in
+data/xyz.daimones.telex.gschema.xml
+src/window.ui
 src/main.py
 src/window.py
-src/window.ui
+
