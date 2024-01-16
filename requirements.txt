@@ -1,2 +1,0 @@
-pygobject-stubs==2.8.0
-PyGObject==3.44.1

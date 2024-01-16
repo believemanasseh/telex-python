@@ -1,7 +1,7 @@
 project('telex',
           version: '0.1.0',
     meson_version: '>= 0.59.0',
-  default_options: [ 'warning_level=2', 'werror=false', ],
+  default_options: [ 'warning_level=2', 'werror=false', 'prefix=/home/manasseh/telex_python' ],
 )
 
 i18n = import('i18n')
