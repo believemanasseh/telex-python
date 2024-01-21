@@ -5,3 +5,5 @@ env/
 build/
 builddir/
 .idea/
+bin
+share
