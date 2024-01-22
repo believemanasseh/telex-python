@@ -1,0 +1,6 @@
+#!/bin/bash
+
+meson setup --reconfigure build
+meson compile -C build
+meson install -C build
+./bin/telex
