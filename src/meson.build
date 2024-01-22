@@ -14,7 +14,7 @@ configure_file(
   output: 'telex',
   configuration: conf,
   install: true,
-  install_dir: get_option('bindir')
+  install_dir: get_option('bindir'),
 )
 
 telex_python_sources = [
@@ -24,3 +24,7 @@ telex_python_sources = [
 ]
 
 install_data(telex_python_sources, install_dir: moduledir)
+
+subdir('windows')
+
+

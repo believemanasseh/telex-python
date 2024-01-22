@@ -17,7 +17,7 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from gi.repository import Gtk
+from .main import Gtk
 
 
 class Window(Gtk.ApplicationWindow):
@@ -60,6 +60,22 @@ class Window(Gtk.ApplicationWindow):
         self.login_btn.connect("clicked", self.on_login)
         self.register_btn.connect("clicked", self.on_register)
 
+    def on_register(self, widget: Gtk.Widget):
+        data = {
+            "button_label": "Register",
+            "text": "Already a user?",
+            "event_handler": self.on_login,
+        }
+        self.load_page(data)
+
+    def on_login(self, widget: Gtk.Widget):
+        data = {
+            "button_label": "Login",
+            "text": "Not yet registered?",
+            "event_handler": self.on_register,
+        }
+        self.load_page(data)
+
     def set_button_color(self, button: Gtk.Button, label: str):
         button.set_label(label)
         button.set_name("btn")
@@ -74,38 +90,28 @@ class Window(Gtk.ApplicationWindow):
         context = button.get_style_context()
         context.add_provider(css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
-    def on_login(self, widget: Gtk.Button) -> None:
+    def load_page(self, data):
         self.box.set_visible(False)
-        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10, width_request=200)
+        box = Gtk.Box(
+            name="login",
+            orientation=Gtk.Orientation.VERTICAL,
+            spacing=10,
+        )
         box.set_halign(Gtk.Align.CENTER)
         box.set_valign(Gtk.Align.CENTER)
         self.set_child(box)
-        self.email_field = Gtk.Entry.new()
-        self.email_field.set_placeholder_text("Enter email address")
-        self.password_field = Gtk.Entry.new()
-        self.password_field.set_placeholder_text("Enter password")
+        self.email_field = Gtk.Entry(placeholder_text="Enter email address")
+        self.password_field = Gtk.Entry(placeholder_text="Enter password")
         box.append(self.email_field)
         box.append(self.password_field)
-        button = widget.new()
-        self.set_button_color(button, "Login")
+        button = self.login_btn.new()
+        self.set_button_color(button, data["button_label"])
         box.append(button)
-        self.stack.add_child(box)
-        box.set_visible(True)
-
-    def on_register(self, widget: Gtk.Button) -> None:
-        self.box.set_visible(False)
-        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10, width_request=200)
-        box.set_halign(Gtk.Align.CENTER)
-        box.set_valign(Gtk.Align.CENTER)
-        self.set_child(box)
-        self.email_field = Gtk.Entry.new()
-        self.email_field.set_placeholder_text("Enter email address")
-        self.password_field = Gtk.Entry.new()
-        self.password_field.set_placeholder_text("Enter password")
-        box.append(self.email_field)
-        box.append(self.password_field)
-        button = widget.new()
-        self.set_button_color(button, "Register")
-        box.append(button)
-        self.stack.add_child(box)
+        text = Gtk.Text(text=data["text"])
+        link_btn = Gtk.LinkButton(label="click here")
+        link_btn.connect("clicked", data["event_handler"])
+        info_box = Gtk.Box(name="info", orientation=Gtk.Orientation.HORIZONTAL)
+        info_box.append(text)
+        info_box.append(link_btn)
+        box.append(info_box)
         box.set_visible(True)

@@ -1,9 +1,14 @@
-usr/
-__pycache__/
+__pycache__
+
+# IDE
 .vscode
-env/
-build/
-builddir/
-.idea/
+.idea
+
+# Virtualenv
+env
+
+# Meson
+build
+builddir
 bin
 share
