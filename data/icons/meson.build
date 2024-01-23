@@ -1,4 +1,4 @@
-application_id = 'xyz.daimones.telex'
+application_id = 'xyz.daimones.Telex'
 
 scalable_dir = join_paths('hicolor', 'scalable', 'apps')
 install_data(

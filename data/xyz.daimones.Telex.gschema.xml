@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist gettext-domain="telex">
-	<schema id="xyz.daimones.telex" path="/xyz/daimones/telex/">
+	<schema id="xyz.daimones.Telex" path="/xyz/daimones/telex/">
 	</schema>
 </schemalist>

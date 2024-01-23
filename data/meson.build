@@ -1,6 +1,6 @@
 desktop_file = i18n.merge_file(
-  input: 'xyz.daimones.telex.desktop.in',
-  output: 'xyz.daimones.telex.desktop',
+  input: 'xyz.daimones.Telex.desktop.in',
+  output: 'xyz.daimones.Telex.desktop',
   type: 'desktop',
   po_dir: '../po',
   install: true,
@@ -15,8 +15,8 @@ if desktop_utils.found()
 endif
 
 appstream_file = i18n.merge_file(
-  input: 'xyz.daimones.telex.appdata.xml.in',
-  output: 'xyz.daimones.telex.appdata.xml',
+  input: 'xyz.daimones.Telex.appdata.xml.in',
+  output: 'xyz.daimones.Telex.appdata.xml',
   po_dir: '../po',
   install: true,
   install_dir: join_paths(get_option('datadir'), 'appdata')
@@ -29,7 +29,7 @@ if appstream_util.found()
   )
 endif
 
-install_data('xyz.daimones.telex.gschema.xml',
+install_data('xyz.daimones.Telex.gschema.xml',
   install_dir: join_paths(get_option('datadir'), 'glib-2.0/schemas')
 )
 
