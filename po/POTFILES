@@ -1,7 +1,7 @@
-data/xyz.daimones.telex.desktop.in
-data/xyz.daimones.telex.appdata.xml.in
-data/xyz.daimones.telex.gschema.xml
-src/window.ui
-src/main.py
+data/xyz.daimones.Telex.desktop.in
+data/xyz.daimones.Telex.appdata.xml.in
+data/xyz.daimones.Telex.gschema.xml
+src/windows/home.py
+src/windows/onboarding.py
+src/app.py
 src/window.py
-
