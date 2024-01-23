@@ -1,6 +1,6 @@
 # window.py
 #
-# Copyright 2022 manasseh
+# Copyright 2022 believemanasseh
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,11 +17,13 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from .main import Gtk
+from windows import Home
+
+from .app import Gtk
 
 
 class Window(Gtk.ApplicationWindow):
-    __gtype_name__ = "MainWindow"
+    __gtype_name__ = "Window"
 
     def __init__(self, application, **kwargs):
         super().__init__(application=application, **kwargs)
@@ -64,7 +66,7 @@ class Window(Gtk.ApplicationWindow):
         data = {
             "button_label": "Register",
             "text": "Already a user?",
-            "event_handler": self.on_login,
+            "signal_handler": self.on_login,
         }
         self.load_page(data)
 
@@ -72,7 +74,7 @@ class Window(Gtk.ApplicationWindow):
         data = {
             "button_label": "Login",
             "text": "Not yet registered?",
-            "event_handler": self.on_register,
+            "signal_handler": self.on_register,
         }
         self.load_page(data)
 
@@ -92,26 +94,33 @@ class Window(Gtk.ApplicationWindow):
 
     def load_page(self, data):
         self.box.set_visible(False)
-        box = Gtk.Box(
+        self.auth_box = Gtk.Box(
             name="login",
             orientation=Gtk.Orientation.VERTICAL,
             spacing=10,
         )
-        box.set_halign(Gtk.Align.CENTER)
-        box.set_valign(Gtk.Align.CENTER)
-        self.set_child(box)
+        self.auth_box.set_halign(Gtk.Align.CENTER)
+        self.auth_box.set_valign(Gtk.Align.CENTER)
+        self.set_child(self.auth_box)
         self.email_field = Gtk.Entry(placeholder_text="Enter email address")
         self.password_field = Gtk.Entry(placeholder_text="Enter password")
-        box.append(self.email_field)
-        box.append(self.password_field)
+        self.auth_box.append(self.email_field)
+        self.auth_box.append(self.password_field)
         button = self.login_btn.new()
         self.set_button_color(button, data["button_label"])
-        box.append(button)
+        self.auth_box.append(button)
         text = Gtk.Text(text=data["text"])
         link_btn = Gtk.LinkButton(label="click here")
-        link_btn.connect("clicked", data["event_handler"])
         info_box = Gtk.Box(name="info", orientation=Gtk.Orientation.HORIZONTAL)
         info_box.append(text)
         info_box.append(link_btn)
-        box.append(info_box)
-        box.set_visible(True)
+        self.auth_box.append(info_box)
+        self.auth_box.set_visible(True)
+        button.connect("clicked", self.load_homepage)
+        print("yep")
+        link_btn.connect("clicked", data["signal_handler"])
+
+    def load_homepage(self):
+        print("fuck it")
+        self.auth_box.set_visible(False)
+        Home.load_page()
