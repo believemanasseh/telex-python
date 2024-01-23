@@ -62,22 +62,6 @@ class Window(Gtk.ApplicationWindow):
         self.login_btn.connect("clicked", self.on_login)
         self.register_btn.connect("clicked", self.on_register)
 
-    def on_register(self, widget: Gtk.Widget):
-        data = {
-            "button_label": "Register",
-            "text": "Already a user?",
-            "signal_handler": self.on_login,
-        }
-        self.load_page(data)
-
-    def on_login(self, widget: Gtk.Widget):
-        data = {
-            "button_label": "Login",
-            "text": "Not yet registered?",
-            "signal_handler": self.on_register,
-        }
-        self.load_page(data)
-
     def set_button_color(self, button: Gtk.Button, label: str):
         button.set_label(label)
         button.set_name("btn")
@@ -116,9 +100,25 @@ class Window(Gtk.ApplicationWindow):
         info_box.append(link_btn)
         self.auth_box.append(info_box)
         self.auth_box.set_visible(True)
-        button.connect("clicked", self.load_homepage)
+        button.connect("clicked", self.on_load_homepage)
         link_btn.connect("clicked", data["signal_handler"])
 
-    def load_homepage(self, widget: Gtk.Widget):
+    def on_register(self, widget: Gtk.Widget):
+        data = {
+            "button_label": "Register",
+            "text": "Already a user?",
+            "signal_handler": self.on_login,
+        }
+        self.load_page(data)
+
+    def on_login(self, widget: Gtk.Widget):
+        data = {
+            "button_label": "Login",
+            "text": "Not yet registered?",
+            "signal_handler": self.on_register,
+        }
+        self.load_page(data)
+
+    def on_load_homepage(self, widget: Gtk.Widget):
         self.auth_box.set_visible(False)
         Home.load_page()
