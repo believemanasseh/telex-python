@@ -37,23 +37,21 @@ class Window(Gtk.ApplicationWindow):
         self.set_child(self.box)
         self.box.set_halign(Gtk.Align.CENTER)
         self.box.set_valign(Gtk.Align.CENTER)
-        self.login_btn = Gtk.Button(label="Login")
-        self.login_btn.set_name("login-btn")
-        self.register_btn = Gtk.Button.new()
-        self.register_btn.set_label(label="Register")
-        self.register_btn.set_name("register-btn")
+        self.login_btn = Gtk.Button(label="Login", name="login-btn")
+        self.register_btn = Gtk.Button(label="Register", name="register-btn")
         css_provider = Gtk.CssProvider()
-        css = """
+        css_provider.load_from_data(
+            """
             #register-btn, #login-btn {
                 background-color: #000000;
                 color: #FFFFFF;
             }
-        """
-        css_provider.load_from_data(css.encode())
-        login_context = self.login_btn.get_style_context()
-        register_context = self.register_btn.get_style_context()
-        login_context.add_provider(css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
-        register_context.add_provider(
+        """.encode()
+        )
+        self.login_btn.get_style_context().add_provider(
+            css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+        )
+        self.register_btn.get_style_context().add_provider(
             css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
         )
         self.box.append(self.login_btn)
@@ -121,4 +119,5 @@ class Window(Gtk.ApplicationWindow):
 
     def on_load_homepage(self, widget: Gtk.Widget):
         self.auth_box.set_visible(False)
-        Home.load_page()
+        home = Home()
+        home.load_page()
