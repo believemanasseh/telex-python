@@ -1,4 +1,4 @@
-from app import Gtk
+from gi.repository import Gtk
 
 
 class Home(Gtk.ApplicationWindow):

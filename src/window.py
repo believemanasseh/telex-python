@@ -17,9 +17,9 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from windows import Home
+from gi.repository import Gtk
 
-from .app import Gtk
+from windows import Home
 
 
 class Window(Gtk.ApplicationWindow):
@@ -117,10 +117,8 @@ class Window(Gtk.ApplicationWindow):
         self.auth_box.append(info_box)
         self.auth_box.set_visible(True)
         button.connect("clicked", self.load_homepage)
-        print("yep")
         link_btn.connect("clicked", data["signal_handler"])
 
-    def load_homepage(self):
-        print("fuck it")
+    def load_homepage(self, widget: Gtk.Widget):
         self.auth_box.set_visible(False)
         Home.load_page()
