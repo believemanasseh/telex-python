@@ -3,6 +3,7 @@ moduledir = join_paths(pkgdatadir, 'telex_python/windows')
 
 telex_python_sources = [
     '__init__.py',
+    'home.py',
     'onboarding.py'
 ]
 
