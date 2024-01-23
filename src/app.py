@@ -1,6 +1,6 @@
 # main.py
 #
-# Copyright 2022-2024 manasseh
+# Copyright 2022 believemanasseh
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ class Telex(Adw.Application):
 
     def __init__(self):
         super().__init__(
-            application_id="xyz.daimones.telex",
+            application_id="xyz.daimones.Telex",
             flags=Gio.ApplicationFlags.FLAGS_NONE,
         )
         self.create_action("quit", self.on_quit_action, ["<primary>q"])
