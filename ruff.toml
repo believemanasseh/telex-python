@@ -1,0 +1,88 @@
+# Same as Black
+line-length = 90
+
+# Always generate Python 3.10-compatible code
+target-version = "py310"
+
+# Files to lint
+include = ["*.py"]
+
+# Allow imports relative to the "src" directory
+src = ["src"]
+
+# Automatically fix basic problems
+fix = true
+
+ignore-init-module-imports = true
+
+select = [
+    "E",
+    "F",
+    "B",
+    "PL",
+    "W",
+    "I",
+    "N",
+    "UP",
+    "N",
+    "D",
+    "C90",
+    "A",
+    "COM",
+    "C4",
+    "DTZ",
+    "BLE",
+    "ASYNC",
+    "S",
+    "FBT",
+    "T10",
+    "EM",
+    "EXE",
+    "ISC",
+    "ICN",
+    "G",
+    "INP",
+    "PIE",
+    "T20",
+    "PYI",
+    "PT",
+    "Q",
+    "RSE",
+    "RET",
+    "SLF",
+    "SIM",
+    "TID",
+    "TCH",
+    "INT",
+    "ARG",
+    "ERA",
+    "PD",
+    "PGH",
+    "PLE",
+    "PLR",
+    "PLW",
+    "TRY",
+    "FLY",
+    "NPY",
+    "RUF",
+]
+
+ignore = [
+    "PLE1205",
+    "G004", # Logging statement uses f-string
+    "W191", # Incompatibility with format.indent-style="tab"
+    "D206", # Incompatibility with format.indent-style="tab"
+    "COM812", # Trailing comma
+]
+
+[format]
+indent-style = "tab"
+
+[per-file-ignores]
+"__init__.py" = ["F403", "D104"]
+
+[pydocstyle]
+convention = "google"
+
+[lint.isort]
+case-sensitive = true

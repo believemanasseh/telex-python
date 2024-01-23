@@ -1,21 +1,7 @@
-# window.py
-#
-# Copyright 2022 believemanasseh
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-# SPDX-License-Identifier: GPL-3.0-or-later
+"""Copyright 2022 believemanasseh.
+
+Application's entry window class. Contains logic for login and registration
+"""
 
 from gi.repository import Gtk
 
@@ -23,16 +9,23 @@ from windows import Home
 
 
 class Window(Gtk.ApplicationWindow):
+    """Authentication window for registration and login."""
+
     __gtype_name__ = "Window"
 
     def __init__(self, application, **kwargs):
+        """Initialises authentication window.
+
+        Create and style login/register buttons
+        """
         super().__init__(application=application, **kwargs)
         self.set_title("Telex")
         self.set_default_size(300, 600)
-        Gtk.TextTag.background = 0000
         self.stack = Gtk.Stack()
         self.box = Gtk.Box(
-            orientation=Gtk.Orientation.VERTICAL, spacing=10, width_request=200
+            orientation=Gtk.Orientation.VERTICAL,
+            spacing=10,
+            width_request=200,
         )
         self.set_child(self.box)
         self.box.set_halign(Gtk.Align.CENTER)
@@ -46,13 +39,15 @@ class Window(Gtk.ApplicationWindow):
                 background-color: #000000;
                 color: #FFFFFF;
             }
-        """.encode()
+        """
         )
         self.login_btn.get_style_context().add_provider(
-            css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+            css_provider,
+            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION,
         )
         self.register_btn.get_style_context().add_provider(
-            css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+            css_provider,
+            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION,
         )
         self.box.append(self.login_btn)
         self.box.append(self.register_btn)
@@ -61,20 +56,28 @@ class Window(Gtk.ApplicationWindow):
         self.register_btn.connect("clicked", self.on_register)
 
     def set_button_color(self, button: Gtk.Button, label: str):
+        """Sets color of register and login button."""
         button.set_label(label)
         button.set_name("btn")
         css_provider = Gtk.CssProvider()
-        css = """
+        css_provider.load_from_data(
+            """
             #btn {
                 background-color: #000000;
                 color: #FFFFFF;
             }
         """
-        css_provider.load_from_data(css.encode())
-        context = button.get_style_context()
-        context.add_provider(css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+        )
+        button.get_style_context().add_provider(
+            css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+        )
 
-    def load_page(self, data):
+    def render_page(self, data):
+        """Renders register or login page.
+
+        Creates entry fields for email and password authentication /
+        creates action buttons and attaches the necessary signal handlers.
+        """
         self.box.set_visible(False)
         self.auth_box = Gtk.Box(
             name="login",
@@ -98,26 +101,29 @@ class Window(Gtk.ApplicationWindow):
         info_box.append(link_btn)
         self.auth_box.append(info_box)
         self.auth_box.set_visible(True)
-        button.connect("clicked", self.on_load_homepage)
+        button.connect("clicked", self.on_render_homepage)
         link_btn.connect("clicked", data["signal_handler"])
 
-    def on_register(self, widget: Gtk.Widget):
+    def on_register(self, _widget: Gtk.Widget):
+        """Responds to click signals from the register button."""
         data = {
             "button_label": "Register",
             "text": "Already a user?",
             "signal_handler": self.on_login,
         }
-        self.load_page(data)
+        self.render_page(data)
 
-    def on_login(self, widget: Gtk.Widget):
+    def on_login(self, _widget: Gtk.Widget):
+        """Responds to click signals from the login button."""
         data = {
             "button_label": "Login",
             "text": "Not yet registered?",
             "signal_handler": self.on_register,
         }
-        self.load_page(data)
+        self.render_page(data)
 
-    def on_load_homepage(self, widget: Gtk.Widget):
+    def on_render_homepage(self, _widget: Gtk.Widget):
+        """Responds to click signals from either the register or login button."""
         self.auth_box.set_visible(False)
         home = Home()
-        home.load_page()
+        home.render_page()
