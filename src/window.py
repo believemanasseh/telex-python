@@ -77,6 +77,9 @@ class Window(Gtk.ApplicationWindow):
 
         Creates entry fields for email and password authentication /
         creates action buttons and attaches the necessary signal handlers.
+
+        Args:
+            data: contains window-specific data
         """
         self.box.set_visible(False)
         self.auth_box = Gtk.Box(
