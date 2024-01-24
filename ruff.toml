@@ -73,6 +73,7 @@ ignore = [
     "W191", # Incompatibility with format.indent-style="tab"
     "D206", # Incompatibility with format.indent-style="tab"
     "COM812", # Trailing comma
+    "D417", # description in docstrings
 ]
 
 [format]
