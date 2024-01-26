@@ -19,12 +19,12 @@ SPDX-License-Identifier: GPL-3.0-or-later
 import sys
 
 import gi
-from gi.repository import Adw, Gio, Gtk
-
-from .window import Window
 
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
+from gi.repository import Adw, Gio, Gtk
+
+from windows import AuthWindow
 
 
 class Telex(Adw.Application):
@@ -48,7 +48,7 @@ class Telex(Adw.Application):
         """
         win = self.props.active_window
         if not win:
-            win = Window(application=self)
+            win = AuthWindow(application=self)
         win.present()
 
     def on_quit_action(self, _action, _pspec):

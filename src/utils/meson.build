@@ -1,11 +1,9 @@
 pkgdatadir = join_paths(get_option('prefix'), get_option('datadir'), meson.project_name())
-moduledir = join_paths(pkgdatadir, 'telex_python/windows')
+moduledir = join_paths(pkgdatadir, 'telex_python/utils')
 
 telex_python_sources = [
     '__init__.py',
-    'auth.py',
-    'home.py',
-    'onboarding.py'
+    'services.py',
 ]
 
 install_data(telex_python_sources, install_dir: moduledir)

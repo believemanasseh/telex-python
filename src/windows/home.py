@@ -6,7 +6,7 @@ Window class for app's homepage
 from gi.repository import Gtk
 
 
-class Home(Gtk.ApplicationWindow):
+class HomeWindow(Gtk.ApplicationWindow):
     """Base class for homepage."""
 
     def __init__(self, *args, **kwargs):
