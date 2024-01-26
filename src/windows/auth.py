@@ -12,7 +12,7 @@ from .home import HomeWindow
 class AuthWindow(Gtk.ApplicationWindow):
     """Authentication window for registration and login."""
 
-    __gtype_name__ = "Window"
+    __gtype_name__ = "AuthWindow"
 
     def __init__(self, application, **kwargs):
         """Initialises authentication window.

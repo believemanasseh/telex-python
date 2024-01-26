@@ -3,7 +3,7 @@
 BASE_URL=https://www.reddit.com/api/v1/authorize
 CLIENT_ID=agzr4Pb-G6IQGf0au4AXnA
 SCOPE=identity+read+mysubreddits
-URI=http://localhost
+URI=telex://oauth
 DURATION=permanent
 STATE=testlex
 TYPE=code
