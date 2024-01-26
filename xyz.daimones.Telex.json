@@ -1,7 +1,7 @@
 {
-    "app-id": "xyz.daimones.Telex",
+    "id": "xyz.daimones.Telex",
     "runtime": "org.gnome.Platform",
-    "runtime-version": "master",
+    "runtime-version": "45",
     "sdk": "org.gnome.Sdk",
     "command": "telex",
     "finish-args": [
@@ -28,7 +28,7 @@
         "buildsystem": "meson",
         "sources": [{
             "type": "git",
-            "url": "file:///home/manasseh/telex_python"
+            "url": "https://github.com/believemanasseh/telex_python"
         }]
     }]
 }

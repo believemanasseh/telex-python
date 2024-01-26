@@ -8,7 +8,11 @@ __pycache__
 env
 
 # Meson
-build
-builddir
 bin
 share
+
+# Ruff
+.ruff_cache
+
+# Flatpak
+.flatpak
