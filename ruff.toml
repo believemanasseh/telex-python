@@ -74,6 +74,7 @@ ignore = [
     "D206", # Incompatibility with format.indent-style="tab"
     "COM812", # Trailing comma
     "D417", # description in docstrings
+    "E402", # Allow module-level imports to not necessarily be at top of file
 ]
 
 [format]
