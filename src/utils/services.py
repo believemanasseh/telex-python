@@ -36,4 +36,4 @@ class Reddit:
         except requests.RequestException:
             return None
 
-        return {"status": res.status_code, "json": res.json()}
+        return {"status_code": res.status_code, "json": res.json()}

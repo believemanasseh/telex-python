@@ -4,7 +4,14 @@ Application's entry window class. Contains logic for login and registration
 """
 import os
 
-from gi.repository import Gio, Gtk
+import gi
+
+gi.require_versions({"Gtk": "4.0", "WebKit": "6.0"})
+from http import HTTPStatus
+
+from gi.repository import Gtk, WebKit
+
+from utils.services import Reddit
 
 from .home import HomeWindow
 
@@ -19,10 +26,21 @@ class AuthWindow(Gtk.ApplicationWindow):
 
         Create and style login/register buttons
         """
-        super().__init__(application=application, **kwargs)
-        self.set_title("Telex")
-        self.set_default_size(300, 600)
-        self.set_icon_name("reddit-icon")
+        super().__init__(
+            application=application,
+            title="Telex",
+            default_height=600,
+            default_width=600,
+            icon_name="reddit-icon",
+            **kwargs,
+        )
+        self.reddit_api = Reddit()
+        self.dialog = Gtk.Dialog(
+            transient_for=self,
+            visible=True,
+            default_height=400,
+            default_width=400,
+        )
         self.stack = Gtk.Stack()
         self.box = Gtk.Box(
             orientation=Gtk.Orientation.VERTICAL,
@@ -39,6 +57,7 @@ class AuthWindow(Gtk.ApplicationWindow):
             #reddit-btn {
                 background-color: #FFFFFF;
                 color: #000000;
+                border: 1px solid #000000;
             }
         """
         )
@@ -50,6 +69,26 @@ class AuthWindow(Gtk.ApplicationWindow):
         self.stack.add_child(self.box)
         self.reddit_btn.connect("clicked", self.on_render_page)
 
+    def __on_load_changed(self, widget: WebKit.WebView, event: WebKit.LoadEvent):
+        """Handler for uri load change signals."""
+        uri = widget.get_uri()
+
+        def on_change(widget: WebKit.WebView, event: WebKit.LoadEvent):
+            if "code=" in uri and event == WebKit.LoadEvent.FINISHED:
+                widget.set_visible(False)
+                start_index = uri.index("code=") + len("code=")
+                end_index = uri.index("#")
+                auth_code = uri[start_index:end_index]
+                res = self.reddit_api.generate_access_token(auth_code)
+                if res["status_code"] == HTTPStatus.OK:
+                    self.dialog.close()
+
+        if "login" in uri and event == WebKit.LoadEvent.FINISHED:
+            login_uri = WebKit.URIRequest(uri=uri)
+            web_view = WebKit.WebView(visible=True)
+            web_view.load_request(login_uri)
+            web_view.connect("load-changed", on_change)
+
     def __on_render_homepage(self, _widget: Gtk.Widget, _window: Gtk.Window):
         """Renders homepage window."""
         home_window = HomeWindow()
@@ -60,8 +99,15 @@ class AuthWindow(Gtk.ApplicationWindow):
 
         Authorisation request on-behalf of application user.
         """
-        self.box.set_visible(False)
-        cancellable = Gio.Cancellable.new()
-        cancellable.connect(self.__on_render_homepage)
-        uri_launcher = Gtk.UriLauncher.new(os.getenv("AUTHORISATION_URL"))
-        uri_launcher.launch(Gtk.Window.new(), cancellable, self.__on_render_homepage)
+        uri = WebKit.URIRequest(uri=os.getenv("AUTHORISATION_URL"))
+        settings = WebKit.Settings(
+            allow_modal_dialogs=True,
+            enable_fullscreen=False,
+            enable_javascript=True,
+            enable_media=True,
+        )
+        web_view = WebKit.WebView(visible=True, settings=settings)
+        web_view.connect("load-changed", self.__on_load_changed)
+        web_view.load_request(uri)
+        self.box.set_opacity(0.5)
+        self.dialog.set_child(web_view)
