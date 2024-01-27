@@ -1,4 +1,0 @@
-PyGObject==3.46.0
-PyGObject-stubs==2.10.0
-requests==2.31.0
-ruff==0.1.14
