@@ -75,6 +75,7 @@ ignore = [
     "COM812", # Trailing comma
     "D417", # description in docstrings
     "E402", # Allow module-level imports to not necessarily be at top of file
+    "E101", # Allow mixed indentation
 ]
 
 [format]
