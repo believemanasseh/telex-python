@@ -2,6 +2,8 @@
 
 Contains classes for various third-party services used
 """
+
+import base64
 import platform
 
 import requests
@@ -14,9 +16,11 @@ class Reddit:
 		"""Initialises request headers."""
 		self.domain = "https://{0}.reddit.com/api/v1"
 		self.system = platform.system()
+		base_encoded_string = base64.b64encode(b"TAugZFgqYCtC9yjZRcWpng").decode("utf-8")
 		self.headers = {
-			"User-Agent": f"Telex/{self.system}:v0.1.0 (by /u/believemanasseh)",
+			"User-Agent": f"Telex/{self.system}:v0.1.0 (by /u/Intrepid-Set1590)",
 			"Content-Type": "application/x-www-form-urlencoded",
+			"Authorization": f"Basic {base_encoded_string}",
 		}
 
 	def generate_access_token(self, code: str):
@@ -29,8 +33,9 @@ class Reddit:
 		data = {
 			"grant_type": "authorization_code",
 			"code": code,
-			"redirect_uri": "telex://oauth",
+			"redirect_uri": "https://2ec8-160-152-128-100.ngrok-free.app",
 		}
+		print(self.headers)
 		try:
 			res = requests.post(url, data=data, headers=self.headers, timeout=30)
 		except requests.RequestException:
