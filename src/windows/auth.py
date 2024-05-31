@@ -2,6 +2,7 @@
 
 Application's entry window class. Contains authentication/authorisation logic.
 """
+
 import os
 
 import gi
@@ -35,12 +36,6 @@ class AuthWindow(Gtk.ApplicationWindow):
 			**kwargs,
 		)
 		self.reddit_api = Reddit()
-		self.dialog = Gtk.Dialog(
-			transient_for=self,
-			visible=True,
-			default_height=400,
-			default_width=400,
-		)
 		self.stack = Gtk.Stack()
 		self.box = Gtk.Box(
 			orientation=Gtk.Orientation.VERTICAL,
@@ -66,7 +61,6 @@ class AuthWindow(Gtk.ApplicationWindow):
 			Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION,
 		)
 		self.box.append(self.reddit_btn)
-		self.stack.add_child(self.box)
 		self.reddit_btn.connect("clicked", self.on_render_page)
 
 	def __on_load_changed(self, widget: WebKit.WebView, event: WebKit.LoadEvent):
@@ -104,6 +98,9 @@ class AuthWindow(Gtk.ApplicationWindow):
 
 		Authorisation request on-behalf of application user.
 		"""
+		self.dialog = Gtk.Dialog(
+			transient_for=self, default_height=400, default_width=400, visible=True
+		)
 		uri = WebKit.URIRequest(uri=os.getenv("AUTHORISATION_URL"))
 		settings = WebKit.Settings(
 			allow_modal_dialogs=True,
