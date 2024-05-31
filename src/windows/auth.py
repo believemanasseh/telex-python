@@ -72,21 +72,17 @@ class AuthWindow(Gtk.ApplicationWindow):
 		"""
 		uri = widget.get_uri()
 
-		def on_change(widget: WebKit.WebView, event: WebKit.LoadEvent):
-			if "code=" in uri and event == WebKit.LoadEvent.FINISHED:
-				widget.set_visible(False)
-				start_index = uri.index("code=") + len("code=")
-				end_index = uri.index("#")
-				auth_code = uri[start_index:end_index]
-				res = self.reddit_api.generate_access_token(auth_code)
-				if res["status_code"] == HTTPStatus.OK:
-					self.dialog.close()
-
-		if "login" in uri and event == WebKit.LoadEvent.FINISHED:
-			login_uri = WebKit.URIRequest(uri=uri)
-			web_view = WebKit.WebView(visible=True)
-			web_view.load_request(login_uri)
-			web_view.connect("load-changed", on_change)
+		if "code=" in uri and event == WebKit.LoadEvent.FINISHED:
+			widget.set_visible(False)
+			start_index = uri.index("code=") + len("code=")
+			end_index = uri.index("#")
+			auth_code = uri[start_index:end_index]
+			res = self.reddit_api.generate_access_token(auth_code)
+			if res["status_code"] == HTTPStatus.OK:
+				code = res["json"]["code"]
+				os.environ["ACCESS_CODE"] = code
+				print(os.getenv("ACCESS_CODE"))
+				self.dialog.close()
 
 	def __on_render_homepage(self, _widget: Gtk.Widget, _window: Gtk.Window):
 		"""Renders homepage window."""
