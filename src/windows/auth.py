@@ -72,6 +72,7 @@ class AuthWindow(Gtk.ApplicationWindow):
 		"""
 		uri = widget.get_uri()
 
+		# Retrieve access token
 		if "code=" in uri and event == WebKit.LoadEvent.FINISHED:
 			widget.set_visible(False)
 			start_index = uri.index("code=") + len("code=")
@@ -79,9 +80,8 @@ class AuthWindow(Gtk.ApplicationWindow):
 			auth_code = uri[start_index:end_index]
 			res = self.reddit_api.generate_access_token(auth_code)
 			if res["status_code"] == HTTPStatus.OK:
-				code = res["json"]["code"]
-				os.environ["ACCESS_CODE"] = code
-				print(os.getenv("ACCESS_CODE"))
+				access_token = res["json"]["access_token"]
+				os.environ["ACCESS_TOKEN"] = access_token
 				self.dialog.close()
 
 	def __on_render_homepage(self, _widget: Gtk.Widget, _window: Gtk.Window):
