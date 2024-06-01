@@ -36,7 +36,6 @@ class AuthWindow(Gtk.ApplicationWindow):
 			**kwargs,
 		)
 		self.reddit_api = Reddit()
-		self.stack = Gtk.Stack()
 		self.box = Gtk.Box(
 			orientation=Gtk.Orientation.VERTICAL,
 			spacing=10,
@@ -83,11 +82,9 @@ class AuthWindow(Gtk.ApplicationWindow):
 				access_token = res["json"]["access_token"]
 				os.environ["ACCESS_TOKEN"] = access_token
 				self.dialog.close()
-
-	def __on_render_homepage(self, _widget: Gtk.Widget, _window: Gtk.Window):
-		"""Renders homepage window."""
-		home_window = HomeWindow()
-		home_window.render_page()
+				self.box.remove(self.reddit_btn)
+				home_window = HomeWindow(box=self.box)
+				home_window.render_page()
 
 	def on_render_page(self, _widget: Gtk.Widget):
 		"""Renders oauth page.
