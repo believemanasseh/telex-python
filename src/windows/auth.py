@@ -83,7 +83,8 @@ class AuthWindow(Gtk.ApplicationWindow):
 				os.environ["ACCESS_TOKEN"] = access_token
 				self.dialog.close()
 				self.box.remove(self.reddit_btn)
-				home_window = HomeWindow(box=self.box)
+				self.box.set_visible(False)
+				home_window = HomeWindow(base_window=self)
 				home_window.render_page()
 
 	def on_render_page(self, _widget: Gtk.Widget):

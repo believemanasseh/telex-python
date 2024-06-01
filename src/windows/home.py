@@ -9,30 +9,39 @@ gi.require_version("Gtk", "4.0")
 from gi.repository import Gtk
 
 
-class HomeWindow(Gtk.ApplicationWindow):
+class HomeWindow:
 	"""Base class for homepage."""
 
-	def __init__(self, box: Gtk.Box, **kwargs):
-		"""Initialises homepage window."""
-		super().__init__(**kwargs)
-		self.box = box
+	def __init__(self, base_window: Gtk.ApplicationWindow):
+		"""Maximises base application window."""
+		self.base = base_window
+		self.base.maximize()
 
 	def render_page(self):
 		"""Renders homepage."""
-		text = Gtk.Text(text="Welcome to Telex!", css_name="text")
-		self.box.set_orientation(Gtk.Orientation.VERTICAL)
+		post_container = Gtk.Box(
+			name="post-container",
+			orientation=Gtk.Orientation.HORIZONTAL,
+			spacing=10,
+			width_request=800,
+			height_request=150,
+			halign=Gtk.Align.CENTER,
+			valign=Gtk.Align.START,
+			hexpand=False,
+			vexpand=False,
+		)
 		css_provider = Gtk.CssProvider()
 		css_provider.load_from_data(
-			b"""
-            #text {
-                background-color: #000000;
-                color: #FFFFFF;
-            }
-        """,
+			"""
+			#post-container {
+				background-color: whitesmoke;
+				color: #000000;
+				margin: 10px 0px;
+				border-radius: 15px;
+			}
+		"""
 		)
-		self.box.get_style_context().add_provider(
-			css_provider,
-			Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION,
+		post_container.get_style_context().add_provider(
+			css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
 		)
-		self.box.append(text)
-		self.box.set_visible(True)
+		self.base.set_child(post_container)
