@@ -39,12 +39,14 @@ class AuthWindow(Gtk.ApplicationWindow):
 		self.box = Gtk.Box(
 			orientation=Gtk.Orientation.VERTICAL,
 			spacing=10,
-			width_request=200,
+			css_classes=["box"],
+			halign=Gtk.Align.CENTER,
+			valign=Gtk.Align.CENTER,
 		)
 		self.set_child(self.box)
-		self.box.set_halign(Gtk.Align.CENTER)
-		self.box.set_valign(Gtk.Align.CENTER)
-		self.reddit_btn = Gtk.Button(label="Continue with Reddit", name="reddit-btn")
+		self.reddit_btn = Gtk.Button(
+			label="Continue with Reddit", name="reddit-btn", width_request=200
+		)
 		css_provider = Gtk.CssProvider()
 		css_provider.load_from_data(
 			"""
@@ -73,7 +75,7 @@ class AuthWindow(Gtk.ApplicationWindow):
 
 		# Retrieve access token
 		if "code=" in uri and event == WebKit.LoadEvent.FINISHED:
-			widget.set_visible(False)
+			widget.set_visible(False)  # close the WebView widget
 			start_index = uri.index("code=") + len("code=")
 			end_index = uri.index("#")
 			auth_code = uri[start_index:end_index]
@@ -83,8 +85,7 @@ class AuthWindow(Gtk.ApplicationWindow):
 				os.environ["ACCESS_TOKEN"] = access_token
 				self.dialog.close()
 				self.box.remove(self.reddit_btn)
-				self.box.set_visible(False)
-				home_window = HomeWindow(base_window=self)
+				home_window = HomeWindow(base_window=self, base_box=self.box)
 				home_window.render_page()
 
 	def on_render_page(self, _widget: Gtk.Widget):
