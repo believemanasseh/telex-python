@@ -25,4 +25,4 @@ telex_python_sources = [
 install_data(telex_python_sources, install_dir: moduledir)
 subdir('windows')
 subdir('utils')
-
+subdir('styles')

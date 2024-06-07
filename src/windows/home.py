@@ -3,6 +3,8 @@
 Window class for app's homepage
 """
 
+import os
+
 import gi
 
 gi.require_version("Gtk", "4.0")
@@ -19,18 +21,8 @@ class HomeWindow:
 		self.base = base_window
 		self.box = base_box
 		self.css_provider = Gtk.CssProvider()
-		self.css_provider.load_from_data(
-			"""
-			.box {
-				padding: 30px 0px;
-			}
-
-			.post-container {
-				background-color: #a3a2a0;
-				color: #000000;
-				border-radius: 15px;
-			}
-		"""
+		self.css_provider.load_from_path(
+			os.path.dirname(__file__) + "/../styles/home.css"
 		)
 		self.box.set_valign(Gtk.Align.START)
 		self.box.get_style_context().add_provider(
@@ -53,3 +45,6 @@ class HomeWindow:
 			self.css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
 		)
 		self.box.append(post_container)
+
+		arrow_up_icon = Gtk.Image(icon_name="arrow-up")
+		post_container.append(arrow_up_icon)
