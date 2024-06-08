@@ -12,12 +12,12 @@ install_data(
   install_dir: join_paths(get_option('datadir'), 'icons', symbolic_dir),
 )
 
-fourty_eight_pixels_dir = join_paths('hicolor', '48x48')
-png_icons = [
-  join_paths(fourty_eight_pixels_dir, 'arrow-up.png'),
-  join_paths(fourty_eight_pixels_dir, 'arrow-down.png'),
-]
+fourty_eight_pixels_dir = join_paths('hicolor', '48x48', 'apps')
 install_data(
-  sources: png_icons,
+  join_paths(fourty_eight_pixels_dir, 'arrow-up.png'),
+  install_dir: join_paths(get_option('datadir'), 'icons', fourty_eight_pixels_dir),
+)
+install_data(
+  join_paths(fourty_eight_pixels_dir, 'arrow-down.png'),
   install_dir: join_paths(get_option('datadir'), 'icons', fourty_eight_pixels_dir),
 )
