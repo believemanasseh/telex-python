@@ -7,3 +7,12 @@
     color: #000000;
     border-radius: 15px;
 }
+
+.icon-box {
+    padding: 20px;
+}
+
+.likes-count {
+    font-size: 20px;
+    font-weight: 600;
+}

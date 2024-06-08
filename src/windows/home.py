@@ -46,5 +46,23 @@ class HomeWindow:
 		)
 		self.box.append(post_container)
 
-		arrow_up_icon = Gtk.Image(icon_name="arrow-up")
-		post_container.append(arrow_up_icon)
+		navigation_box = Gtk.Box(
+			orientation=Gtk.Orientation.VERTICAL, spacing=10, css_classes=["icon-box"]
+		)
+		navigation_box.get_style_context().add_provider(
+			self.css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+		)
+
+		arrow_up_btn = Gtk.Button(icon_name="arrow-up")
+		navigation_box.append(arrow_up_btn)
+
+		likes_count = Gtk.Label(label=7020, css_classes=["likes-count"])
+		likes_count.get_style_context().add_provider(
+			self.css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+		)
+		navigation_box.append(likes_count)
+
+		arrow_down_btn = Gtk.Button(icon_name="arrow-down")
+		navigation_box.append(arrow_down_btn)
+
+		post_container.append(navigation_box)
