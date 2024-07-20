@@ -3,14 +3,14 @@
 Window class for app's homepage
 """
 
-import os
-
 import gi
 
 gi.require_version("Gtk", "4.0")
 
 
 from gi.repository import Gtk
+
+from utils.common import generate_image, load_css
 
 
 class HomeWindow:
@@ -20,10 +20,7 @@ class HomeWindow:
 		"""Maximises base application window and styles base box widget."""
 		self.base = base_window
 		self.box = base_box
-		self.css_provider = Gtk.CssProvider()
-		self.css_provider.load_from_path(
-			os.path.dirname(__file__) + "/../styles/home.css"
-		)
+		self.css_provider = load_css("/src/assets/styles/home.css")
 		self.box.set_valign(Gtk.Align.START)
 		self.box.get_style_context().add_provider(
 			self.css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
@@ -36,16 +33,13 @@ class HomeWindow:
 			css_classes=["post-container"],
 			orientation=Gtk.Orientation.HORIZONTAL,
 			spacing=10,
-			width_request=800,
-			height_request=150,
-			halign=Gtk.Align.CENTER,
-			valign=Gtk.Align.CENTER,
 		)
 		post_container.get_style_context().add_provider(
 			self.css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
 		)
 		self.box.append(post_container)
 
+		# Add upvote and downvote buttons to navigation box
 		navigation_box = Gtk.Box(
 			orientation=Gtk.Orientation.VERTICAL, spacing=10, css_classes=["icon-box"]
 		)
@@ -53,8 +47,8 @@ class HomeWindow:
 			self.css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
 		)
 
-		arrow_up_btn = Gtk.Button(icon_name="arrow-up")
-		navigation_box.append(arrow_up_btn)
+		upvote_btn = Gtk.Button(icon_name="upvote-btn")
+		navigation_box.append(upvote_btn)
 
 		likes_count = Gtk.Label(label=7020, css_classes=["likes-count"])
 		likes_count.get_style_context().add_provider(
@@ -62,7 +56,18 @@ class HomeWindow:
 		)
 		navigation_box.append(likes_count)
 
-		arrow_down_btn = Gtk.Button(icon_name="arrow-down")
-		navigation_box.append(arrow_down_btn)
+		downvote_btn = Gtk.Button(icon_name="downvote-btn")
+		navigation_box.append(downvote_btn)
 
 		post_container.append(navigation_box)
+
+		# Add image to post container
+		post_image_box = Gtk.Box(
+			css_classes=["post-image-box"],
+		)
+		post_image = generate_image(
+			"/src/assets/images/light.jpg", "Light", ["post-image"], self.css_provider
+		)
+		post_image_box.append(post_image)
+
+		post_container.append(post_image_box)

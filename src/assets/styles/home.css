@@ -1,0 +1,27 @@
+.box {
+    padding: 50px 0px;
+}
+
+.post-container {
+    background-color: whitesmoke;
+    color: #000000;
+    border-radius: 15px;
+    margin: 0px 500px;
+}
+
+.icon-box {
+    padding: 20px;
+}
+
+.likes-count {
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.post-image-box {
+    padding: 20px;
+}
+
+.post-image {
+    min-width: 500px;
+}
