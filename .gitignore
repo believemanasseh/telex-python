@@ -10,6 +10,8 @@ env
 # Meson
 bin
 share
+usr
+build
 
 # Ruff
 .ruff_cache
