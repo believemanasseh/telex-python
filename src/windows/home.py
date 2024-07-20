@@ -10,7 +10,7 @@ gi.require_version("Gtk", "4.0")
 
 from gi.repository import Gtk
 
-from utils.common import generate_image, load_css
+from utils.common import load_css, load_image
 
 
 class HomeWindow:
@@ -20,7 +20,7 @@ class HomeWindow:
 		"""Maximises base application window and styles base box widget."""
 		self.base = base_window
 		self.box = base_box
-		self.css_provider = load_css("/src/assets/styles/home.css")
+		self.css_provider = load_css("/assets/styles/home.css")
 		self.box.set_valign(Gtk.Align.START)
 		self.box.get_style_context().add_provider(
 			self.css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
@@ -50,7 +50,7 @@ class HomeWindow:
 		upvote_btn = Gtk.Button(icon_name="upvote-btn")
 		navigation_box.append(upvote_btn)
 
-		likes_count = Gtk.Label(label=7020, css_classes=["likes-count"])
+		likes_count = Gtk.Label(label=6000, css_classes=["likes-count"])
 		likes_count.get_style_context().add_provider(
 			self.css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
 		)
@@ -65,9 +65,18 @@ class HomeWindow:
 		post_image_box = Gtk.Box(
 			css_classes=["post-image-box"],
 		)
-		post_image = generate_image(
-			"/src/assets/images/light.jpg", "Light", ["post-image"], self.css_provider
+		post_image = load_image(
+			"/assets/images/light.jpg", "Light", ["post-image"], self.css_provider
 		)
 		post_image_box.append(post_image)
 
 		post_container.append(post_image_box)
+
+		# Add post title and necessary metadata
+		post_detail_box = Gtk.Box(css_classes=["post-detail-box"])
+		post_title = Gtk.Text(text="Post Title", css_classes=["post-title"])
+		post_title.get_style_context().add_provider(
+			self.css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+		)
+		post_detail_box.append(post_title)
+		post_container.append(post_detail_box)

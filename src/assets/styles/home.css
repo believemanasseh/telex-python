@@ -25,3 +25,13 @@
 .post-image {
     min-width: 500px;
 }
+
+.post-detail-box {
+    padding: 20px;
+}
+
+.post-title {
+    color: #000000;
+    font-weight: 600;
+    font-size: 20px;
+}
