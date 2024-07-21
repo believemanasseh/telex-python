@@ -5,7 +5,7 @@ Contains common utility functions shared across the app.
 
 import os
 
-from gi.repository import Gtk
+from gi.repository import Gdk, Gtk
 
 
 def load_image(
@@ -43,3 +43,14 @@ def add_style_contexts(widgets: list[Gtk.Widget], css_provider: Gtk.CssProvider)
 		widget.get_style_context().add_provider(
 			css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
 		)
+
+
+def create_cursor(name: str) -> Gdk.Cursor:
+	"""Creates cursor from name."""
+	return Gdk.Cursor.new_from_name(name)
+
+
+def append_all(box: Gtk.Box, widgets: list[Gtk.Widget]) -> None:
+	"""Append multiple widgets to box."""
+	for widget in widgets:
+		box.append(widget)
