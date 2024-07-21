@@ -90,6 +90,7 @@ class HomeWindow:
 			css_classes=["post-metadata-box"],
 			orientation=Gtk.Orientation.VERTICAL,
 			valign=Gtk.Align.CENTER,
+			halign=Gtk.Align.START,
 		)
 		add_style_context(post_metadata_box, self.css_provider)
 
