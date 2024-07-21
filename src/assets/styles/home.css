@@ -19,26 +19,33 @@
 }
 
 .post-image-box {
-    padding: 20px;
+    padding: 20px 0px;
 }
 
 .post-image {
     min-width: 500px;
 }
 
+.post-metadata-box {
+    padding: 20px 0px;
+}
+
 .post-title {
     color: #000000;
     font-weight: 600;
     font-size: 15px;
-    min-width: 550px;
+}
+
+.post-title:active,
+.post-action-btn:active {
+    color: rgb(0, 123, 255);
 }
 
 .post-user,
 .post-subreddit {
-    text-decoration: underline;
-    color: red;
+    color: rgb(0, 123, 255);
 }
 
-.post-action-btn {
+.post-metadata {
     color: rgb(67, 66, 66);
 }
