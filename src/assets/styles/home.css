@@ -26,12 +26,19 @@
     min-width: 500px;
 }
 
-.post-detail-box {
-    padding: 20px;
-}
-
 .post-title {
     color: #000000;
     font-weight: 600;
-    font-size: 20px;
+    font-size: 15px;
+    min-width: 550px;
+}
+
+.post-user,
+.post-subreddit {
+    text-decoration: underline;
+    color: red;
+}
+
+.post-action-btn {
+    color: rgb(67, 66, 66);
 }
