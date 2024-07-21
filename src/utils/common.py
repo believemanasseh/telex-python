@@ -11,7 +11,7 @@ from gi.repository import Gtk
 def load_image(
 	img_path: str, alt_text: str, css_classes: list, css_provider: Gtk.CssProvider
 ) -> Gtk.Picture:
-	"""Generate image."""
+	"""Load image file from assets directory."""
 	abspath = os.path.abspath(__file__)
 	post_image = Gtk.Picture(
 		alternative_text=alt_text, css_classes=css_classes
@@ -23,7 +23,7 @@ def load_image(
 
 
 def load_css(css_path) -> Gtk.CssProvider:
-	"""Load css from assets file."""
+	"""Load css file from assets directory."""
 	css_provider = Gtk.CssProvider()
 	abspath = os.path.abspath(__file__)
 	css_provider.load_from_path(abspath[: len(abspath) - 16] + css_path)
