@@ -23,7 +23,7 @@
         "*.a"
     ],
     "modules": [
-        "python3-requests.json", {
+        "python-deps.json", {
             "name": "telex",
             "builddir": true,
             "buildsystem": "meson",
