@@ -6,8 +6,9 @@ Python implementation of a Reddit GUI client for Linux, Windows and macOS operat
 
 - gtk4 >= 4.5
 - libadwaita >= 1.1
-- python >= 3.10
+- python >= 3.11
 - requests
+- asyncio
 
 ## Install from source
 
