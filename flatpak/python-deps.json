@@ -2,20 +2,47 @@
     "name": "python-deps",
     "buildsystem": "simple",
     "build-commands": [],
-    "modules": [
-        {
+    "modules": [{
             "name": "python3-asyncio",
             "buildsystem": "simple",
             "build-commands": [
                 "pip3 install --verbose --exists-action=i --no-index --find-links=\"file://${PWD}\" --prefix=${FLATPAK_DEST} \"asyncio==3.4.3\" --no-build-isolation"
             ],
-            "sources": [
+            "sources": [{
+                "type": "file",
+                "url": "https://files.pythonhosted.org/packages/22/74/07679c5b9f98a7cb0fc147b1ef1cc1853bc07a4eb9cb5731e24732c5f773/asyncio-3.4.3-py3-none-any.whl",
+                "sha256": "c4d18b22701821de07bd6aea8b53d21449ec0ec5680645e5317062ea21817d2d"
+            }]
+        },
+        {
+            "name": "python3-PyGObject",
+            "buildsystem": "simple",
+            "build-commands": [
+                "pip3 install --verbose --exists-action=i --no-index --find-links=\"file://${PWD}\" --prefix=${FLATPAK_DEST} \"PyGObject==3.46.0\" --no-build-isolation"
+            ],
+            "sources": [{
+                    "type": "file",
+                    "url": "https://files.pythonhosted.org/packages/ac/4a/f24ddf1d20cc4b56affc7921e29928559a06c922eb60077448392792b914/PyGObject-3.46.0.tar.gz",
+                    "sha256": "481437b05af0a66b7c366ea052710eb3aacbb979d22d30b797f7ec29347ab1e6"
+                },
                 {
                     "type": "file",
-                    "url": "https://files.pythonhosted.org/packages/22/74/07679c5b9f98a7cb0fc147b1ef1cc1853bc07a4eb9cb5731e24732c5f773/asyncio-3.4.3-py3-none-any.whl",
-                    "sha256": "c4d18b22701821de07bd6aea8b53d21449ec0ec5680645e5317062ea21817d2d"
+                    "url": "https://files.pythonhosted.org/packages/19/4f/0d48a017090d4527e921d6892bc550ae869902e67859fc960f8fe63a9094/pycairo-1.26.1.tar.gz",
+                    "sha256": "a11b999ce55b798dbf13516ab038e0ce8b6ec299b208d7c4e767a6f7e68e8430"
                 }
             ]
+        },
+        {
+            "name": "python3-PyGObject-stubs",
+            "buildsystem": "simple",
+            "build-commands": [
+                "pip3 install --verbose --exists-action=i --no-index --find-links=\"file://${PWD}\" --prefix=${FLATPAK_DEST} \"PyGObject-stubs==2.10.0\" --no-build-isolation"
+            ],
+            "sources": [{
+                "type": "file",
+                "url": "https://files.pythonhosted.org/packages/68/d2/40868f7c2894b0910e6d49976c09042783e0ebf8e1ce7ddab21fc9518f97/PyGObject-stubs-2.10.0.tar.gz",
+                "sha256": "c1842f9bbb91873520376087008c829b060dad1b0ee5aa5b905f0d13ee79fe20"
+            }]
         },
         {
             "name": "python3-requests",
@@ -23,8 +50,7 @@
             "build-commands": [
                 "pip3 install --verbose --exists-action=i --no-index --find-links=\"file://${PWD}\" --prefix=${FLATPAK_DEST} \"requests==2.31.0\" --no-build-isolation"
             ],
-            "sources": [
-                {
+            "sources": [{
                     "type": "file",
                     "url": "https://files.pythonhosted.org/packages/1c/d5/c84e1a17bf61d4df64ca866a1c9a913874b4e9bdc131ec689a0ad013fb36/certifi-2024.7.4-py3-none-any.whl",
                     "sha256": "c198e21b1289c2ab85ee4e67bb4b4ef3ead0892059901a8d5b622f24a1101e90"
