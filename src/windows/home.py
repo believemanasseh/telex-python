@@ -117,10 +117,9 @@ class HomeWindow:
 		)
 
 		post_user = Gtk.Label(
-			label="<u>FriendlyBabyFrog</u> ",
+			label="FriendlyBabyFrog ",
 			css_classes=["post-user"],
 			cursor=self.cursor,
-			use_markup=True,
 			margin_top=5,
 		)
 		add_style_context(post_user, self.css_provider)
@@ -129,10 +128,9 @@ class HomeWindow:
 		add_style_contexts([post_time, post_text], self.css_provider)
 
 		post_subreddit = Gtk.Label(
-			label="<u>r/mildlyinteresting</u>",
+			label="r/mildlyinteresting",
 			css_classes=["post-subreddit"],
 			cursor=self.cursor,
-			use_markup=True,
 			margin_top=5,
 		)
 		add_style_context(post_subreddit, self.css_provider)
@@ -155,48 +153,42 @@ class HomeWindow:
 			margin_top=5,
 		)
 		post_comments = Gtk.Label(
-			label="<u>3274 comments</u> ",
-			use_markup=True,
+			label="3274 comments ",
 			css_classes=["post-action-btn"],
 			cursor=self.cursor,
 			margin_top=5,
 		)
 
 		post_share = Gtk.Label(
-			label="<u>share</u> ",
-			use_markup=True,
+			label="share ",
 			css_classes=["post-action-btn"],
 			cursor=self.cursor,
 			margin_top=5,
 		)
 
 		post_save = Gtk.Label(
-			label="<u>save</u> ",
-			use_markup=True,
+			label="save ",
 			css_classes=["post-action-btn"],
 			cursor=self.cursor,
 			margin_top=5,
 		)
 
 		post_hide = Gtk.Label(
-			label="<u>hide</u> ",
-			use_markup=True,
+			label="hide ",
 			css_classes=["post-action-btn"],
 			cursor=self.cursor,
 			margin_top=5,
 		)
 
 		post_report = Gtk.Label(
-			label="<u>report</u> ",
-			use_markup=True,
+			label="report ",
 			css_classes=["post-action-btn"],
 			cursor=self.cursor,
 			margin_top=5,
 		)
 
 		post_crosspost = Gtk.Label(
-			label="<u>crosspost</u> ",
-			use_markup=True,
+			label="crosspost ",
 			css_classes=["post-action-btn"],
 			cursor=self.cursor,
 			margin_top=5,
