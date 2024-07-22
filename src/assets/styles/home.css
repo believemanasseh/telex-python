@@ -44,6 +44,7 @@
 .post-user,
 .post-subreddit {
     color: rgb(0, 123, 255);
+    line-height: 5px;
 }
 
 .post-metadata {
