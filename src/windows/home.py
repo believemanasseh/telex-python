@@ -72,14 +72,18 @@ class HomeWindow:
 		)
 		add_style_context(box, self.css_provider)
 
-		upvote_btn = Gtk.Button(icon_name="upvote-btn", cursor=self.cursor)
+		upvote_btn = Gtk.Button(
+			icon_name="xyz.daimones.Telex.upvote-btn", cursor=self.cursor
+		)
 		box.append(upvote_btn)
 
 		likes_count = Gtk.Label(label=6000, css_classes=["likes-count"])
 		add_style_context(likes_count, self.css_provider)
 		box.append(likes_count)
 
-		downvote_btn = Gtk.Button(icon_name="downvote-btn", cursor=self.cursor)
+		downvote_btn = Gtk.Button(
+			icon_name="xyz.daimones.Telex.downvote-btn", cursor=self.cursor
+		)
 		box.append(downvote_btn)
 
 		return box
