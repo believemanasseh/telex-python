@@ -55,7 +55,7 @@ class AzureClient:
 	"""Base class for Azure Key Vault Secrets service."""
 
 	@classmethod
-	def client(cls):
+	def create_client(cls):
 		"""Creates secret client for requests to Azure."""
 		credential = DefaultAzureCredential()
 		return SecretClient(

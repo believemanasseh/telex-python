@@ -1,6 +1,0 @@
-asyncio==3.4.3
-azure-keyvault-secrets==4.8.0
-azure-identity==1.17.1
-PyGObject==3.46.0
-PyGObject-stubs==2.10.0
-requests==2.31.0
