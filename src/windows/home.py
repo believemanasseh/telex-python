@@ -55,7 +55,9 @@ class HomeWindow:
 
 	def __add_post_image(self) -> Gtk.Box:
 		"""Add post image."""
-		post_image_box = Gtk.Box(css_classes=["post-image-box"], height_request=100)
+		post_image_box = Gtk.Box(
+			css_classes=["post-image-box"], cursor=self.cursor, height_request=100
+		)
 		add_style_context(post_image_box, self.css_provider)
 
 		post_image = load_image(
