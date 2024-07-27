@@ -7,6 +7,8 @@ import base64
 import platform
 
 import requests
+from azure.identity import DefaultAzureCredential
+from azure.keyvault.secrets import SecretClient
 
 
 class Reddit:
@@ -24,7 +26,11 @@ class Reddit:
 			"User-Agent": f"{self.system.lower()}:telex:v0.1.0 (by /u/Intrepid-Set1590)",
 		}
 
-	def generate_access_token(self, code: str):
+	def inject_token(self, token: str) -> None:
+		"""Add access token to authorisation header."""
+		self.headers["Authorization"] = f"Bearer {token}"
+
+	def generate_access_token(self, code: str) -> dict[str, int | dict]:
 		"""Generates access token.
 
 		Args:
@@ -34,7 +40,7 @@ class Reddit:
 		data = {
 			"grant_type": "authorization_code",
 			"code": code,
-			"redirect_uri": "https://6f62-169-159-74-29.ngrok-free.app",
+			"redirect_uri": "https://9873-160-152-51-66.ngrok-free.app",
 		}
 
 		try:
@@ -43,3 +49,15 @@ class Reddit:
 			return None
 
 		return {"status_code": res.status_code, "json": res.json()}
+
+
+class AzureClient:
+	"""Base class for Azure Key Vault Secrets service."""
+
+	@classmethod
+	def client(cls):
+		"""Creates secret client for requests to Azure."""
+		credential = DefaultAzureCredential()
+		return SecretClient(
+			vault_url="https://telex.vault.azure.net/", credential=credential
+		)

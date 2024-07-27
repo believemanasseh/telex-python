@@ -82,9 +82,11 @@ class AuthWindow(Gtk.ApplicationWindow):
 			res = self.reddit_api.generate_access_token(auth_code)
 			if res["status_code"] == HTTPStatus.OK:
 				access_token = res["json"]["access_token"]
-				os.environ["ACCESS_TOKEN"] = access_token
+				self.reddit_api.inject_token(access_token)
 				self.dialog.close()
 				self.box.remove(self.reddit_btn)
+				self.box.set_opacity(1.0)
+
 				home_window = HomeWindow(base_window=self, base_box=self.box)
 				home_window.render_page()
 
@@ -93,21 +95,21 @@ class AuthWindow(Gtk.ApplicationWindow):
 
 		Authorisation request on-behalf of application user.
 		"""
-		# self.dialog = Gtk.Dialog(
-		# 	transient_for=self, default_height=400, default_width=400, visible=True
-		# )
-		# uri = WebKit.URIRequest(uri=os.getenv("AUTHORISATION_URL"))
-		# settings = WebKit.Settings(
-		# 	allow_modal_dialogs=True,
-		# 	enable_fullscreen=False,
-		# 	enable_javascript=True,
-		# 	enable_media=True,
-		# )
-		# web_view = WebKit.WebView(visible=True, settings=settings)
-		# web_view.connect("load-changed", self.__on_load_changed)
-		# web_view.load_request(uri)
-		# self.box.set_opacity(0.5)
-		# self.dialog.set_child(web_view)
-		self.box.remove(self.reddit_btn)
-		home_window = HomeWindow(base_window=self, base_box=self.box)
-		home_window.render_page()
+		self.dialog = Gtk.Dialog(
+			transient_for=self, default_height=400, default_width=400, visible=True
+		)
+		uri = WebKit.URIRequest(uri=os.getenv("AUTHORISATION_URL"))
+		settings = WebKit.Settings(
+			allow_modal_dialogs=True,
+			enable_fullscreen=False,
+			enable_javascript=True,
+			enable_media=True,
+		)
+		web_view = WebKit.WebView(visible=True, settings=settings)
+		web_view.connect("load-changed", self.__on_load_changed)
+		web_view.load_request(uri)
+		self.box.set_opacity(0.5)
+		self.dialog.set_child(web_view)
+		# self.box.remove(self.reddit_btn)
+		# home_window = HomeWindow(base_window=self, base_box=self.box)
+		# home_window.render_page()
