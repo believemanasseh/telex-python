@@ -14,7 +14,7 @@ from azure.keyvault.secrets import SecretClient
 class Reddit:
 	"""Base class for all operations on Reddit's API."""
 
-	def __init__(self):
+	def __init__(self) -> None:
 		"""Initialises request headers."""
 		self.domain = "https://{0}.reddit.com/api/v1"
 		self.system = platform.system()
@@ -30,12 +30,8 @@ class Reddit:
 		"""Add access token to authorisation header."""
 		self.headers["Authorization"] = f"Bearer {token}"
 
-	def generate_access_token(self, code: str) -> dict[str, int | dict]:
-		"""Generates access token.
-
-		Args:
-		code - authorization code
-		"""
+	def generate_access_token(self, code: str) -> dict[str, int | dict] | None:
+		"""Generates access token."""
 		url = self.domain.format("www") + "/access_token"
 		data = {
 			"grant_type": "authorization_code",
@@ -45,6 +41,16 @@ class Reddit:
 
 		try:
 			res = requests.post(url, data=data, headers=self.headers, timeout=30)
+		except requests.RequestException:
+			return None
+
+		return {"status_code": res.status_code, "json": res.json()}
+
+	def retrieve_listings(self, category: str) -> dict[str, int | dict] | None:
+		"""Returns new posts."""
+		url = self.domain.format("oauth") + f"/{category}"
+		try:
+			res = requests.get(url, headers=self.headers, timeout=30)
 		except requests.RequestException:
 			return None
 

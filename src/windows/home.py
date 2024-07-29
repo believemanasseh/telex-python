@@ -18,19 +18,24 @@ from utils.common import (
 	load_css,
 	load_image,
 )
+from utils.services import Reddit
 
 
 class HomeWindow:
 	"""Base class for homepage."""
 
-	def __init__(self, base_window: Gtk.ApplicationWindow, base_box: Gtk.Box):
+	def __init__(
+		self, base_window: Gtk.ApplicationWindow, base_box: Gtk.Box, api: Reddit
+	):
 		"""Maximises base application window and styles base box widget."""
 		self.base = base_window
 		self.box = base_box
+		self.api = api
 		self.cursor = create_cursor("pointer")
 		self.css_provider = load_css("/assets/styles/home.css")
 		self.box.set_valign(Gtk.Align.START)
 		add_style_context(self.box, self.css_provider)
+		self.data = self.__fetch_data("new")
 		self.base.maximize()
 
 	def render_page(self):
@@ -52,6 +57,21 @@ class HomeWindow:
 
 		post_metadata_box = self.__add_post_metadata()
 		post_container.append(post_metadata_box)
+
+	def __get_categories():
+		return [
+			"new",
+			"popular",
+			"random",
+			"sort",
+			"top",
+			"rising",
+			"hot",
+			"controversial",
+		]
+
+	def __fetch_data(self, category) -> dict[str, int | dict] | None:
+		return self.api.retrieve_listings(category)
 
 	def __add_post_image(self) -> Gtk.Box:
 		"""Add post image."""

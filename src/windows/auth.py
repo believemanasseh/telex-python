@@ -3,11 +3,14 @@
 Application's entry window class. Contains authentication/authorisation logic.
 """
 
+import os
+
 import gi
 
 gi.require_versions({"Gtk": "4.0", "WebKit": "6.0"})
 from http import HTTPStatus
 
+from azure.keyvault.secrets import SecretClient
 from gi.repository import Gtk, WebKit
 
 from utils.services import AzureClient, Reddit
@@ -34,7 +37,7 @@ class AuthWindow(Gtk.ApplicationWindow):
 			**kwargs,
 		)
 		self.reddit_api = Reddit()
-		self.azure_client = AzureClient.create_client()
+		self.azure_client: SecretClient = AzureClient.create_client()
 		self.box = Gtk.Box(
 			orientation=Gtk.Orientation.VERTICAL,
 			spacing=10,
@@ -85,9 +88,11 @@ class AuthWindow(Gtk.ApplicationWindow):
 				self.azure_client.set_secret("telex-access-token", access_token)
 				self.dialog.close()
 				self.box.remove(self.reddit_btn)
-				# self.box.set_opacity(1.0)
+				self.box.set_opacity(1.0)
 
-				home_window = HomeWindow(base_window=self, base_box=self.box)
+				home_window = HomeWindow(
+					base_window=self, base_box=self.box, api=self.reddit_api
+				)
 				home_window.render_page()
 
 	def on_render_page(self, _widget: Gtk.Widget):
@@ -95,21 +100,18 @@ class AuthWindow(Gtk.ApplicationWindow):
 
 		Authorisation request on-behalf of application user.
 		"""
-		# self.dialog = Gtk.Dialog(
-		# 	transient_for=self, default_height=400, default_width=400, visible=True
-		# )
-		# uri = WebKit.URIRequest(uri=os.getenv("AUTHORISATION_URL"))
-		# settings = WebKit.Settings(
-		# 	allow_modal_dialogs=True,
-		# 	enable_fullscreen=False,
-		# 	enable_javascript=True,
-		# 	enable_media=True,
-		# )
-		# web_view = WebKit.WebView(visible=True, settings=settings)
-		# web_view.connect("load-changed", self.__on_load_changed)
-		# web_view.load_request(uri)
-		# self.box.set_opacity(0.5)
-		# self.dialog.set_child(web_view)
-		self.box.remove(self.reddit_btn)
-		home_window = HomeWindow(base_window=self, base_box=self.box)
-		home_window.render_page()
+		self.dialog = Gtk.Dialog(
+			transient_for=self, default_height=400, default_width=400, visible=True
+		)
+		uri = WebKit.URIRequest(uri=os.getenv("AUTHORISATION_URL", ""))
+		settings = WebKit.Settings(
+			allow_modal_dialogs=True,
+			enable_fullscreen=False,
+			enable_javascript=True,
+			enable_media=True,
+		)
+		web_view = WebKit.WebView(visible=True, settings=settings)
+		web_view.connect("load-changed", self.__on_load_changed)
+		web_view.load_request(uri)
+		self.box.set_opacity(0.5)
+		self.dialog.set_child(web_view)
