@@ -23,7 +23,7 @@ class AuthWindow(Gtk.ApplicationWindow):
 
 	__gtype_name__ = "AuthWindow"
 
-	def __init__(self, application, **kwargs):
+	def __init__(self, application, **kwargs) -> None:
 		"""Initialises authentication window.
 
 		Create and style login/register buttons
@@ -57,7 +57,8 @@ class AuthWindow(Gtk.ApplicationWindow):
                 color: #000000;
                 border: 1px solid #000000;
             }
-        """
+        """,
+			100,
 		)
 		self.reddit_btn.get_style_context().add_provider(
 			css_provider,
@@ -66,7 +67,7 @@ class AuthWindow(Gtk.ApplicationWindow):
 		self.box.append(self.reddit_btn)
 		self.reddit_btn.connect("clicked", self.on_render_page)
 
-	def __on_load_changed(self, widget: WebKit.WebView, event: WebKit.LoadEvent):
+	def __on_load_changed(self, widget: WebKit.WebView, event: WebKit.LoadEvent) -> None:
 		"""Handler for uri load change signals.
 
 		Args:
@@ -95,7 +96,7 @@ class AuthWindow(Gtk.ApplicationWindow):
 				)
 				home_window.render_page()
 
-	def on_render_page(self, _widget: Gtk.Widget):
+	def on_render_page(self, _widget: Gtk.Widget) -> None:
 		"""Renders oauth page.
 
 		Authorisation request on-behalf of application user.

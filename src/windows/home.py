@@ -10,7 +10,7 @@ gi.require_version("Gtk", "4.0")
 
 from gi.repository import Gtk, Pango
 
-from utils.common import (
+from utils.commo import (
 	add_style_context,
 	add_style_contexts,
 	append_all,
@@ -58,7 +58,8 @@ class HomeWindow:
 		post_metadata_box = self.__add_post_metadata()
 		post_container.append(post_metadata_box)
 
-	def __get_categories():
+	def __get_categories(self):
+		"""Return all Reddit post categories."""
 		return [
 			"new",
 			"popular",
@@ -99,7 +100,7 @@ class HomeWindow:
 		)
 		box.append(upvote_btn)
 
-		likes_count = Gtk.Label(label=6000, css_classes=["likes-count"])
+		likes_count = Gtk.Label(label="6000", css_classes=["likes-count"])
 		add_style_context(likes_count, self.css_provider)
 		box.append(likes_count)
 

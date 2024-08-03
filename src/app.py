@@ -17,6 +17,8 @@ SPDX-License-Identifier: GPL-3.0-or-later
 """
 
 import sys
+from collections.abc import Callable
+from typing import Any
 
 import gi
 
@@ -29,7 +31,7 @@ from windows import AuthWindow
 class Telex(Adw.Application):
 	"""The main application singleton class."""
 
-	def __init__(self):
+	def __init__(self) -> None:
 		"""Initialises application and signal handlers."""
 		super().__init__(
 			application_id="xyz.daimones.Telex",
@@ -50,19 +52,24 @@ class Telex(Adw.Application):
 			win = AuthWindow(application=self)
 		win.present()
 
-	def on_quit_action(self, _action, _pspec):
+	def on_quit_action(self, _action, _pspec) -> None:
 		"""Callback for app.quit action."""
 		self.quit()
 
-	def on_about_action(self, _widget, _):
+	def on_about_action(self, _widget, _) -> None:
 		"""Callback for the app.about action."""
 		about = Gtk.AboutDialog(version="1.0", authors=["Believe Manasseh"])
 		about.present()
 
-	def on_preferences_action(self, _widget, _):
+	def on_preferences_action(self, _widget, _) -> None:
 		"""Callback for the app.preferences action."""
 
-	def create_action(self, name, callback, shortcuts=None):
+	def create_action(
+		self,
+		name: str,
+		callback: Callable[[Any, Any], None],
+		shortcuts: list | None = None,
+	) -> None:
 		"""Add an application action.
 
 		Args:
@@ -77,7 +84,7 @@ class Telex(Adw.Application):
 			self.set_accels_for_action(f"app.{name}", shortcuts)
 
 
-def main(_version):
+def main(_version) -> int:
 	"""The application's entry point."""
 	app = Telex()
 	return app.run(sys.argv)
