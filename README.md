@@ -11,7 +11,7 @@ Python implementation of a Reddit GUI client for Linux, Windows and macOS operat
 - asyncio
 - boto3
 
-## Run with VSCode Extension
+## Run Locally with VSCode Extension
 
 For easy building and running of application, it is advisable to use the flatpak vscode extension. For more instructions, click [here](https://marketplace.visualstudio.com/items?itemName=bilelmoussaoui.flatpak-vscode).
 
