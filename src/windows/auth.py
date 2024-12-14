@@ -10,10 +10,10 @@ import gi
 gi.require_versions({"Gtk": "4.0", "WebKit": "6.0"})
 from http import HTTPStatus
 
-from azure.keyvault.secrets import SecretClient
 from gi.repository import Gtk, WebKit
 
-from utils.services import AzureClient, Reddit
+from utils.common import add_style_context, load_css
+from utils.services import AWSClient, Reddit
 
 from .home import HomeWindow
 
@@ -37,7 +37,7 @@ class AuthWindow(Gtk.ApplicationWindow):
 			**kwargs,
 		)
 		self.reddit_api = Reddit()
-		self.azure_client: SecretClient = AzureClient.create_client()
+		self.aws_client = AWSClient()
 		self.box = Gtk.Box(
 			orientation=Gtk.Orientation.VERTICAL,
 			spacing=10,
@@ -49,21 +49,8 @@ class AuthWindow(Gtk.ApplicationWindow):
 		self.reddit_btn = Gtk.Button(
 			label="Continue with Reddit", name="reddit-btn", width_request=200
 		)
-		css_provider = Gtk.CssProvider()
-		css_provider.load_from_data(
-			"""
-            #reddit-btn {
-                background-color: #FFFFFF;
-                color: #000000;
-                border: 1px solid #000000;
-            }
-        """,
-			100,
-		)
-		self.reddit_btn.get_style_context().add_provider(
-			css_provider,
-			Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION,
-		)
+		css_provider = load_css("/assets/styles/auth.css")
+		add_style_context(self.reddit_btn, css_provider)
 		self.box.append(self.reddit_btn)
 		self.reddit_btn.connect("clicked", self.on_render_page)
 
@@ -86,7 +73,7 @@ class AuthWindow(Gtk.ApplicationWindow):
 			if res["status_code"] == HTTPStatus.OK:
 				access_token = res["json"]["access_token"]
 				self.reddit_api.inject_token(access_token)
-				self.azure_client.set_secret("telex-access-token", access_token)
+				self.aws_client.create_secret("telex-access-token", access_token)
 				self.dialog.close()
 				self.box.remove(self.reddit_btn)
 				self.box.set_opacity(1.0)
