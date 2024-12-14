@@ -1,6 +1,5 @@
 asyncio==3.4.3
-azure-identity==1.17.1
-azure-keyvault-secrets==4.8.0
+boto3==1.35.81
 mypy==1.11.0
 PyGObject==3.46.0
 PyGObject-stubs==2.10.0

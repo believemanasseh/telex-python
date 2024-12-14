@@ -24,3 +24,6 @@ build
 
 # Mypy
 .mypy_cache
+
+# AWS
+.aws
