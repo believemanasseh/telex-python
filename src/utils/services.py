@@ -5,10 +5,11 @@ Contains classes for various third-party services used
 
 import base64
 import platform
+from typing import Any
 
+import boto3
 import requests
-from azure.identity import DefaultAzureCredential
-from azure.keyvault.secrets import SecretClient
+from botocore.exceptions import ClientError
 
 
 class Reddit:
@@ -18,7 +19,7 @@ class Reddit:
 		"""Initialises request headers."""
 		self.domain = "https://{0}.reddit.com/api/v1"
 		self.system = platform.system()
-		base_encoded_string = base64.b64encode(b"TAugZFgqYCtC9yjZRcWpng:" + b"").decode(
+		base_encoded_string = base64.b64encode(b"xLfTJ9fCMdxmr5JCiNWMHQ:" + b"").decode(
 			"utf-8"
 		)
 		self.headers = {
@@ -36,7 +37,7 @@ class Reddit:
 		data = {
 			"grant_type": "authorization_code",
 			"code": code,
-			"redirect_uri": "https://9873-160-152-51-66.ngrok-free.app",
+			"redirect_uri": "https://ce43-169-159-70-11.ngrok-free.app",
 		}
 
 		try:
@@ -57,13 +58,47 @@ class Reddit:
 		return {"status_code": res.status_code, "json": res.json()}
 
 
-class AzureClient:
-	"""Base class for Azure Key Vault Secrets service."""
+class AWSClient:
+	"""Base class for AWS Secrets Manager service."""
 
-	@classmethod
-	def create_client(cls):
-		"""Creates secret client for requests to Azure."""
-		credential = DefaultAzureCredential()
-		return SecretClient(
-			vault_url="https://telex.vault.azure.net/", credential=credential
+	def __init__(self):
+		"""Initialises boto3 sdk session client."""
+		session = boto3.Session()
+		self.client = session.client(service_name="secretsmanager")
+
+	def create_secret(self, name: str, secret_string: str) -> dict[str, Any]:
+		"""Creates secret."""
+		return self.client.create_secret(Name=name, SecretString=secret_string)
+
+	def get_secret(self, secret_id: str) -> str:
+		"""Retrieves secret value."""
+		error_msg = None
+
+		try:
+			get_secret_value_response = self.client.get_secret_value(SecretId=secret_id)
+
+			if "SecretString" in get_secret_value_response:
+				return {
+					"status": "success",
+					"secret_value": get_secret_value_response["SecretString"],
+				}
+		except ClientError as e:
+			if e.response["Error"]["Code"] == "ResourceNotFoundException":
+				error_msg = f"The requested secret {secret_id} was not found"
+			elif e.response["Error"]["Code"] == "InvalidRequestException":
+				error_msg = f"The request was invalid due to: {e}"
+			elif e.response["Error"]["Code"] == "InvalidParameterException":
+				error_msg = f"The request had invalid params: {e}"
+			elif e.response["Error"]["Code"] == "DecryptionFailure":
+				error_msg = f"The requested secret can't be decrypted using the provided \
+				KMS key: {e}"
+			elif e.response["Error"]["Code"] == "InternalServiceError":
+				error_msg = f"An error occurred on service side: {e}"
+
+		return {"status": "error", "message": error_msg}
+
+	def delete_secret(self, secret_id: str) -> dict:
+		"""Deletes secret."""
+		return self.client.delete_secret(
+			SecretId=secret_id, RecoveryWindowInDays=7, ForceDeleteWithoutRecovery=False
 		)
