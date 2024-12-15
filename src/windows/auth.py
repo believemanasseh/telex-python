@@ -40,7 +40,7 @@ class AuthWindow(Gtk.ApplicationWindow):
 		self.aws_client = AWSClient()
 		self.box = Gtk.Box(
 			orientation=Gtk.Orientation.VERTICAL,
-			spacing=10,
+			spacing=20,
 			css_classes=["box"],
 			halign=Gtk.Align.CENTER,
 			valign=Gtk.Align.CENTER,
@@ -65,11 +65,12 @@ class AuthWindow(Gtk.ApplicationWindow):
 
 		# Retrieve access token
 		if "code=" in uri and event == WebKit.LoadEvent.FINISHED:
-			widget.set_visible(False)  # close the WebView widget
+			widget.set_visible(False)  # closes the WebView widget
 			start_index = uri.index("code=") + len("code=")
 			end_index = uri.index("#")
 			auth_code = uri[start_index:end_index]
 			res = self.reddit_api.generate_access_token(auth_code)
+
 			if res["status_code"] == HTTPStatus.OK:
 				access_token = res["json"]["access_token"]
 				self.reddit_api.inject_token(access_token)
@@ -83,7 +84,7 @@ class AuthWindow(Gtk.ApplicationWindow):
 				)
 				home_window.render_page()
 
-	def on_render_page(self, _widget: Gtk.Widget) -> None:
+	def on_render_page(self, _widget: Gtk.Widget | None = None) -> None:
 		"""Renders oauth page.
 
 		Authorisation request on-behalf of application user.
