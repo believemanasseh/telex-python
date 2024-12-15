@@ -34,29 +34,36 @@ class HomeWindow:
 		self.cursor = create_cursor("pointer")
 		self.css_provider = load_css("/assets/styles/home.css")
 		self.box.set_valign(Gtk.Align.START)
+		self.box.set_overflow(Gtk.Overflow(0))
 		add_style_context(self.box, self.css_provider)
 		self.data = self.__fetch_data("new")
 		self.base.maximize()
 
 	def render_page(self):
 		"""Renders homepage."""
-		post_container = Gtk.Box(
-			css_classes=["post-container"],
-			orientation=Gtk.Orientation.HORIZONTAL,
-			spacing=10,
-		)
-		add_style_context(post_container, self.css_provider)
+		for data in self.data["json"]["data"]["children"]:
+			post_container = Gtk.Box(
+				css_classes=["post-container"],
+				orientation=Gtk.Orientation.HORIZONTAL,
+				spacing=10,
+			)
+			add_style_context(post_container, self.css_provider)
 
-		self.box.append(post_container)
+			self.box.append(post_container)
 
-		vote_btns_box = self.__add_vote_buttons()
-		post_container.append(vote_btns_box)
+			vote_btns_box = self.__add_vote_buttons(data["data"]["score"])
+			post_container.append(vote_btns_box)
 
-		post_image_box = self.__add_post_image()
-		post_container.append(post_image_box)
+			post_image_box = self.__add_post_image()
+			post_container.append(post_image_box)
 
-		post_metadata_box = self.__add_post_metadata()
-		post_container.append(post_metadata_box)
+			post_metadata_box = self.__add_post_metadata(
+				data["data"]["title"],
+				data["data"]["subreddit_name_prefixed"],
+				data["data"]["author"],
+				data["data"]["num_comments"],
+			)
+			post_container.append(post_metadata_box)
 
 	def __get_categories(self):
 		"""Return all Reddit post categories."""
@@ -77,7 +84,9 @@ class HomeWindow:
 	def __add_post_image(self) -> Gtk.Box:
 		"""Add post image."""
 		post_image_box = Gtk.Box(
-			css_classes=["post-image-box"], cursor=self.cursor, height_request=100
+			css_classes=["post-image-box"],
+			cursor=self.cursor,
+			width_request=100,
 		)
 		add_style_context(post_image_box, self.css_provider)
 
@@ -88,8 +97,8 @@ class HomeWindow:
 
 		return post_image_box
 
-	def __add_vote_buttons(self) -> Gtk.Box:
-		"""Add likes count and upvote/downvote buttons."""
+	def __add_vote_buttons(self, score: int) -> Gtk.Box:
+		"""Add score count and upvote/downvote buttons."""
 		box = Gtk.Box(
 			orientation=Gtk.Orientation.VERTICAL, spacing=10, css_classes=["icon-box"]
 		)
@@ -100,9 +109,9 @@ class HomeWindow:
 		)
 		box.append(upvote_btn)
 
-		likes_count = Gtk.Label(label="6000", css_classes=["likes-count"])
-		add_style_context(likes_count, self.css_provider)
-		box.append(likes_count)
+		score_count = Gtk.Label(label=f"{score}", css_classes=["score-count"])
+		add_style_context(score_count, self.css_provider)
+		box.append(score_count)
 
 		downvote_btn = Gtk.Button(
 			icon_name="xyz.daimones.Telex.downvote-btn", cursor=self.cursor
@@ -111,7 +120,9 @@ class HomeWindow:
 
 		return box
 
-	def __add_post_metadata(self) -> Gtk.Box:
+	def __add_post_metadata(
+		self, title: str, subreddit_name: str, user: str, num_of_comments: int
+	) -> Gtk.Box:
 		"""Add widgets for post metadata (e.g. post title, post user, post subreddit)."""
 		post_metadata_box = Gtk.Box(
 			css_classes=["post-metadata-box"],
@@ -122,10 +133,11 @@ class HomeWindow:
 		add_style_context(post_metadata_box, self.css_provider)
 
 		post_title = Gtk.Label(
-			label="This is the first post from the Reddit API client and whatever the #",
+			label=title,
 			css_classes=["post-title"],
 			wrap=True,
 			hexpand=True,
+			halign=Gtk.Align.START,
 			wrap_mode=Pango.WrapMode.CHAR,
 			cursor=self.cursor,
 		)
@@ -140,7 +152,7 @@ class HomeWindow:
 		)
 
 		post_user = Gtk.Label(
-			label="FriendlyBabyFrog ",
+			label=f"{user} ",
 			css_classes=["post-user"],
 			cursor=self.cursor,
 			margin_top=5,
@@ -151,7 +163,7 @@ class HomeWindow:
 		add_style_contexts([post_time, post_text], self.css_provider)
 
 		post_subreddit = Gtk.Label(
-			label="r/mildlyinteresting",
+			label=subreddit_name,
 			css_classes=["post-subreddit"],
 			cursor=self.cursor,
 			margin_top=5,
@@ -162,13 +174,13 @@ class HomeWindow:
 
 		post_metadata_box.append(post_box)
 
-		post_action_btns_box = self.__add_action_btns()
+		post_action_btns_box = self.__add_action_btns(num_of_comments)
 
 		post_metadata_box.append(post_action_btns_box)
 
 		return post_metadata_box
 
-	def __add_action_btns(self) -> Gtk.Box:
+	def __add_action_btns(self, num_of_comments: int) -> Gtk.Box:
 		"""Add widgets for action buttons (e.g. share, save, crosspost, etc)."""
 		post_action_btns_box = Gtk.Box(
 			orientation=Gtk.Orientation.HORIZONTAL,
@@ -176,7 +188,7 @@ class HomeWindow:
 			margin_top=5,
 		)
 		post_comments = Gtk.Label(
-			label="3274 comments ",
+			label=f"{num_of_comments} comments ",
 			css_classes=["post-action-btn"],
 			cursor=self.cursor,
 			margin_top=5,

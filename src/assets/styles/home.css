@@ -7,23 +7,20 @@
     color: #000000;
     border-radius: 15px;
     margin: 0px 500px;
+    min-width: 1000px;
 }
 
 .icon-box {
     padding: 20px;
 }
 
-.likes-count {
+.score-count {
     font-size: 20px;
     font-weight: 600;
 }
 
 .post-image-box {
     padding: 20px 0px;
-}
-
-.post-image {
-    min-width: 500px;
 }
 
 .post-metadata-box {
