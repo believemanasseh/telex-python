@@ -15,6 +15,7 @@ from utils.common import (
 	add_style_contexts,
 	append_all,
 	create_cursor,
+	get_submission_time,
 	load_css,
 	load_image,
 )
@@ -32,53 +33,6 @@ class HomeWindow:
 
 		# Fetches data from reddit
 		self.data = self.__fetch_data("new")
-
-	def render_page(self):
-		"""Renders homepage."""
-		box = Gtk.Box(
-			orientation=Gtk.Orientation.VERTICAL,
-			spacing=20,
-			css_classes=["box"],
-			halign=Gtk.Align.CENTER,
-			valign=Gtk.Align.START,
-			hexpand=True,
-			vexpand=True,
-		)
-		self.css_provider = load_css("/assets/styles/home.css")
-		add_style_context(box, self.css_provider)
-
-		for data in self.data["json"]["data"]["children"]:
-			post_container = Gtk.Box(
-				css_classes=["post-container"],
-				orientation=Gtk.Orientation.HORIZONTAL,
-				spacing=10,
-			)
-			add_style_context(post_container, self.css_provider)
-
-			box.append(post_container)
-
-			vote_btns_box = self.__add_vote_buttons(data["data"]["score"])
-			post_container.append(vote_btns_box)
-
-			post_image_box = self.__add_post_image()
-			post_container.append(post_image_box)
-
-			post_metadata_box = self.__add_post_metadata(
-				data["data"]["title"],
-				data["data"]["subreddit_name_prefixed"],
-				data["data"]["author"],
-				data["data"]["num_comments"],
-			)
-			post_container.append(post_metadata_box)
-
-		viewport = Gtk.Viewport()
-		viewport.set_child(box)
-
-		scrolled_window = Gtk.ScrolledWindow()
-		scrolled_window.set_child(viewport)
-
-		self.base.set_child(scrolled_window)
-		self.base.maximize()
 
 	def __get_categories(self):
 		"""Return all Reddit post categories."""
@@ -136,7 +90,12 @@ class HomeWindow:
 		return box
 
 	def __add_post_metadata(
-		self, title: str, subreddit_name: str, user: str, num_of_comments: int
+		self,
+		title: str,
+		subreddit_name: str,
+		user: str,
+		num_of_comments: int,
+		submission_time: str,
 	) -> Gtk.Box:
 		"""Add widgets for post metadata (e.g. post title, post user, post subreddit)."""
 		post_metadata_box = Gtk.Box(
@@ -160,7 +119,7 @@ class HomeWindow:
 		post_metadata_box.append(post_title)
 		post_box = Gtk.Box(margin_top=5, orientation=Gtk.Orientation.HORIZONTAL)
 		post_time = Gtk.Label(
-			label="submitted 23 hours ago by ",
+			label=f"submitted {submission_time} by ",
 			css_classes=["post-metadata"],
 			halign=Gtk.Align.START,
 			margin_top=5,
@@ -263,3 +222,51 @@ class HomeWindow:
 		post_action_btns_box.append(post_crosspost)
 
 		return post_action_btns_box
+
+	def render_page(self):
+		"""Renders homepage."""
+		box = Gtk.Box(
+			orientation=Gtk.Orientation.VERTICAL,
+			spacing=20,
+			css_classes=["box"],
+			halign=Gtk.Align.CENTER,
+			valign=Gtk.Align.START,
+			hexpand=True,
+			vexpand=True,
+		)
+		self.css_provider = load_css("/assets/styles/home.css")
+		add_style_context(box, self.css_provider)
+
+		for data in self.data["json"]["data"]["children"]:
+			post_container = Gtk.Box(
+				css_classes=["post-container"],
+				orientation=Gtk.Orientation.HORIZONTAL,
+				spacing=10,
+			)
+			add_style_context(post_container, self.css_provider)
+
+			box.append(post_container)
+
+			vote_btns_box = self.__add_vote_buttons(data["data"]["score"])
+			post_container.append(vote_btns_box)
+
+			post_image_box = self.__add_post_image()
+			post_container.append(post_image_box)
+
+			post_metadata_box = self.__add_post_metadata(
+				data["data"]["title"],
+				data["data"]["subreddit_name_prefixed"],
+				data["data"]["author"],
+				data["data"]["num_comments"],
+				get_submission_time(data["data"]["created_utc"]),
+			)
+			post_container.append(post_metadata_box)
+
+		viewport = Gtk.Viewport()
+		viewport.set_child(box)
+
+		scrolled_window = Gtk.ScrolledWindow()
+		scrolled_window.set_child(viewport)
+
+		self.base.set_child(scrolled_window)
+		self.base.maximize()

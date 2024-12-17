@@ -4,6 +4,7 @@ moduledir = join_paths(pkgdatadir, 'telex_python/utils')
 telex_python_sources = [
     '__init__.py',
     'common.py',
+    'constants.py',
     'services.py',
 ]
 

@@ -5,9 +5,12 @@ Contains common utility functions shared across the app.
 
 import os
 from collections.abc import Callable, Sequence
+from datetime import datetime, timezone
 
 import requests
 from gi.repository import Gdk, GdkPixbuf, Gtk
+
+from .constants import Seconds
 
 
 def load_image(
@@ -95,3 +98,31 @@ def create_image_widget(pixbuf) -> None:
 	Gtk.Picture(alternative_text="placeholder img").new_for_filename(
 		abspath[: len(abspath) - 16] + "/assets/images/placeholder.jpg"
 	)
+
+
+def get_submission_time(utc_timestamp: int) -> str:
+	"""Returns submission time of post."""
+	current_time = datetime.now(tz=timezone.utc)
+	event_time = datetime.fromtimestamp(utc_timestamp, tz=timezone.utc)
+	time_difference = current_time - event_time
+	total_seconds = abs(time_difference.total_seconds())
+
+	# Determine the scale -- minutes, hours, days, or weeks
+	if total_seconds < Seconds.MINUTE:
+		return "Less than a minute ago"
+
+	if total_seconds < Seconds.HOUR:  # 60 seconds * 60 minutes
+		minutes = int(total_seconds // Seconds.MINUTE)
+		return f"{minutes} minute{'s' if minutes > 1 else ''} ago"
+
+	if total_seconds < Seconds.DAY:  # 3600 seconds * 24 hours
+		hours = int(total_seconds // Seconds.HOUR)
+		return f"{hours} hour{'s' if hours > 1 else ''} ago"
+
+	if total_seconds < Seconds.WEEK:  # 86400 seconds * 7 days
+		days = int(total_seconds // Seconds.DAY)
+		return f"{days} day{'s' if days > 1 else ''} ago"
+
+	weeks = int(total_seconds // Seconds.WEEK)
+
+	return f"{weeks} week{'s' if weeks > 1 else ''} ago"
