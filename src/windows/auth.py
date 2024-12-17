@@ -12,7 +12,7 @@ from http import HTTPStatus
 
 from gi.repository import Gtk, WebKit
 
-from utils.common import add_style_context, load_css
+from utils.common import add_style_context, create_cursor, load_css
 from utils.services import AWSClient, Reddit
 
 from .home import HomeWindow
@@ -47,7 +47,10 @@ class AuthWindow(Gtk.ApplicationWindow):
 		)
 		self.set_child(self.box)
 		self.reddit_btn = Gtk.Button(
-			label="Continue with Reddit", name="reddit-btn", width_request=200
+			label="Continue with Reddit",
+			name="reddit-btn",
+			width_request=200,
+			cursor=create_cursor("pointer"),
 		)
 		css_provider = load_css("/assets/styles/auth.css")
 		add_style_context(self.reddit_btn, css_provider)
@@ -75,13 +78,13 @@ class AuthWindow(Gtk.ApplicationWindow):
 				access_token = res["json"]["access_token"]
 				self.reddit_api.inject_token(access_token)
 				self.aws_client.create_secret("telex-access-token", access_token)
+
 				self.dialog.close()
 				self.box.remove(self.reddit_btn)
 				self.box.set_opacity(1.0)
+				self.box.set_visible(False)
 
-				home_window = HomeWindow(
-					base_window=self, base_box=self.box, api=self.reddit_api
-				)
+				home_window = HomeWindow(base_window=self, api=self.reddit_api)
 				home_window.render_page()
 
 	def on_render_page(self, _widget: Gtk.Widget | None = None) -> None:

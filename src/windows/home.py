@@ -24,23 +24,29 @@ from utils.services import Reddit
 class HomeWindow:
 	"""Base class for homepage."""
 
-	def __init__(
-		self, base_window: Gtk.ApplicationWindow, base_box: Gtk.Box, api: Reddit
-	):
+	def __init__(self, base_window: Gtk.ApplicationWindow, api: Reddit):
 		"""Maximises base application window and styles base box widget."""
 		self.base = base_window
-		self.box = base_box
 		self.api = api
 		self.cursor = create_cursor("pointer")
-		self.css_provider = load_css("/assets/styles/home.css")
-		self.box.set_valign(Gtk.Align.START)
-		self.box.set_overflow(Gtk.Overflow(0))
-		add_style_context(self.box, self.css_provider)
+
+		# Fetches data from reddit
 		self.data = self.__fetch_data("new")
-		self.base.maximize()
 
 	def render_page(self):
 		"""Renders homepage."""
+		box = Gtk.Box(
+			orientation=Gtk.Orientation.VERTICAL,
+			spacing=20,
+			css_classes=["box"],
+			halign=Gtk.Align.CENTER,
+			valign=Gtk.Align.START,
+			hexpand=True,
+			vexpand=True,
+		)
+		self.css_provider = load_css("/assets/styles/home.css")
+		add_style_context(box, self.css_provider)
+
 		for data in self.data["json"]["data"]["children"]:
 			post_container = Gtk.Box(
 				css_classes=["post-container"],
@@ -49,7 +55,7 @@ class HomeWindow:
 			)
 			add_style_context(post_container, self.css_provider)
 
-			self.box.append(post_container)
+			box.append(post_container)
 
 			vote_btns_box = self.__add_vote_buttons(data["data"]["score"])
 			post_container.append(vote_btns_box)
@@ -64,6 +70,15 @@ class HomeWindow:
 				data["data"]["num_comments"],
 			)
 			post_container.append(post_metadata_box)
+
+		viewport = Gtk.Viewport()
+		viewport.set_child(box)
+
+		scrolled_window = Gtk.ScrolledWindow()
+		scrolled_window.set_child(viewport)
+
+		self.base.set_child(scrolled_window)
+		self.base.maximize()
 
 	def __get_categories(self):
 		"""Return all Reddit post categories."""
@@ -188,7 +203,7 @@ class HomeWindow:
 			margin_top=5,
 		)
 		post_comments = Gtk.Label(
-			label=f"{num_of_comments} comments ",
+			label=f"{num_of_comments} comment{'s' if num_of_comments > 1 else ''} ",
 			css_classes=["post-action-btn"],
 			cursor=self.cursor,
 			margin_top=5,
