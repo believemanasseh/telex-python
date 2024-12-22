@@ -49,6 +49,7 @@ class AuthWindow(Gtk.ApplicationWindow):
 		self.reddit_btn = Gtk.Button(
 			label="Continue with Reddit",
 			name="reddit-btn",
+			css_classes=["reddit-btn"],
 			width_request=200,
 			cursor=create_cursor("pointer"),
 		)
