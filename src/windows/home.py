@@ -31,7 +31,7 @@ class HomeWindow:
 		self.api = api
 		self.cursor = create_cursor("pointer")
 
-		# Fetches data from reddit
+		# Fetches data from Reddit
 		self.data = self.__fetch_data("new")
 
 	def __get_categories(self):
@@ -60,7 +60,10 @@ class HomeWindow:
 		add_style_context(post_image_box, self.css_provider)
 
 		post_image = load_image(
-			"/assets/images/light.jpg", "Light", ["post-image"], self.css_provider
+			"/assets/images/reddit-placeholder.png",
+			"Reddit placeholder",
+			["post-image"],
+			self.css_provider,
 		)
 		post_image_box.append(post_image)
 
@@ -265,7 +268,10 @@ class HomeWindow:
 		viewport = Gtk.Viewport()
 		viewport.set_child(box)
 
-		scrolled_window = Gtk.ScrolledWindow()
+		scrolled_window = Gtk.ScrolledWindow(
+			hscrollbar_policy=Gtk.PolicyType.EXTERNAL,
+			vscrollbar_policy=Gtk.PolicyType.ALWAYS,
+		)
 		scrolled_window.set_child(viewport)
 
 		self.base.set_child(scrolled_window)
