@@ -12,7 +12,7 @@ from http import HTTPStatus
 
 from gi.repository import Gtk, WebKit
 
-from utils.common import add_style_context, create_cursor, load_css
+from utils.common import add_style_context, load_css
 from utils.services import AWSClient, Reddit
 
 from .home import HomeWindow
@@ -51,7 +51,6 @@ class AuthWindow(Gtk.ApplicationWindow):
 			name="reddit-btn",
 			css_classes=["reddit-btn"],
 			width_request=200,
-			cursor=create_cursor("pointer"),
 		)
 		css_provider = load_css("/assets/styles/auth.css")
 		add_style_context(self.reddit_btn, css_provider)
@@ -88,7 +87,7 @@ class AuthWindow(Gtk.ApplicationWindow):
 				home_window = HomeWindow(base_window=self, api=self.reddit_api)
 				home_window.render_page()
 
-	def on_render_page(self, _widget: Gtk.Widget | None = None) -> None:
+	def on_render_page(self, _widget: Gtk.Widget) -> None:
 		"""Renders oauth page.
 
 		Authorisation request on-behalf of application user.
