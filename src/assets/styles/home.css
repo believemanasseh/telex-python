@@ -6,8 +6,10 @@
     background-color: whitesmoke;
     color: #000000;
     border-radius: 15px;
-    margin: 0px 500px;
-    min-width: 1000px;
+}
+
+.post-container:hover {
+    background-color: #d2d2d2;
 }
 
 .icon-box {

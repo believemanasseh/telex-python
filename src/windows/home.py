@@ -54,7 +54,6 @@ class HomeWindow:
 		"""Add post image."""
 		post_image_box = Gtk.Box(
 			css_classes=["post-image-box"],
-			cursor=self.cursor,
 			width_request=100,
 		)
 		add_style_context(post_image_box, self.css_provider)
@@ -245,6 +244,7 @@ class HomeWindow:
 				css_classes=["post-container"],
 				orientation=Gtk.Orientation.HORIZONTAL,
 				spacing=10,
+				width_request=400,
 			)
 			add_style_context(post_container, self.css_provider)
 

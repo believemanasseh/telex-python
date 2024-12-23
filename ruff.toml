@@ -76,6 +76,9 @@ ignore = [
     "D417", # description in docstrings
     "E402", # Allow module-level imports to not necessarily be at top of file
     "E101", # Allow mixed indentation
+    "FBT001", # Allow boolean-type positional arguments
+    "FBT002", # Alow boolean-type positional argument in function definition
+    "FBT003" # Allow boolean positional value in function call
 ]
 
 [format]
