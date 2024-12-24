@@ -13,11 +13,17 @@ install_data(
 )
 
 fourty_eight_pixels_dir = join_paths('hicolor', '48x48', 'apps')
-install_data(
-  join_paths(fourty_eight_pixels_dir, 'xyz.daimones.Telex.upvote-btn.png'),
-  install_dir: join_paths(get_option('datadir'), 'icons', fourty_eight_pixels_dir),
-)
-install_data(
-  join_paths(fourty_eight_pixels_dir, 'xyz.daimones.Telex.downvote-btn.png'),
-  install_dir: join_paths(get_option('datadir'), 'icons', fourty_eight_pixels_dir),
-)
+pngs = [
+  ('@0@.upvote.png').format(application_id), 
+  ('@0@.downvote.png').format(application_id), 
+  ('@0@.profile.png').format(application_id),
+  ('@0@.search.png').format(application_id),
+  ('@0@.reload.png').format(application_id)
+]
+
+foreach png : pngs
+  install_data(
+    join_paths(fourty_eight_pixels_dir, png),
+    install_dir: join_paths(get_option('datadir'), 'icons', fourty_eight_pixels_dir),
+  )
+endforeach

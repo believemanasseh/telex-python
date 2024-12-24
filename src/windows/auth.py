@@ -10,7 +10,7 @@ import gi
 gi.require_versions({"Gtk": "4.0", "WebKit": "6.0"})
 from http import HTTPStatus
 
-from gi.repository import Gtk, WebKit
+from gi.repository import Adw, Gtk, WebKit
 
 from utils.common import add_style_context, load_css
 from utils.services import AWSClient, Reddit
@@ -28,14 +28,27 @@ class AuthWindow(Gtk.ApplicationWindow):
 
 		Create and style login/register buttons
 		"""
+		start_box = Gtk.Box(halign=True, orientation=Gtk.Orientation.HORIZONTAL)
+		start_box.append(Gtk.Button(icon_name="xyz.daimones.Telex.reload"))
+
+		end_box = Gtk.Box(halign=True, orientation=Gtk.Orientation.HORIZONTAL)
+		end_box.append(Gtk.Button(icon_name="xyz.daimones.Telex.search"))
+		end_box.append(Gtk.Button(icon_name="xyz.daimones.Telex.profile"))
+
+		header_bar = Gtk.HeaderBar(decoration_layout="close,maximize,minimize")
+		header_bar.pack_start(start_box)
+		header_bar.pack_end(end_box)
+
 		super().__init__(
 			application=application,
-			title="Telex",
 			default_height=600,
 			default_width=600,
+			title="",
+			titlebar=header_bar,
 			icon_name="reddit-icon",
 			**kwargs,
 		)
+
 		self.reddit_api = Reddit()
 		self.aws_client = AWSClient()
 		self.box = Gtk.Box(
@@ -92,8 +105,12 @@ class AuthWindow(Gtk.ApplicationWindow):
 
 		Authorisation request on-behalf of application user.
 		"""
-		self.dialog = Gtk.Dialog(
-			transient_for=self, default_height=400, default_width=400, visible=True
+		self.dialog = Adw.MessageDialog(
+			transient_for=self,
+			default_height=400,
+			default_width=400,
+			visible=True,
+			titlebar=Adw.HeaderBar(show_title=False),
 		)
 		uri = WebKit.URIRequest(uri=os.getenv("AUTHORISATION_URL", ""))
 		settings = WebKit.Settings(

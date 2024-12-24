@@ -8,7 +8,7 @@ import gi
 gi.require_version("Gtk", "4.0")
 
 
-from gi.repository import Gtk, Pango
+from gi.repository import Adw, Gtk, Pango
 
 from utils.common import (
 	add_style_context,
@@ -25,7 +25,7 @@ from utils.services import Reddit
 class HomeWindow:
 	"""Base class for homepage."""
 
-	def __init__(self, base_window: Gtk.ApplicationWindow, api: Reddit):
+	def __init__(self, base_window: Adw.ApplicationWindow, api: Reddit):
 		"""Maximises base application window and styles base box widget."""
 		self.base = base_window
 		self.api = api
@@ -75,18 +75,14 @@ class HomeWindow:
 		)
 		add_style_context(box, self.css_provider)
 
-		upvote_btn = Gtk.Button(
-			icon_name="xyz.daimones.Telex.upvote-btn", cursor=self.cursor
-		)
+		upvote_btn = Gtk.Button(icon_name="xyz.daimones.Telex.upvote")
 		box.append(upvote_btn)
 
 		score_count = Gtk.Label(label=f"{score}", css_classes=["score-count"])
 		add_style_context(score_count, self.css_provider)
 		box.append(score_count)
 
-		downvote_btn = Gtk.Button(
-			icon_name="xyz.daimones.Telex.downvote-btn", cursor=self.cursor
-		)
+		downvote_btn = Gtk.Button(icon_name="xyz.daimones.Telex.downvote")
 		box.append(downvote_btn)
 
 		return box
@@ -116,6 +112,7 @@ class HomeWindow:
 			halign=Gtk.Align.START,
 			wrap_mode=Pango.WrapMode.CHAR,
 			cursor=self.cursor,
+			max_width_chars=90,
 		)
 		add_style_context(post_title, self.css_provider)
 		post_metadata_box.append(post_title)
@@ -244,7 +241,6 @@ class HomeWindow:
 				css_classes=["post-container"],
 				orientation=Gtk.Orientation.HORIZONTAL,
 				spacing=10,
-				width_request=400,
 			)
 			add_style_context(post_container, self.css_provider)
 
