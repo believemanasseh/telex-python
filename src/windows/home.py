@@ -265,8 +265,8 @@ class HomeWindow:
 		viewport.set_child(box)
 
 		scrolled_window = Gtk.ScrolledWindow(
-			hscrollbar_policy=Gtk.PolicyType.EXTERNAL,
-			vscrollbar_policy=Gtk.PolicyType.ALWAYS,
+			hscrollbar_policy=Gtk.PolicyType.NEVER,
+			vscrollbar_policy=Gtk.PolicyType.AUTOMATIC,
 		)
 		scrolled_window.set_child(viewport)
 
