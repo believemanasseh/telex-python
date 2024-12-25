@@ -29,11 +29,17 @@ class AuthWindow(Gtk.ApplicationWindow):
 		Create and style login/register buttons
 		"""
 		start_box = Gtk.Box(halign=True, orientation=Gtk.Orientation.HORIZONTAL)
-		start_box.append(Gtk.Button(icon_name="xyz.daimones.Telex.reload"))
+		start_box.append(
+			Gtk.Button(icon_name="xyz.daimones.Telex.reload", tooltip_text="Reload")
+		)
 
 		end_box = Gtk.Box(halign=True, orientation=Gtk.Orientation.HORIZONTAL)
-		end_box.append(Gtk.Button(icon_name="xyz.daimones.Telex.search"))
-		end_box.append(Gtk.Button(icon_name="xyz.daimones.Telex.profile"))
+		end_box.append(
+			Gtk.Button(icon_name="xyz.daimones.Telex.search", tooltip_text="Search")
+		)
+		end_box.append(
+			Gtk.Button(icon_name="xyz.daimones.Telex.profile", tooltip_text="Profile")
+		)
 
 		header_bar = Gtk.HeaderBar(decoration_layout="close,maximize,minimize")
 		header_bar.pack_start(start_box)
