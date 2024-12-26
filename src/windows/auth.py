@@ -1,6 +1,7 @@
-"""Copyright 2022 believemanasseh.
+"""Application's entry window class. Contains authentication/authorisation logic.
 
-Application's entry window class. Contains authentication/authorisation logic.
+This module provides:
+- AuthWindow: base window class for authentication
 """
 
 import os
@@ -49,7 +50,7 @@ class AuthWindow(Gtk.ApplicationWindow):
 			application=application,
 			default_height=600,
 			default_width=600,
-			title="",
+			title="Telex",
 			titlebar=header_bar,
 			icon_name="reddit-icon",
 			**kwargs,
@@ -98,10 +99,11 @@ class AuthWindow(Gtk.ApplicationWindow):
 				self.reddit_api.inject_token(access_token)
 				self.aws_client.create_secret("telex-access-token", access_token)
 
-				self.dialog.close()
 				self.box.remove(self.reddit_btn)
 				self.box.set_opacity(1.0)
 				self.box.set_visible(False)
+
+				self.dialog.close()
 
 				home_window = HomeWindow(base_window=self, api=self.reddit_api)
 				home_window.render_page()

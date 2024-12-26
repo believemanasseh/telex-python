@@ -1,6 +1,7 @@
-"""Copyright 2022 believemanasseh.
+"""Window class for app's homepage.
 
-Window class for app's homepage
+This module provides:
+- HomeWindow: window class for home page
 """
 
 import gi

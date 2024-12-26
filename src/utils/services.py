@@ -1,6 +1,8 @@
-"""Copyright 2022 believemanasseh.
+"""Contains classes for various third-party services used.
 
-Contains classes for various third-party services used
+This module provides:
+- Reddit: base Reddit class for all http operations
+- AWSClient: base class for AWS Secrets Manager
 """
 
 import base64

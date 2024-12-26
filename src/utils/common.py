@@ -1,6 +1,15 @@
-"""Copyright 2022 believemanasseh.
+"""Common utility functions shared across the app.
 
-Contains common utility functions shared across the app.
+This module provides:
+- load_image: function to load image files
+- load_css: function to load css files
+- add_style_context: function to add style context to widget
+- add_style_contexts: function to add css style contexts to multiple widgets
+- create_cursor: function to create cursor from name
+- append_all: function to add multiple widgets to box
+- load_image_from_url_async: function to download image asynchronously from url
+- create_image_widget: function to create picture widget
+- get_submission_time: function to retrieve post submission time
 """
 
 import os
@@ -43,7 +52,7 @@ def add_style_context(widget: Gtk.Widget, css_provider: Gtk.CssProvider) -> None
 
 
 def add_style_contexts(widgets: list[Gtk.Widget], css_provider: Gtk.CssProvider) -> None:
-	"""Add multiple css style contexts to widget."""
+	"""Add css style context to multiple widgets."""
 	for widget in widgets:
 		widget.get_style_context().add_provider(
 			css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
