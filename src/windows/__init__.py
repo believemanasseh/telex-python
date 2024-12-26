@@ -1,3 +1,3 @@
 from .auth import *
 from .home import *
-from .onboarding import *
+from .post_detail import *

@@ -8,7 +8,8 @@ import os
 
 import gi
 
-gi.require_versions({"Gtk": "4.0", "WebKit": "6.0"})
+gi.require_versions({"Adw": "1", "Gtk": "4.0", "WebKit": "6.0"})
+
 from http import HTTPStatus
 
 from gi.repository import Adw, Gtk, WebKit
@@ -99,11 +100,11 @@ class AuthWindow(Gtk.ApplicationWindow):
 				self.reddit_api.inject_token(access_token)
 				self.aws_client.create_secret("telex-access-token", access_token)
 
+				self.dialog.close()
+
 				self.box.remove(self.reddit_btn)
 				self.box.set_opacity(1.0)
 				self.box.set_visible(False)
-
-				self.dialog.close()
 
 				home_window = HomeWindow(base_window=self, api=self.reddit_api)
 				home_window.render_page()
@@ -113,12 +114,12 @@ class AuthWindow(Gtk.ApplicationWindow):
 
 		Authorisation request on-behalf of application user.
 		"""
-		self.dialog = Adw.MessageDialog(
+		self.dialog = Gtk.MessageDialog(
 			transient_for=self,
 			default_height=400,
 			default_width=400,
 			visible=True,
-			titlebar=Adw.HeaderBar(show_title=False),
+			titlebar=Adw.HeaderBar(),
 		)
 		uri = WebKit.URIRequest(uri=os.getenv("AUTHORISATION_URL", ""))
 		settings = WebKit.Settings(
