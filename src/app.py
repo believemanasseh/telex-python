@@ -39,7 +39,6 @@ class Telex(Adw.Application):
 		)
 		self.create_action("quit", self.on_quit_action, ["<primary>q"])
 		self.create_action("about", self.on_about_action)
-		self.create_action("preferences", self.on_preferences_action)
 
 	def do_activate(self):
 		"""Called when the application is activated.
@@ -60,9 +59,6 @@ class Telex(Adw.Application):
 		"""Callback for the app.about action."""
 		about = Gtk.AboutDialog(version="1.0", authors=["Believe Manasseh"])
 		about.present()
-
-	def on_preferences_action(self, _widget, _) -> None:
-		"""Callback for the app.preferences action."""
 
 	def create_action(
 		self,

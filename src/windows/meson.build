@@ -5,7 +5,7 @@ telex_python_sources = [
     '__init__.py',
     'auth.py',
     'home.py',
-    'onboarding.py'
+    'post_detail.py'
 ]
 
 install_data(telex_python_sources, install_dir: moduledir)
