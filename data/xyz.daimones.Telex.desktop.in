@@ -1,8 +1,9 @@
 [Desktop Entry]
-Name=telex
+Name=Telex
 Exec=telex
-Icon=xyz.daimones.Telex
+Icon=xyz.daimones.Telex.logo
 Terminal=false
 Type=Application
+Comment=A cross-platform Reddit client
 Categories=GTK;
 StartupNotify=true

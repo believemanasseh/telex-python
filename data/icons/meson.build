@@ -18,7 +18,8 @@ pngs = [
   ('@0@.downvote.png').format(application_id), 
   ('@0@.profile.png').format(application_id),
   ('@0@.search.png').format(application_id),
-  ('@0@.reload.png').format(application_id)
+  ('@0@.reload.png').format(application_id),
+  ('@0@.logo.png').format(application_id)
 ]
 
 foreach png : pngs
