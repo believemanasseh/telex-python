@@ -16,7 +16,11 @@ import os
 from collections.abc import Callable, Sequence
 from datetime import datetime, timezone
 
+import gi
 import requests
+
+gi.require_versions({"Gdk": "4.0"})
+
 from gi.repository import Gdk, GdkPixbuf, Gtk
 
 from .constants import Seconds

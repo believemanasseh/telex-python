@@ -103,11 +103,14 @@ class AuthWindow(Gtk.ApplicationWindow):
 				self.dialog.close()
 
 				self.box.remove(self.reddit_btn)
-				self.box.set_opacity(1.0)
 				self.box.set_visible(False)
 
 				home_window = HomeWindow(base_window=self, api=self.reddit_api)
 				home_window.render_page()
+
+	def __on_close_webview(self, _widget: WebKit.WebView) -> None:
+		"""Handler for WebView widget's close event."""
+		self.box.set_opacity(1.0)
 
 	def on_render_page(self, _widget: Gtk.Widget) -> None:
 		"""Renders oauth page.
@@ -121,6 +124,8 @@ class AuthWindow(Gtk.ApplicationWindow):
 			visible=True,
 			titlebar=Adw.HeaderBar(),
 		)
+		self.dialog.connect("close-request", self.__on_close_webview)
+
 		uri = WebKit.URIRequest(uri=os.getenv("AUTHORISATION_URL", ""))
 		settings = WebKit.Settings(
 			allow_modal_dialogs=True,
