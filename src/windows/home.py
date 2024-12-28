@@ -31,6 +31,7 @@ class HomeWindow:
 		self.base = base_window
 		self.api = api
 		self.cursor = create_cursor("pointer")
+		self.css_provider = load_css("/assets/styles/home.css")
 
 		# Fetches data from Reddit
 		self.data = self.__fetch_data("new")
@@ -158,65 +159,26 @@ class HomeWindow:
 			halign=Gtk.Align.START,
 			margin_top=5,
 		)
-		post_comments = Gtk.Label(
-			label=f"{num_of_comments} comment{'s' if num_of_comments > 1 else ''} ",
-			css_classes=["post-action-btn"],
-			cursor=self.cursor,
-			margin_top=5,
-		)
 
-		post_share = Gtk.Label(
-			label="share ",
-			css_classes=["post-action-btn"],
-			cursor=self.cursor,
-			margin_top=5,
-		)
+		labels = [
+			f"{num_of_comments} comment{'s' if num_of_comments > 1 else ''} ",
+			"share ",
+			"save ",
+			"hide ",
+			"report ",
+			"crosspost ",
+		]
 
-		post_save = Gtk.Label(
-			label="save ",
-			css_classes=["post-action-btn"],
-			cursor=self.cursor,
-			margin_top=5,
-		)
+		for label in labels:
+			post = Gtk.Label(
+				label=label,
+				css_classes=["post-action-btn"],
+				cursor=self.cursor,
+				margin_top=5,
+			)
+			add_style_context(post, self.css_provider)
 
-		post_hide = Gtk.Label(
-			label="hide ",
-			css_classes=["post-action-btn"],
-			cursor=self.cursor,
-			margin_top=5,
-		)
-
-		post_report = Gtk.Label(
-			label="report ",
-			css_classes=["post-action-btn"],
-			cursor=self.cursor,
-			margin_top=5,
-		)
-
-		post_crosspost = Gtk.Label(
-			label="crosspost ",
-			css_classes=["post-action-btn"],
-			cursor=self.cursor,
-			margin_top=5,
-		)
-
-		add_style_contexts(
-			[
-				post_comments,
-				post_share,
-				post_save,
-				post_hide,
-				post_report,
-				post_crosspost,
-			],
-			self.css_provider,
-		)
-		post_action_btns_box.append(post_comments)
-		post_action_btns_box.append(post_share)
-		post_action_btns_box.append(post_save)
-		post_action_btns_box.append(post_hide)
-		post_action_btns_box.append(post_report)
-		post_action_btns_box.append(post_crosspost)
+			post_action_btns_box.append(post)
 
 		return post_action_btns_box
 
@@ -231,7 +193,6 @@ class HomeWindow:
 			hexpand=True,
 			vexpand=True,
 		)
-		self.css_provider = load_css("/assets/styles/home.css")
 		add_style_context(box, self.css_provider)
 
 		for data in self.data["json"]["data"]["children"]:
