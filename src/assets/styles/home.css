@@ -35,9 +35,10 @@
     font-size: 15px;
 }
 
-.post-title:active,
-.post-action-btn:active {
-    color: rgb(0, 123, 255);
+.post-user:hover,
+.post-subreddit:hover,
+.post-action-btn:hover {
+    text-decoration: underline;
 }
 
 .post-user,

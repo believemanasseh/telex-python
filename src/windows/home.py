@@ -126,10 +126,7 @@ class HomeWindow:
 		)
 
 		post_user = Gtk.Label(
-			label=f"{user} ",
-			css_classes=["post-user"],
-			cursor=self.cursor,
-			margin_top=5,
+			label=f"{user} ", css_classes=["post-user"], cursor=self.cursor, margin_top=5
 		)
 		add_style_context(post_user, self.css_provider)
 
