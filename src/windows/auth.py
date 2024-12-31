@@ -14,7 +14,7 @@ from http import HTTPStatus
 
 from gi.repository import Adw, Gtk, WebKit
 
-from utils.common import add_style_context, load_css
+from utils.common import add_style_context, load_css, load_image
 from utils.services import AWSClient, Reddit
 
 from .home import HomeWindow
@@ -30,6 +30,8 @@ class AuthWindow(Gtk.ApplicationWindow):
 
 		Create and style login/register buttons
 		"""
+		self.css_provider = load_css("/assets/styles/auth.css")
+
 		start_box = Gtk.Box(halign=True, orientation=Gtk.Orientation.HORIZONTAL)
 		start_box.append(
 			Gtk.Button(icon_name="xyz.daimones.Telex.reload", tooltip_text="Reload")
@@ -39,8 +41,45 @@ class AuthWindow(Gtk.ApplicationWindow):
 		end_box.append(
 			Gtk.Button(icon_name="xyz.daimones.Telex.search", tooltip_text="Search")
 		)
+
+		popover_child = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+		grid = Gtk.Grid()
+		grid.insert_row(0)
+		grid.insert_column(0)
+		grid.insert_column(1)
+
+		user_profile_img = load_image(
+			"/assets/images/reddit-placeholder.png",
+			"placeholder",
+			css_classes=["user-profile-img"],
+		)
+		add_style_context(user_profile_img, self.css_provider)
+		grid.attach(user_profile_img, 0, 0, 50, 50)
+
+		box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+		box.append(Gtk.Label(label="u/believemanasseh"))
+		box.append(Gtk.Label(label="38 karma"))
+		grid.attach(box, 1, 0, 100, 100)
+
+		popover_child.append(grid)
+
+		menu_labels = ["View Profile", "Preferences", "Log Out"]
+		for label in menu_labels:
+			menu_btn = Gtk.Button(
+				label=label,
+				css_classes=["menu-btn"],
+				hexpand=True,
+				width_request=200,
+			)
+			add_style_context(menu_btn, self.css_provider)
+			popover_child.append(menu_btn)
+
 		end_box.append(
-			Gtk.Button(icon_name="xyz.daimones.Telex.profile", tooltip_text="Profile")
+			Gtk.MenuButton(
+				icon_name="xyz.daimones.Telex.profile",
+				tooltip_text="Profile",
+				popover=Gtk.Popover(child=popover_child),
+			)
 		)
 
 		header_bar = Gtk.HeaderBar(decoration_layout="close,maximize,minimize")
@@ -73,10 +112,9 @@ class AuthWindow(Gtk.ApplicationWindow):
 			css_classes=["reddit-btn"],
 			width_request=200,
 		)
-		css_provider = load_css("/assets/styles/auth.css")
-		add_style_context(self.reddit_btn, css_provider)
+		add_style_context(self.reddit_btn, self.css_provider)
 		self.box.append(self.reddit_btn)
-		self.reddit_btn.connect("clicked", self.on_render_page)
+		self.reddit_btn.connect("clicked", self.__on_render_page)
 
 	def __on_load_changed(self, widget: WebKit.WebView, event: WebKit.LoadEvent) -> None:
 		"""Handler for uri load change signals.
@@ -112,7 +150,7 @@ class AuthWindow(Gtk.ApplicationWindow):
 		"""Handler for WebView widget's close event."""
 		self.box.set_opacity(1.0)
 
-	def on_render_page(self, _widget: Gtk.Widget) -> None:
+	def __on_render_page(self, _widget: Gtk.Widget) -> None:
 		"""Renders oauth page.
 
 		Authorisation request on-behalf of application user.

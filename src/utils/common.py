@@ -27,16 +27,25 @@ from .constants import Seconds
 
 
 def load_image(
-	img_path: str, alt_text: str, css_classes: list[str], css_provider: Gtk.CssProvider
+	img_path: str,
+	alt_text: str,
+	css_classes: list[str] | None = None,
+	css_provider: Gtk.CssProvider | None = None,
 ) -> Gtk.Picture:
 	"""Load image file from assets directory."""
 	abspath = os.path.abspath(__file__)
-	post_image = Gtk.Picture(
-		alternative_text=alt_text, css_classes=css_classes
-	).new_for_filename(abspath[: len(abspath) - 16] + img_path)
-	post_image.get_style_context().add_provider(
-		css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+	post_image = Gtk.Picture(alternative_text=alt_text).new_for_filename(
+		abspath[: len(abspath) - 16] + img_path
 	)
+
+	if css_classes:
+		post_image.set_css_classes(css_classes)
+
+	if css_provider:
+		post_image.get_style_context().add_provider(
+			css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+		)
+
 	return post_image
 
 
@@ -100,7 +109,7 @@ def load_image_from_url_async(
 		callback(None)
 
 
-def create_image_widget(pixbuf) -> None:
+def create_image_widget(pixbuf: GdkPixbuf.Pixbuf | None = None) -> None:
 	"""Creates the image widget."""
 	if pixbuf:
 		Gtk.Picture.new_for_pixbuf(pixbuf)

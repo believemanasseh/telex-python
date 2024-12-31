@@ -8,3 +8,16 @@
     background-color: #000000;
     color: #FFFFFF;
 }
+
+.menu-btn {
+    background-color: #FFFFFF;
+    font-size: 13px;
+}
+
+.menu-btn:hover {
+    background-color: whitesmoke;
+}
+
+.user-profile-img {
+    min-width: 1px;
+}
