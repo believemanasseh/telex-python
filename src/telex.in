@@ -37,9 +37,9 @@ gettext.install('telex', localedir)
 
 # Set env variable
 BASE_URL='https://www.reddit.com/api/v1/authorize.compact'
-CLIENT_ID='74svIPlZpmkHXoIvMAZ1NQ'
+CLIENT_ID='xLfTJ9fCMdxmr5JCiNWMHQ'
 SCOPE='identity+read+mysubreddits'
-URI='https://7515-160-152-187-61.ngrok-free.app'
+URI='https://590b-160-152-172-251.ngrok-free.app'
 DURATION='permanent'
 STATE='telex'
 TYPE='code'

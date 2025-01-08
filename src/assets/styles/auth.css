@@ -9,13 +9,19 @@
     color: #FFFFFF;
 }
 
-.menu-btn {
+.menu-btn, .menu-btn-logout {
     background-color: #FFFFFF;
     font-size: 13px;
 }
 
 .menu-btn:hover {
     background-color: whitesmoke;
+}
+
+.menu-btn-logout:hover {
+    border: 1px solid red;
+    color: red;
+
 }
 
 .user-profile-img {

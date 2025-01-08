@@ -32,59 +32,7 @@ class AuthWindow(Gtk.ApplicationWindow):
 		"""
 		self.css_provider = load_css("/assets/styles/auth.css")
 
-		start_box = Gtk.Box(halign=True, orientation=Gtk.Orientation.HORIZONTAL)
-		start_box.append(
-			Gtk.Button(icon_name="xyz.daimones.Telex.reload", tooltip_text="Reload")
-		)
-
-		end_box = Gtk.Box(halign=True, orientation=Gtk.Orientation.HORIZONTAL)
-		end_box.append(
-			Gtk.Button(icon_name="xyz.daimones.Telex.search", tooltip_text="Search")
-		)
-
-		popover_child = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-		grid = Gtk.Grid()
-		grid.insert_row(0)
-		grid.insert_column(0)
-		grid.insert_column(1)
-
-		user_profile_img = load_image(
-			"/assets/images/reddit-placeholder.png",
-			"placeholder",
-			css_classes=["user-profile-img"],
-		)
-		add_style_context(user_profile_img, self.css_provider)
-		grid.attach(user_profile_img, 0, 0, 50, 50)
-
-		box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-		box.append(Gtk.Label(label="u/believemanasseh"))
-		box.append(Gtk.Label(label="38 karma"))
-		grid.attach(box, 1, 0, 100, 100)
-
-		popover_child.append(grid)
-
-		menu_labels = ["View Profile", "Preferences", "Log Out"]
-		for label in menu_labels:
-			menu_btn = Gtk.Button(
-				label=label,
-				css_classes=["menu-btn"],
-				hexpand=True,
-				width_request=200,
-			)
-			add_style_context(menu_btn, self.css_provider)
-			popover_child.append(menu_btn)
-
-		end_box.append(
-			Gtk.MenuButton(
-				icon_name="xyz.daimones.Telex.profile",
-				tooltip_text="Profile",
-				popover=Gtk.Popover(child=popover_child),
-			)
-		)
-
-		header_bar = Gtk.HeaderBar(decoration_layout="close,maximize,minimize")
-		header_bar.pack_start(start_box)
-		header_bar.pack_end(end_box)
+		header_bar = self.__customise_titlebar()
 
 		super().__init__(
 			application=application,
@@ -115,6 +63,78 @@ class AuthWindow(Gtk.ApplicationWindow):
 		add_style_context(self.reddit_btn, self.css_provider)
 		self.box.append(self.reddit_btn)
 		self.reddit_btn.connect("clicked", self.__on_render_page)
+
+	def __customise_titlebar(self) -> Gtk.HeaderBar:
+		"""Customise titlebar widgets."""
+		start_box = Gtk.Box(halign=True, orientation=Gtk.Orientation.HORIZONTAL)
+		start_box.append(
+			Gtk.Button(icon_name="xyz.daimones.Telex.reload", tooltip_text="Reload")
+		)
+
+		end_box = Gtk.Box(halign=True, orientation=Gtk.Orientation.HORIZONTAL)
+		end_box.append(
+			Gtk.Button(icon_name="xyz.daimones.Telex.search", tooltip_text="Search")
+		)
+
+		popover_child = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+		grid = Gtk.Grid(column_spacing=30)
+		grid.insert_row(0)
+		grid.insert_column(0)
+		grid.insert_column(1)
+
+		user_profile_img = load_image(
+			"/assets/images/reddit-placeholder.png",
+			"placeholder",
+			css_classes=["user-profile-img"],
+		)
+		add_style_context(user_profile_img, self.css_provider)
+		grid.attach(user_profile_img, 0, 0, 1, 1)
+
+		box = Gtk.Box(
+			orientation=Gtk.Orientation.VERTICAL,
+			valign=Gtk.Align.CENTER,
+			halign=Gtk.Align.CENTER,
+		)
+		box.append(Gtk.Label(label="u/believemanasseh", halign=Gtk.Align.START))
+		box.append(Gtk.Label(label="38 karma", halign=Gtk.Align.START))
+		grid.attach(box, 1, 0, 1, 1)
+
+		popover_child.append(grid)
+
+		menu_labels = [
+			"View Profile",
+			"Subreddits",
+			"Settings",
+			"About",
+			"Log Out",
+		]
+		for label in menu_labels:
+			if "Log" in label:
+				menu_btn = Gtk.Button(
+					label=label, css_classes=["menu-btn-logout"], hexpand=True
+				)
+			else:
+				menu_btn = Gtk.Button(label=label, css_classes=["menu-btn"], hexpand=True)
+
+			if menu_btn.get_child():
+				menu_btn.get_child().set_halign(Gtk.Align.START)
+
+			add_style_context(menu_btn, self.css_provider)
+			popover_child.append(menu_btn)
+
+		end_box.append(
+			Gtk.MenuButton(
+				icon_name="xyz.daimones.Telex.profile",
+				tooltip_text="Profile",
+				popover=Gtk.Popover(child=popover_child),
+			)
+		)
+
+		header_bar = Gtk.HeaderBar(decoration_layout="close,maximize,minimize")
+		header_bar.pack_start(start_box)
+		header_bar.pack_end(end_box)
+
+		return header_bar
 
 	def __on_load_changed(self, widget: WebKit.WebView, event: WebKit.LoadEvent) -> None:
 		"""Handler for uri load change signals.

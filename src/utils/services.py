@@ -20,7 +20,7 @@ class Reddit:
 		"""Initialises request headers."""
 		self.domain = "https://{0}.reddit.com"
 		self.system = platform.system()
-		base_encoded_string = base64.b64encode(b"74svIPlZpmkHXoIvMAZ1NQ:" + b"").decode(
+		base_encoded_string = base64.b64encode(b"xLfTJ9fCMdxmr5JCiNWMHQ:" + b"").decode(
 			"utf-8"
 		)
 		self.headers = {
@@ -38,7 +38,7 @@ class Reddit:
 		data = {
 			"grant_type": "authorization_code",
 			"code": code,
-			"redirect_uri": "https://7515-160-152-187-61.ngrok-free.app",
+			"redirect_uri": "https://590b-160-152-172-251.ngrok-free.app",
 		}
 
 		try:

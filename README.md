@@ -1,6 +1,6 @@
 # Telex
 
-Python implementation of a Reddit GUI client for Linux, Windows and macOS operating systems.
+Python implementation of a Reddit GUI client for Linux, Windows and MacOS operating systems.
 
 ## Dependencies
 
@@ -13,7 +13,7 @@ Python implementation of a Reddit GUI client for Linux, Windows and macOS operat
 
 ## Development Purposes Only
 
-### Run Locally with VSCode Extension
+### Run locally with vscode extension
 
 For easy building and running of application, it is advisable to use the flatpak vscode extension. For more instructions, click [here](https://marketplace.visualstudio.com/items?itemName=bilelmoussaoui.flatpak-vscode).
 
