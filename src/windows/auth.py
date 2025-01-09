@@ -14,10 +14,8 @@ from http import HTTPStatus
 
 from gi.repository import Adw, Gtk, WebKit
 
-from utils.common import add_style_context, load_css, load_image
+from utils.common import add_style_context, load_css
 from utils.services import AWSClient, Reddit
-
-from .home import HomeWindow
 
 
 class AuthWindow(Gtk.ApplicationWindow):
@@ -32,14 +30,14 @@ class AuthWindow(Gtk.ApplicationWindow):
 		"""
 		self.css_provider = load_css("/assets/styles/auth.css")
 
-		header_bar = self.__customise_titlebar()
+		self.header_bar = Gtk.HeaderBar(decoration_layout="close,maximize,minimize")
 
 		super().__init__(
 			application=application,
 			default_height=600,
 			default_width=600,
 			title="Telex",
-			titlebar=header_bar,
+			titlebar=self.header_bar,
 			icon_name="reddit-icon",
 			**kwargs,
 		)
@@ -64,78 +62,6 @@ class AuthWindow(Gtk.ApplicationWindow):
 		self.box.append(self.reddit_btn)
 		self.reddit_btn.connect("clicked", self.__on_render_page)
 
-	def __customise_titlebar(self) -> Gtk.HeaderBar:
-		"""Customise titlebar widgets."""
-		start_box = Gtk.Box(halign=True, orientation=Gtk.Orientation.HORIZONTAL)
-		start_box.append(
-			Gtk.Button(icon_name="xyz.daimones.Telex.reload", tooltip_text="Reload")
-		)
-
-		end_box = Gtk.Box(halign=True, orientation=Gtk.Orientation.HORIZONTAL)
-		end_box.append(
-			Gtk.Button(icon_name="xyz.daimones.Telex.search", tooltip_text="Search")
-		)
-
-		popover_child = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-		grid = Gtk.Grid(column_spacing=30)
-		grid.insert_row(0)
-		grid.insert_column(0)
-		grid.insert_column(1)
-
-		user_profile_img = load_image(
-			"/assets/images/reddit-placeholder.png",
-			"placeholder",
-			css_classes=["user-profile-img"],
-		)
-		add_style_context(user_profile_img, self.css_provider)
-		grid.attach(user_profile_img, 0, 0, 1, 1)
-
-		box = Gtk.Box(
-			orientation=Gtk.Orientation.VERTICAL,
-			valign=Gtk.Align.CENTER,
-			halign=Gtk.Align.CENTER,
-		)
-		box.append(Gtk.Label(label="u/believemanasseh", halign=Gtk.Align.START))
-		box.append(Gtk.Label(label="38 karma", halign=Gtk.Align.START))
-		grid.attach(box, 1, 0, 1, 1)
-
-		popover_child.append(grid)
-
-		menu_labels = [
-			"View Profile",
-			"Subreddits",
-			"Settings",
-			"About",
-			"Log Out",
-		]
-		for label in menu_labels:
-			if "Log" in label:
-				menu_btn = Gtk.Button(
-					label=label, css_classes=["menu-btn-logout"], hexpand=True
-				)
-			else:
-				menu_btn = Gtk.Button(label=label, css_classes=["menu-btn"], hexpand=True)
-
-			if menu_btn.get_child():
-				menu_btn.get_child().set_halign(Gtk.Align.START)
-
-			add_style_context(menu_btn, self.css_provider)
-			popover_child.append(menu_btn)
-
-		end_box.append(
-			Gtk.MenuButton(
-				icon_name="xyz.daimones.Telex.profile",
-				tooltip_text="Profile",
-				popover=Gtk.Popover(child=popover_child),
-			)
-		)
-
-		header_bar = Gtk.HeaderBar(decoration_layout="close,maximize,minimize")
-		header_bar.pack_start(start_box)
-		header_bar.pack_end(end_box)
-
-		return header_bar
-
 	def __on_load_changed(self, widget: WebKit.WebView, event: WebKit.LoadEvent) -> None:
 		"""Handler for uri load change signals.
 
@@ -143,6 +69,8 @@ class AuthWindow(Gtk.ApplicationWindow):
 		  widget: web view instance
 		  event: on_load event
 		"""
+		from . import HomeWindow
+
 		uri = widget.get_uri()
 
 		# Retrieve access token

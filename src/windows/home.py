@@ -8,8 +8,7 @@ import gi
 
 gi.require_versions({"Gtk": "4.0", "Adw": "1"})
 
-
-from gi.repository import Adw, Gtk, Pango
+from gi.repository import Gtk, Pango
 
 from utils.common import (
 	add_style_context,
@@ -22,11 +21,13 @@ from utils.common import (
 )
 from utils.services import Reddit
 
+from . import AuthWindow
 
-class HomeWindow:
+
+class HomeWindow(Gtk.ApplicationWindow):
 	"""Base class for homepage."""
 
-	def __init__(self, base_window: Adw.ApplicationWindow, api: Reddit):
+	def __init__(self, base_window: AuthWindow, api: Reddit):
 		"""Maximises base application window and styles base box widget."""
 		self.base = base_window
 		self.api = api
@@ -182,8 +183,82 @@ class HomeWindow:
 
 		return post_action_btns_box
 
+	def __customise_titlebar(self) -> Gtk.HeaderBar:
+		"""Customise titlebar widgets."""
+		start_box = Gtk.Box(halign=True, orientation=Gtk.Orientation.HORIZONTAL)
+		start_box.append(
+			Gtk.Button(icon_name="xyz.daimones.Telex.reload", tooltip_text="Reload")
+		)
+
+		end_box = Gtk.Box(halign=True, orientation=Gtk.Orientation.HORIZONTAL)
+		end_box.append(
+			Gtk.Button(icon_name="xyz.daimones.Telex.search", tooltip_text="Search")
+		)
+
+		popover_child = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+		grid = Gtk.Grid(column_spacing=30)
+		grid.insert_row(0)
+		grid.insert_column(0)
+		grid.insert_column(1)
+
+		user_profile_img = load_image(
+			"/assets/images/reddit-placeholder.png",
+			"placeholder",
+			css_classes=["user-profile-img"],
+		)
+		add_style_context(user_profile_img, self.css_provider)
+		grid.attach(user_profile_img, 0, 0, 1, 1)
+
+		box = Gtk.Box(
+			orientation=Gtk.Orientation.VERTICAL,
+			valign=Gtk.Align.CENTER,
+			halign=Gtk.Align.CENTER,
+		)
+		box.append(Gtk.Label(label="u/believemanasseh", halign=Gtk.Align.START))
+		box.append(Gtk.Label(label="38 karma", halign=Gtk.Align.START))
+		grid.attach(box, 1, 0, 1, 1)
+
+		popover_child.append(grid)
+
+		menu_labels = [
+			"View Profile",
+			"Subreddits",
+			"Settings",
+			"About",
+			"Log Out",
+		]
+		for label in menu_labels:
+			if "Log" in label:
+				menu_btn = Gtk.Button(
+					label=label, css_classes=["menu-btn-logout"], hexpand=True
+				)
+			else:
+				menu_btn = Gtk.Button(label=label, css_classes=["menu-btn"], hexpand=True)
+
+			if menu_btn.get_child():
+				menu_btn.get_child().set_halign(Gtk.Align.START)
+
+			add_style_context(menu_btn, self.css_provider)
+			popover_child.append(menu_btn)
+
+		end_box.append(
+			Gtk.MenuButton(
+				icon_name="xyz.daimones.Telex.profile",
+				tooltip_text="Profile",
+				popover=Gtk.Popover(child=popover_child),
+			)
+		)
+
+		self.base.header_bar.pack_start(start_box)
+		self.base.header_bar.pack_end(end_box)
+
+		return self.base.header_bar
+
 	def render_page(self):
 		"""Renders homepage."""
+		header_bar = self.__customise_titlebar()
+		super().__init__(titlebar=header_bar)
+
 		box = Gtk.Box(
 			orientation=Gtk.Orientation.VERTICAL,
 			spacing=20,
