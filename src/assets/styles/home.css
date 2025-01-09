@@ -49,3 +49,26 @@
 .post-metadata {
     color: rgb(67, 66, 66);
 }
+
+.menu-btn, .menu-btn-logout {
+    background-color: #FFFFFF;
+    font-size: 13px;
+}
+
+.menu-btn:hover {
+    background-color: whitesmoke;
+}
+
+.menu-btn-logout:hover {
+    border: 1px solid red;
+    color: red;
+
+}
+
+.user-profile-img {
+    min-width: 1px;
+}
+
+.menu-btn-label {
+    font-size: 12px;
+}

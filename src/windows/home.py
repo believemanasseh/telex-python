@@ -10,6 +10,7 @@ gi.require_versions({"Gtk": "4.0", "Adw": "1"})
 
 from gi.repository import Gtk, Pango
 
+import store
 from utils.common import (
 	add_style_context,
 	add_style_contexts,
@@ -183,19 +184,10 @@ class HomeWindow(Gtk.ApplicationWindow):
 
 		return post_action_btns_box
 
-	def __customise_titlebar(self) -> Gtk.HeaderBar:
-		"""Customise titlebar widgets."""
-		start_box = Gtk.Box(halign=True, orientation=Gtk.Orientation.HORIZONTAL)
-		start_box.append(
-			Gtk.Button(icon_name="xyz.daimones.Telex.reload", tooltip_text="Reload")
-		)
-
-		end_box = Gtk.Box(halign=True, orientation=Gtk.Orientation.HORIZONTAL)
-		end_box.append(
-			Gtk.Button(icon_name="xyz.daimones.Telex.search", tooltip_text="Search")
-		)
-
+	def __add_profile_popover_child(self) -> Gtk.Box:
+		"""Creates profile popover child widget."""
 		popover_child = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+
 		grid = Gtk.Grid(column_spacing=30)
 		grid.insert_row(0)
 		grid.insert_column(0)
@@ -240,6 +232,94 @@ class HomeWindow(Gtk.ApplicationWindow):
 
 			add_style_context(menu_btn, self.css_provider)
 			popover_child.append(menu_btn)
+
+		return popover_child
+
+	def __add_sort_popover_child(self) -> Gtk.Box:
+		"""Creates sort popover child widget."""
+		popover_child = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+
+		check_btn = Gtk.CheckButton(
+			active=True, label=store.post_sort_type[store.current_sort]
+		)
+
+		store.current_sort += 1
+		check_btn1 = Gtk.CheckButton(active=False)
+		check_btn1.set_group(check_btn)
+		check_btn1.set_label(store.post_sort_type[store.current_sort])
+
+		store.current_sort += 1
+		check_btn2 = Gtk.CheckButton(
+			active=False, label=store.post_sort_type[store.current_sort]
+		)
+		check_btn2.set_group(check_btn1)
+
+		store.current_sort += 1
+		check_btn3 = Gtk.CheckButton(
+			active=False, label=store.post_sort_type[store.current_sort]
+		)
+		check_btn3.set_group(check_btn2)
+
+		store.current_sort += 1
+		check_btn4 = Gtk.CheckButton(
+			active=False, label=store.post_sort_type[store.current_sort]
+		)
+		check_btn4.set_group(check_btn3)
+
+		popover_child.append(check_btn)
+		popover_child.append(check_btn1)
+		popover_child.append(check_btn2)
+		popover_child.append(check_btn3)
+		popover_child.append(check_btn4)
+
+		return popover_child
+
+	def __add_menu_button_child(self) -> Gtk.Box:
+		"""Creates menu button child widget."""
+		menu_btn_child = Gtk.Box(
+			orientation=Gtk.Orientation.VERTICAL,
+			halign=Gtk.Align.CENTER,
+			valign=Gtk.Align.CENTER,
+		)
+
+		grid = Gtk.Grid(column_spacing=30)
+		grid.insert_row(0)
+		grid.insert_column(0)
+		grid.insert_column(1)
+
+		label = Gtk.Label(label=store.post_sort_type[store.current_sort])
+		grid.attach(label, 0, 0, 1, 1)
+
+		image = Gtk.Image(icon_name="xyz.daimones.Telex.sort-down")
+		grid.attach(image, 1, 0, 1, 1)
+
+		menu_btn_child.append(grid)
+
+		return menu_btn_child
+
+	def __customise_titlebar(self) -> Gtk.HeaderBar:
+		"""Customise titlebar widgets."""
+		start_box = Gtk.Box(halign=True, orientation=Gtk.Orientation.HORIZONTAL)
+		start_box.append(
+			Gtk.Button(icon_name="xyz.daimones.Telex.reload", tooltip_text="Reload")
+		)
+
+		end_box = Gtk.Box(halign=True, orientation=Gtk.Orientation.HORIZONTAL)
+
+		menu_btn_child = self.__add_menu_button_child()
+		popover_child = self.__add_sort_popover_child()
+		end_box.append(
+			Gtk.MenuButton(
+				child=menu_btn_child,
+				tooltip_text="Sort posts",
+				popover=Gtk.Popover(child=popover_child),
+			)
+		)
+		end_box.append(
+			Gtk.Button(icon_name="xyz.daimones.Telex.search", tooltip_text="Search")
+		)
+
+		popover_child = self.__add_profile_popover_child()
 
 		end_box.append(
 			Gtk.MenuButton(
