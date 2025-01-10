@@ -10,9 +10,9 @@ pygobject = "==3.46.0"
 pygobject-stubs = "==2.10.0"
 requests = "==2.31.0"
 mypy = "==1.11.0"
-types-requests = "==2.32.0.20240712"
 
 [dev-packages]
+types-requests = "==2.32.0.20240712"
 
 [requires]
 python_version = "3.11"

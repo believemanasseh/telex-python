@@ -52,7 +52,8 @@
 
 .menu-btn, .menu-btn-logout {
     background-color: #FFFFFF;
-    font-size: 13px;
+    font-size: 15px;
+    font-weight: 400;
 }
 
 .menu-btn:hover {
@@ -70,5 +71,6 @@
 }
 
 .menu-btn-label {
-    font-size: 12px;
+    font-size: 14px;
+    font-weight: 400;
 }

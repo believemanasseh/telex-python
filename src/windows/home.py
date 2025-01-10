@@ -287,13 +287,17 @@ class HomeWindow(Gtk.ApplicationWindow):
 		grid.insert_column(0)
 		grid.insert_column(1)
 
-		label = Gtk.Label(label=store.post_sort_type[store.current_sort])
+		label = Gtk.Label(
+			label=store.post_sort_type[store.current_sort], css_classes=["menu-btn-label"]
+		)
 		grid.attach(label, 0, 0, 1, 1)
 
 		image = Gtk.Image(icon_name="xyz.daimones.Telex.sort-down")
 		grid.attach(image, 1, 0, 1, 1)
 
 		menu_btn_child.append(grid)
+
+		add_style_context(label, self.css_provider)
 
 		return menu_btn_child
 
