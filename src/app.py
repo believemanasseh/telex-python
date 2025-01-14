@@ -25,7 +25,7 @@ import gi
 gi.require_versions({"Gtk": "4.0", "Adw": "1"})
 from gi.repository import Adw, Gio, Gtk
 
-from windows import AuthWindow
+from windows.auth import AuthWindow
 
 
 class Telex(Adw.Application):

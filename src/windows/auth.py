@@ -14,8 +14,8 @@ from http import HTTPStatus
 
 from gi.repository import Adw, Gtk, WebKit
 
+from services import AWSClient, Reddit
 from utils.common import add_style_context, load_css
-from utils.services import AWSClient, Reddit
 
 
 class AuthWindow(Gtk.ApplicationWindow):
@@ -24,13 +24,12 @@ class AuthWindow(Gtk.ApplicationWindow):
 	__gtype_name__ = "AuthWindow"
 
 	def __init__(self, application, **kwargs) -> None:
-		"""Initialises authentication window.
-
-		Create and style login/register buttons
-		"""
+		"""Initialises authentication window."""
 		self.css_provider = load_css("/assets/styles/auth.css")
 
-		self.header_bar = Gtk.HeaderBar(decoration_layout="close,maximize,minimize")
+		self.header_bar = Adw.HeaderBar(
+			decoration_layout="close,maximize,minimize", show_back_button=True
+		)
 
 		super().__init__(
 			application=application,
@@ -42,7 +41,7 @@ class AuthWindow(Gtk.ApplicationWindow):
 			**kwargs,
 		)
 
-		self.reddit_api = Reddit()
+		self.api = Reddit()
 		self.aws_client = AWSClient()
 		self.box = Gtk.Box(
 			orientation=Gtk.Orientation.VERTICAL,
@@ -69,7 +68,7 @@ class AuthWindow(Gtk.ApplicationWindow):
 		  widget: web view instance
 		  event: on_load event
 		"""
-		from . import HomeWindow
+		from windows.home import HomeWindow
 
 		uri = widget.get_uri()
 
@@ -79,11 +78,11 @@ class AuthWindow(Gtk.ApplicationWindow):
 			start_index = uri.index("code=") + len("code=")
 			end_index = uri.index("#")
 			auth_code = uri[start_index:end_index]
-			res = self.reddit_api.generate_access_token(auth_code)
+			res = self.api.generate_access_token(auth_code)
 
 			if res["status_code"] == HTTPStatus.OK:
 				access_token = res["json"]["access_token"]
-				self.reddit_api.inject_token(access_token)
+				self.api.inject_token(access_token)
 				self.aws_client.create_secret("telex-access-token", access_token)
 
 				self.dialog.close()
@@ -91,7 +90,7 @@ class AuthWindow(Gtk.ApplicationWindow):
 				self.box.remove(self.reddit_btn)
 				self.box.set_visible(False)
 
-				home_window = HomeWindow(base_window=self, api=self.reddit_api)
+				home_window = HomeWindow(base_window=self, api=self.api)
 				home_window.render_page()
 
 	def __on_close_webview(self, _widget: WebKit.WebView) -> None:
