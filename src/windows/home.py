@@ -11,6 +11,7 @@ gi.require_versions({"Gtk": "4.0", "Adw": "1"})
 from gi.repository import Gtk, Pango
 
 import store
+from services import Reddit
 from utils.common import (
 	add_style_context,
 	add_style_contexts,
@@ -20,9 +21,7 @@ from utils.common import (
 	load_css,
 	load_image,
 )
-from utils.services import Reddit
-
-from . import AuthWindow
+from windows.auth import AuthWindow
 
 
 class HomeWindow(Gtk.ApplicationWindow):
@@ -36,25 +35,13 @@ class HomeWindow(Gtk.ApplicationWindow):
 		self.css_provider = load_css("/assets/styles/home.css")
 
 		# Fetches data from Reddit
-		self.data = self.__fetch_data("new")
-
-	def __get_categories(self):
-		"""Return all Reddit post categories."""
-		return [
-			"new",
-			"popular",
-			"random",
-			"sort",
-			"top",
-			"rising",
-			"hot",
-			"controversial",
-		]
+		category = store.post_sort_type[store.current_sort].lower()
+		self.data = self.__fetch_data(category)
 
 	def __fetch_data(self, category) -> dict[str, int | dict] | None:
 		return self.api.retrieve_listings(category)
 
-	def __add_post_image(self) -> Gtk.Box:
+	def add_post_image(self) -> Gtk.Box:
 		"""Add post image."""
 		post_image_box = Gtk.Box(
 			css_classes=["post-image-box"],
@@ -72,7 +59,7 @@ class HomeWindow(Gtk.ApplicationWindow):
 
 		return post_image_box
 
-	def __add_vote_buttons(self, score: int) -> Gtk.Box:
+	def add_vote_buttons(self, score: int) -> Gtk.Box:
 		"""Add score count and upvote/downvote buttons."""
 		box = Gtk.Box(
 			orientation=Gtk.Orientation.VERTICAL, spacing=10, css_classes=["icon-box"]
@@ -91,7 +78,7 @@ class HomeWindow(Gtk.ApplicationWindow):
 
 		return box
 
-	def __add_post_metadata(
+	def add_post_metadata(
 		self,
 		title: str,
 		subreddit_name: str,
@@ -154,7 +141,7 @@ class HomeWindow(Gtk.ApplicationWindow):
 
 		return post_metadata_box
 
-	def __add_action_btns(self, num_of_comments: int) -> Gtk.Box:
+	def add_action_btns(self, num_of_comments: int) -> Gtk.Box:
 		"""Add widgets for action buttons (e.g. share, save, crosspost, etc)."""
 		post_action_btns_box = Gtk.Box(
 			orientation=Gtk.Orientation.HORIZONTAL,
@@ -338,6 +325,13 @@ class HomeWindow(Gtk.ApplicationWindow):
 
 		return self.base.header_bar
 
+	def __on_box_clicked(self, gesture, n_press, x, y):
+		from windows.post_detail import PostDetailWindow
+
+		self.scrolled_window.set_child_visible(False)
+		post_detail_window = PostDetailWindow(base=self, api=self.api)
+		post_detail_window.render_page()
+
 	def render_page(self):
 		"""Renders homepage."""
 		header_bar = self.__customise_titlebar()
@@ -362,6 +356,10 @@ class HomeWindow(Gtk.ApplicationWindow):
 			)
 			add_style_context(post_container, self.css_provider)
 
+			click_controller = Gtk.GestureClick()
+			click_controller.connect("pressed", self.__on_box_clicked)
+			post_container.add_controller(click_controller)
+
 			box.append(post_container)
 
 			vote_btns_box = self.__add_vote_buttons(data["data"]["score"])
@@ -379,14 +377,14 @@ class HomeWindow(Gtk.ApplicationWindow):
 			)
 			post_container.append(post_metadata_box)
 
-		viewport = Gtk.Viewport()
-		viewport.set_child(box)
+		self.viewport = Gtk.Viewport()
+		self.viewport.set_child(box)
 
-		scrolled_window = Gtk.ScrolledWindow(
+		self.scrolled_window = Gtk.ScrolledWindow(
 			hscrollbar_policy=Gtk.PolicyType.NEVER,
 			vscrollbar_policy=Gtk.PolicyType.AUTOMATIC,
 		)
-		scrolled_window.set_child(viewport)
+		self.scrolled_window.set_child(self.viewport)
 
-		self.base.set_child(scrolled_window)
+		self.base.set_child(self.scrolled_window)
 		self.base.maximize()
