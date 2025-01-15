@@ -135,7 +135,7 @@ class HomeWindow(Gtk.ApplicationWindow):
 
 		post_metadata_box.append(post_box)
 
-		post_action_btns_box = self.__add_action_btns(num_of_comments)
+		post_action_btns_box = self.add_action_btns(num_of_comments)
 
 		post_metadata_box.append(post_action_btns_box)
 
@@ -334,8 +334,7 @@ class HomeWindow(Gtk.ApplicationWindow):
 
 	def render_page(self):
 		"""Renders homepage."""
-		header_bar = self.__customise_titlebar()
-		super().__init__(titlebar=header_bar)
+		self.__customise_titlebar()
 
 		box = Gtk.Box(
 			orientation=Gtk.Orientation.VERTICAL,
@@ -362,13 +361,13 @@ class HomeWindow(Gtk.ApplicationWindow):
 
 			box.append(post_container)
 
-			vote_btns_box = self.__add_vote_buttons(data["data"]["score"])
+			vote_btns_box = self.add_vote_buttons(data["data"]["score"])
 			post_container.append(vote_btns_box)
 
-			post_image_box = self.__add_post_image()
+			post_image_box = self.add_post_image()
 			post_container.append(post_image_box)
 
-			post_metadata_box = self.__add_post_metadata(
+			post_metadata_box = self.add_post_metadata(
 				data["data"]["title"],
 				data["data"]["subreddit_name_prefixed"],
 				data["data"]["author"],
