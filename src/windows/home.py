@@ -325,11 +325,20 @@ class HomeWindow(Gtk.ApplicationWindow):
 
 		return self.base.header_bar
 
-	def __on_box_clicked(self, gesture, n_press, x, y):
+	def __on_box_clicked(
+		self,
+		_gesture: Gtk.GestureClick,
+		_n_press: int,
+		_x: float,
+		_y: float,
+		widget: Gtk.Box,
+	):
 		from windows.post_detail import PostDetailWindow
 
+		index = widget.get_name()
+		post_id = self.data["json"]["data"]["children"][int(index)]["data"]["id"]
 		self.scrolled_window.set_child_visible(False)
-		post_detail_window = PostDetailWindow(base=self, api=self.api)
+		post_detail_window = PostDetailWindow(base=self, api=self.api, post_id=post_id)
 		post_detail_window.render_page()
 
 	def render_page(self):
@@ -347,16 +356,26 @@ class HomeWindow(Gtk.ApplicationWindow):
 		)
 		add_style_context(box, self.css_provider)
 
-		for data in self.data["json"]["data"]["children"]:
+		for index, data in enumerate(self.data["json"]["data"]["children"]):
 			post_container = Gtk.Box(
 				css_classes=["post-container"],
 				orientation=Gtk.Orientation.HORIZONTAL,
 				spacing=10,
+				name=str(index),
 			)
 			add_style_context(post_container, self.css_provider)
 
 			click_controller = Gtk.GestureClick()
-			click_controller.connect("pressed", self.__on_box_clicked)
+			click_controller.connect(
+				"pressed",
+				lambda gesture,
+				n_press,
+				x,
+				y,
+				widget=post_container: self.__on_box_clicked(
+					gesture, n_press, x, y, widget
+				),
+			)
 			post_container.add_controller(click_controller)
 
 			box.append(post_container)

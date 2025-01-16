@@ -22,10 +22,11 @@ class PostDetailWindow(Gtk.ApplicationWindow):
 		"""Initialises window for post details."""
 		self.base = base
 		self.api = api
+		print(post_id, "id")
 
 		self.data = self.__fetch_data(post_id)["json"]["data"]["children"][0]
 
-	def __fetch_data(self, post_id) -> dict[str, int | dict] | None:
+	def __fetch_data(self, post_id: str) -> dict[str, int | dict] | None:
 		return self.api.retrieve_comments(post_id)
 
 	def render_page(self):
