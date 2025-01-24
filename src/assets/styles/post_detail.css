@@ -1,0 +1,9 @@
+.post-container {
+    background-color: whitesmoke;
+    color: #000000;
+    border-radius: 15px;
+}
+
+.post-container:hover {
+    background-color: #d2d2d2;
+}
