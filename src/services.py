@@ -12,6 +12,8 @@ import boto3
 import requests
 from botocore.exceptions import ClientError
 
+s = 1
+
 
 class Reddit:
 	"""Base class for all operations on Reddit's API."""
@@ -38,7 +40,7 @@ class Reddit:
 		data = {
 			"grant_type": "authorization_code",
 			"code": code,
-			"redirect_uri": "https://93c9-169-159-123-32.ngrok-free.app",
+			"redirect_uri": "https://ed33-169-159-77-168.ngrok-free.app",
 		}
 
 		try:
