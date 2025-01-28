@@ -112,7 +112,7 @@ def get_package_name(filename: str) -> str:
 		if len(segments) == 2:
 			return segments[0]
 		return "-".join(segments[: len(segments) - 1])
-	elif filename.endswith("whl"):
+	if filename.endswith("whl"):
 		segments = filename.split("-")
 		if len(segments) == 5:
 			return segments[0]
@@ -122,10 +122,9 @@ def get_package_name(filename: str) -> str:
 		if candidate[-1] == segments[len(segments) - 4]:
 			return "-".join(candidate[:-1])
 		return "-".join(candidate)
-	else:
-		raise Exception(
-			f"Downloaded filename: {filename} does not end with bz2, gz, xz, zip, or whl"
-		)
+	raise Exception(
+		f"Downloaded filename: {filename} does not end with bz2, gz, xz, zip, or whl"
+	)
 
 
 def get_file_version(filename: str) -> str:

@@ -7,12 +7,16 @@ target-version = "py310"
 # Files to lint
 include = ["*.py"]
 
+# Directories to ignore
+exclude = ["flatpak"]
+
 # Allow imports relative to the "src" directory
 src = ["src"]
 
 # Automatically fix basic problems
 fix = true
 
+[lint]
 ignore-init-module-imports = true
 
 select = [
@@ -81,14 +85,14 @@ ignore = [
     "FBT003" # Allow boolean positional value in function call
 ]
 
-[format]
-indent-style = "tab"
-
-[per-file-ignores]
+[lint.per-file-ignores]
 "__init__.py" = ["F403", "D104"]
 
-[pydocstyle]
+[lint.pydocstyle]
 convention = "google"
 
 [lint.isort]
 case-sensitive = true
+
+[format]
+indent-style = "tab"
