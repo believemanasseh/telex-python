@@ -40,7 +40,6 @@ class AuthWindow(Gtk.ApplicationWindow):
 			icon_name="reddit-icon",
 			**kwargs,
 		)
-
 		self.api = Reddit()
 		self.aws_client = AWSClient()
 		self.box = Gtk.Box(

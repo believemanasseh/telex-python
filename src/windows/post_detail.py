@@ -18,50 +18,66 @@ from windows.home import HomeWindow
 class PostDetailWindow(Gtk.ApplicationWindow):
 	"""Entry window class for post detail."""
 
-	def __init__(self, base: HomeWindow, api: Reddit, post_id: str):
+	def __init__(self, base_window: HomeWindow, api: Reddit, post_id: str):
 		"""Initialises window for post details."""
-		self.base = base
+		self.base = base_window
 		self.api = api
 		self.css_provider = load_css("/assets/styles/post_detail.css")
 
 		self.data = self.__fetch_data(post_id)
 		self.box = Gtk.Box(
+			css_classes=["box"],
 			orientation=Gtk.Orientation.VERTICAL,
 			halign=Gtk.Align.CENTER,
 			valign=Gtk.Align.START,
-			css_classes=["box"],
+			hexpand=True,
+			vexpand=True,
 		)
 
 	def __fetch_data(self, post_id: str) -> dict[str, int | dict] | None:
+		"""Retrieves comments."""
 		return self.api.retrieve_comments(post_id)
 
-	def __load_comments(self) -> None:
-		comments_data = self.data["json"][1:]
-		for comments in comments_data:
-			data = comments["data"]["children"][0]
+	def __load_comments(self, parent_box: Gtk.Box, comments_data: list[dict]) -> None:
+		"""Loads comments.
 
-			grid = Gtk.Grid(column_spacing=30)
-			grid.insert_row(0)
-			grid.insert_column(0)
-			grid.insert_column(1)
+		Args:
+		  parent_box: Gtk.Box instance
+		  comments_data: List of comments
+		"""
+		data = comments_data["data"]["children"][0]
 
-			post_image = load_image(
-				"/assets/images/reddit-placeholder.png",
-				"Reddit placeholder",
-				css_provider=self.css_provider,
-			)
-			grid.attach(post_image, 0, 0, 1, 1)
+		box = Gtk.Box(
+			orientation=Gtk.Orientation.HORIZONTAL,
+			spacing=10,
+		)
 
-			box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
-			author = data["author"]
-			body = data["body"]
+		grid = Gtk.Grid(column_spacing=30)
+		grid.insert_row(0)
+		grid.insert_column(0)
+		grid.insert_column(1)
 
-			box.append(author)
-			box.append(body)
+		post_image = load_image(
+			"/assets/images/reddit-placeholder.png",
+			"Reddit placeholder",
+			css_provider=self.css_provider,
+		)
+		grid.attach(post_image, 0, 0, 1, 1)
 
-			grid.attach(box, 1, 0, 1, 1)
+		grid_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+		author = data["data"]["author"]
+		body = data["data"]["body"]
+		replies = data["data"]["replies"]
 
-			self.box.append(grid)
+		grid_box.append(author)
+		grid_box.append(body)
+
+		grid.attach(grid_box, 1, 0, 1, 1)
+
+		parent_box.append(grid)
+
+		if replies:
+			self.__load_comments(box, replies)
 
 	def render_page(self):
 		"""Renders window."""
@@ -92,11 +108,15 @@ class PostDetailWindow(Gtk.ApplicationWindow):
 		add_style_contexts([self.box, post_container], self.css_provider)
 
 		self.base.viewport.set_child(self.box)
-		self.base.set_titlebar(
+		self.base.base.set_titlebar(
 			Adw.HeaderBar(
 				decoration_layout="close,maximize,minimize", show_back_button=True
 			)
 		)
 		self.base.scrolled_window.set_child(self.base.viewport)
 		self.base.scrolled_window.set_child_visible(True)
-		self.__load_comments()
+
+		# Load comments
+		comments_data = self.data["json"][1:]
+		for comments in comments_data:
+			self.__load_comments(self.box, comments)

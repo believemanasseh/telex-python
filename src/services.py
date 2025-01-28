@@ -40,7 +40,7 @@ class Reddit:
 		data = {
 			"grant_type": "authorization_code",
 			"code": code,
-			"redirect_uri": "https://ed33-169-159-77-168.ngrok-free.app",
+			"redirect_uri": "https://a96e-160-152-86-202.ngrok-free.app",
 		}
 
 		try:

@@ -39,6 +39,7 @@ class HomeWindow(Gtk.ApplicationWindow):
 		self.data = self.__fetch_data(category)
 
 	def __fetch_data(self, category) -> dict[str, int | dict] | None:
+		"""Retrieves listing."""
 		return self.api.retrieve_listings(category)
 
 	def add_post_image(self) -> Gtk.Box:
@@ -338,7 +339,9 @@ class HomeWindow(Gtk.ApplicationWindow):
 		index = widget.get_name()
 		post_id = self.data["json"]["data"]["children"][int(index)]["data"]["id"]
 		self.scrolled_window.set_child_visible(False)
-		post_detail_window = PostDetailWindow(base=self, api=self.api, post_id=post_id)
+		post_detail_window = PostDetailWindow(
+			base_window=self, api=self.api, post_id=post_id
+		)
 		post_detail_window.render_page()
 
 	def render_page(self):
