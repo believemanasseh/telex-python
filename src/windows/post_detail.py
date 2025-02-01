@@ -64,20 +64,24 @@ class PostDetailWindow(Gtk.ApplicationWindow):
 		)
 		grid.attach(post_image, 0, 0, 1, 1)
 
-		grid_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
-		author = data["data"]["author"]
-		body = data["data"]["body"]
-		replies = data["data"]["replies"]
+		grid_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
 
-		grid_box.append(author)
-		grid_box.append(body)
+		if "author" in data["data"]:
+			author = data["data"]["author"]
+			body = data["data"]["body"]
+			replies = data["data"]["replies"]
 
-		grid.attach(grid_box, 1, 0, 1, 1)
+			author_label = Gtk.Label(label=author, halign=Gtk.Align.START)
+			body_label = Gtk.Label(label=body, halign=Gtk.Align.START)
+			grid_box.append(author_label)
+			grid_box.append(body_label)
 
-		parent_box.append(grid)
+			grid.attach(grid_box, 1, 0, 1, 1)
 
-		if replies:
-			self.__load_comments(box, replies)
+			parent_box.append(grid)
+
+			if replies:
+				self.__load_comments(box, replies)
 
 	def render_page(self):
 		"""Renders window."""
