@@ -38,21 +38,20 @@ class PostDetailWindow(Gtk.ApplicationWindow):
 		"""Retrieves comments."""
 		return self.api.retrieve_comments(post_id)
 
-	def __load_comments(self, parent_box: Gtk.Box, comments_data: list[dict]) -> None:
+	def __load_comments(
+		self, parent_box: Gtk.Box, comments_data: list[dict], reply_comment: bool
+	) -> None:
 		"""Loads comments.
 
 		Args:
 		  parent_box: Gtk.Box instance
 		  comments_data: List of comments
 		"""
-		data = comments_data["data"]["children"][0]
+		box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+		if reply_comment:
+			box.set_margin_start(5)
 
-		box = Gtk.Box(
-			orientation=Gtk.Orientation.HORIZONTAL,
-			spacing=10,
-		)
-
-		grid = Gtk.Grid(column_spacing=30)
+		grid = Gtk.Grid(column_spacing=10)
 		grid.insert_row(0)
 		grid.insert_column(0)
 		grid.insert_column(1)
@@ -66,22 +65,28 @@ class PostDetailWindow(Gtk.ApplicationWindow):
 
 		grid_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
 
-		if "author" in data["data"]:
-			author = data["data"]["author"]
-			body = data["data"]["body"]
-			replies = data["data"]["replies"]
+		if "author" not in comments_data["data"]:
+			return
 
-			author_label = Gtk.Label(label=author, halign=Gtk.Align.START)
-			body_label = Gtk.Label(label=body, halign=Gtk.Align.START)
-			grid_box.append(author_label)
-			grid_box.append(body_label)
+		author = comments_data["data"]["author"]
+		body = comments_data["data"]["body"]
+		replies = comments_data["data"]["replies"]
 
-			grid.attach(grid_box, 1, 0, 1, 1)
+		author_label = Gtk.Label(label=author, halign=Gtk.Align.START)
+		body_label = Gtk.Label(
+			label=body, halign=Gtk.Align.START, width_chars=100, wrap=True
+		)
+		grid_box.append(author_label)
+		grid_box.append(body_label)
 
-			parent_box.append(grid)
+		grid.attach(grid_box, 1, 0, 1, 1)
 
-			if replies:
-				self.__load_comments(box, replies)
+		box.append(grid)
+
+		parent_box.append(box)
+
+		if replies:
+			self.__load_comments(box, replies, True)
 
 	def render_page(self):
 		"""Renders window."""
@@ -121,6 +126,6 @@ class PostDetailWindow(Gtk.ApplicationWindow):
 		self.base.scrolled_window.set_child_visible(True)
 
 		# Load comments
-		comments_data = self.data["json"][1:]
+		comments_data = self.data["json"][1]["data"]["children"]
 		for comments in comments_data:
-			self.__load_comments(self.box, comments)
+			self.__load_comments(self.box, comments, False)
