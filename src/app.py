@@ -21,66 +21,104 @@ from collections.abc import Callable
 from typing import Any
 
 import gi
-
-gi.require_versions({"Gtk": "4.0", "Adw": "1"})
 from gi.repository import Adw, Gio, Gtk
 
 from windows.auth import AuthWindow
 
+gi.require_versions({"Gtk": "4.0", "Adw": "1"})
+
 
 class Telex(Adw.Application):
-	"""The main application singleton class."""
+    """The main application singleton class."""
 
-	def __init__(self) -> None:
-		"""Initialises application and signal handlers."""
-		super().__init__(
-			application_id="xyz.daimones.Telex",
-			flags=Gio.ApplicationFlags.FLAGS_NONE,
-		)
-		self.create_action("quit", self.on_quit_action, ["<primary>q"])
-		self.create_action("about", self.on_about_action)
+    def __init__(self) -> None:
+        """Initialises application and signal handlers."""
+        super().__init__(
+            application_id="xyz.daimones.Telex",
+            flags=Gio.ApplicationFlags.FLAGS_NONE,
+        )
+        self.create_action("quit", self.on_quit_action, ["<primary>q"])
+        self.create_action("about", self.on_about_action)
 
-	def do_activate(self):
-		"""Called when the application is activated.
+    def do_activate(self):
+        """Called when the application is activated.
 
-		We raise the application's main window, creating it if
-		necessary.
-		"""
-		win = self.props.active_window
-		if not win:
-			win = AuthWindow(application=self)
-		win.present()
+        We raise the application's main window, creating it if
+        necessary.
 
-	def on_quit_action(self, _action, _pspec) -> None:
-		"""Callback for app.quit action."""
-		self.quit()
+        Returns:
+            None
+        """
+        win = self.props.active_window
+        if not win:
+            win = AuthWindow(application=self)
+        win.present()
 
-	def on_about_action(self, _widget, _) -> None:
-		"""Callback for the app.about action."""
-		about = Gtk.AboutDialog(version="1.0", authors=["Believe Manasseh"])
-		about.present()
+    def on_quit_action(self, _action, _param) -> None:
+        """Callback for app.quit action.
 
-	def create_action(
-		self,
-		name: str,
-		callback: Callable[[Any, Any], None],
-		shortcuts: list | None = None,
-	) -> None:
-		"""Add an application action.
+        Called when the quit action is triggered through the UI or keyboard shortcut.
 
-		Args:
-		  name: the name of the action
-		  callback: the function to be called when the action is activated
-		  shortcuts: an optional list of accelerators
-		"""
-		action = Gio.SimpleAction.new(name, None)
-		action.connect("activate", callback)
-		self.add_action(action)
-		if shortcuts:
-			self.set_accels_for_action(f"app.{name}", shortcuts)
+        Args:
+            _action: The Gio.SimpleAction that was activated
+            _param: Parameter passed to the action (None in this case)
+
+        Returns:
+            None
+        """
+        self.quit()
+
+    def on_about_action(self, _action, _param) -> None:
+        """Callback for the app.about action.
+
+        Creates and displays the application's about dialog.
+
+        Args:
+            _action: The Gio.SimpleAction that was activated
+            _param: Parameter passed to the action (None in this case)
+
+        Returns:
+            None
+        """
+        about = Gtk.AboutDialog(version="1.0", authors=["Believe Manasseh"])
+        about.present()
+
+    def create_action(
+        self,
+        name: str,
+        callback: Callable[[Any, Any], None],
+        shortcuts: list | None = None,
+    ) -> None:
+        """Add an application action.
+
+        Creates a new Gio.SimpleAction, connects it to a callback function,
+        and adds it to the application with optional keyboard shortcuts.
+
+        Args:
+            name: The name of the action
+            callback: The function to be called when the action is activated
+            shortcuts: Optional list of keyboard accelerators (e.g. ["<primary>q"])
+
+        Returns:
+            None
+        """
+        action = Gio.SimpleAction.new(name, None)
+        action.connect("activate", callback)
+        self.add_action(action)
+        if shortcuts:
+            self.set_accels_for_action(f"app.{name}", shortcuts)
 
 
 def main(_version) -> int:
-	"""The application's entry point."""
-	app = Telex()
-	return app.run(sys.argv)
+    """The application's entry point.
+
+    Creates and runs the main Telex application.
+
+    Args:
+        _version: The application version (unused)
+
+    Returns:
+        int: The application exit code
+    """
+    app = Telex()
+    return app.run(sys.argv)
