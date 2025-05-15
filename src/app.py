@@ -21,11 +21,12 @@ from collections.abc import Callable
 from typing import Any
 
 import gi
+
+gi.require_versions({"Gtk": "4.0", "Adw": "1", "Gio": "2.0"})
+
 from gi.repository import Adw, Gio, Gtk
 
 from windows.auth import AuthWindow
-
-gi.require_versions({"Gtk": "4.0", "Adw": "1"})
 
 
 class Telex(Adw.Application):

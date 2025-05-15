@@ -5,9 +5,13 @@ This module provides:
 """
 
 import gi
-from gi.repository import Gtk, Pango
 
 import store
+
+gi.require_versions({"Gtk": "4.0", "Pango": "1.0"})
+
+from gi.repository import Gtk, Pango
+
 from services import Reddit
 from utils.common import (
     add_style_context,
@@ -19,8 +23,6 @@ from utils.common import (
     load_image,
 )
 from windows.auth import AuthWindow
-
-gi.require_versions({"Gtk": "4.0"})
 
 
 class HomeWindow(Gtk.ApplicationWindow):

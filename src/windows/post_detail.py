@@ -5,13 +5,14 @@ Thism module provides:
 """
 
 import gi
+
+gi.require_versions({"Gtk": "4.0", "Adw": "1"})
+
 from gi.repository import Adw, Gtk
 
 from services import Reddit
 from utils.common import add_style_contexts, get_submission_time, load_css, load_image
 from windows.home import HomeWindow
-
-gi.require_versions({"Gtk": "4.0", "Adw": "1"})
 
 
 class PostDetailWindow(Gtk.ApplicationWindow):

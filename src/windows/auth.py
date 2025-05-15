@@ -8,12 +8,13 @@ import os
 from http import HTTPStatus
 
 import gi
+
+gi.require_versions({"Adw": "1", "Gtk": "4.0", "WebKit": "6.0"})
+
 from gi.repository import Adw, Gtk, WebKit
 
 from services import AWSClient, Reddit
 from utils.common import add_style_context, load_css
-
-gi.require_versions({"Adw": "1", "Gtk": "4.0", "WebKit": "6.0"})
 
 
 class AuthWindow(Gtk.ApplicationWindow):
