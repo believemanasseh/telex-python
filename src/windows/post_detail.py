@@ -31,6 +31,7 @@ class PostDetailWindow(Gtk.ApplicationWindow):
         self.css_provider = load_css("/assets/styles/post_detail.css")
 
         self.data = self.__fetch_data(post_id)
+
         self.box = Gtk.Box(
             css_classes=["box"],
             orientation=Gtk.Orientation.VERTICAL,
@@ -188,6 +189,8 @@ class PostDetailWindow(Gtk.ApplicationWindow):
 
         self.box.append(post_container)
 
+        # self.base.customise_titlebar()
+
         vote_btns_box = self.base.add_vote_buttons(post_data["data"]["score"])
         post_container.append(vote_btns_box)
 
@@ -205,11 +208,11 @@ class PostDetailWindow(Gtk.ApplicationWindow):
         add_style_contexts([self.box, post_container], self.css_provider)
 
         self.base.viewport.set_child(self.box)
-        self.base.base.set_titlebar(
-            Adw.HeaderBar(
-                decoration_layout="close,maximize,minimize", show_back_button=True
-            )
-        )
+        # self.base.base.set_titlebar(
+        #     Adw.HeaderBar(
+        #         decoration_layout="close,maximize,minimize", show_back_button=True
+        #     )
+        # )
         self.base.scrolled_window.set_child(self.base.viewport)
         self.base.scrolled_window.set_child_visible(True)
 

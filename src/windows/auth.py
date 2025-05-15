@@ -86,6 +86,7 @@ class AuthWindow(Gtk.ApplicationWindow):
 
             if res["status_code"] == HTTPStatus.OK:
                 access_token = res["json"]["access_token"]
+                print(f"Access token: {access_token}")
                 self.api.inject_token(access_token)
                 self.aws_client.create_secret("telex-access-token", access_token)
 

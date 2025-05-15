@@ -338,8 +338,38 @@ class HomeWindow(Gtk.ApplicationWindow):
         add_style_context(label, self.css_provider)
 
         return menu_btn_child
+    
+    def __on_box_clicked(
+        self,
+        _gesture: Gtk.GestureClick,
+        _n_press: int,
+        _x: float,
+        _y: float,
+        widget: Gtk.Box,
+    ):
+        """Handles post click events.
 
-    def __customise_titlebar(self) -> Gtk.HeaderBar:
+        Opens the post detail view when a post container is clicked.
+
+        Args:
+            _gesture (Gtk.GestureClick): The click gesture that triggered the event
+            _n_press (int): Number of presses that triggered the event
+            _x (float): x-coordinate of the event
+            _y (float): y-coordinate of the event
+            widget (Gtk.Box): The post container widget that was clicked
+        """
+        from windows.post_detail import PostDetailWindow
+
+        store.current_sort = 0
+        index = widget.get_name()
+        post_id = self.data["json"]["data"]["children"][int(index)]["data"]["id"]
+        self.scrolled_window.set_child_visible(False)
+        post_detail_window = PostDetailWindow(
+            base_window=self, api=self.api, post_id=post_id
+        )
+        post_detail_window.render_page()
+
+    def customise_titlebar(self) -> Gtk.HeaderBar:
         """Customise titlebar widgets.
 
         Adds buttons and menus to the header bar including reload, sort,
@@ -383,42 +413,13 @@ class HomeWindow(Gtk.ApplicationWindow):
 
         return self.base.header_bar
 
-    def __on_box_clicked(
-        self,
-        _gesture: Gtk.GestureClick,
-        _n_press: int,
-        _x: float,
-        _y: float,
-        widget: Gtk.Box,
-    ):
-        """Handles post click events.
-
-        Opens the post detail view when a post container is clicked.
-
-        Args:
-            _gesture (Gtk.GestureClick): The click gesture that triggered the event
-            _n_press (int): Number of presses that triggered the event
-            _x (float): x-coordinate of the event
-            _y (float): y-coordinate of the event
-            widget (Gtk.Box): The post container widget that was clicked
-        """
-        from windows.post_detail import PostDetailWindow
-
-        index = widget.get_name()
-        post_id = self.data["json"]["data"]["children"][int(index)]["data"]["id"]
-        self.scrolled_window.set_child_visible(False)
-        post_detail_window = PostDetailWindow(
-            base_window=self, api=self.api, post_id=post_id
-        )
-        post_detail_window.render_page()
-
     def render_page(self):
         """Renders homepage.
 
         Creates the main layout for the homepage, customizes the titlebar,
         and displays the list of posts with scrolling functionality.
         """
-        self.__customise_titlebar()
+        self.customise_titlebar()
 
         box = Gtk.Box(
             orientation=Gtk.Orientation.VERTICAL,
