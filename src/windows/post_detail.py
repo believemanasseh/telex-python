@@ -33,10 +33,10 @@ class PostDetailWindow(Gtk.ApplicationWindow):
         self.box = Gtk.Box(
             css_classes=["box"],
             orientation=Gtk.Orientation.VERTICAL,
-            halign=Gtk.Align.CENTER,
             valign=Gtk.Align.START,
-            hexpand=True,
             vexpand=True,
+            margin_start=410,
+            margin_end=410,
         )
 
     def __fetch_data(self, post_id: str) -> dict[str, int | dict] | None:
@@ -76,12 +76,10 @@ class PostDetailWindow(Gtk.ApplicationWindow):
         comment_box = Gtk.Box(
             orientation=Gtk.Orientation.VERTICAL,
             valign=Gtk.Align.START,
-            halign=Gtk.Align.FILL,
-            hexpand=True,
+            vexpand=True,
             spacing=8,
             margin_start=nesting_level * 30,
             margin_bottom=15,
-            margin_end=10,
             css_classes=["comment-box"],
         )
 
@@ -89,7 +87,7 @@ class PostDetailWindow(Gtk.ApplicationWindow):
         header_box = Gtk.Box(
             orientation=Gtk.Orientation.HORIZONTAL,
             spacing=8,
-            valign=Gtk.Align.CENTER,
+            valign=Gtk.Align.START,
             halign=Gtk.Align.START,
         )
 
@@ -122,10 +120,8 @@ class PostDetailWindow(Gtk.ApplicationWindow):
         body_label = Gtk.Label(
             label=body,
             halign=Gtk.Align.START,
-            hexpand=True,
             max_width_chars=160,
             wrap=True,
-            xalign=0,
             css_classes=["comment-body"],
         )
 
@@ -186,6 +182,7 @@ class PostDetailWindow(Gtk.ApplicationWindow):
             css_classes=["post-container"],
             orientation=Gtk.Orientation.HORIZONTAL,
             spacing=10,
+            width_request=900,
         )
 
         self.box.append(post_container)
@@ -229,10 +226,9 @@ class PostDetailWindow(Gtk.ApplicationWindow):
         # Create a comments container
         comments_container = Gtk.Box(
             orientation=Gtk.Orientation.VERTICAL,
+            spacing=10,
             valign=Gtk.Align.START,
-            halign=Gtk.Align.FILL,
-            hexpand=True,
-            css_classes=["comments-container"],
+            halign=Gtk.Align.CENTER,
         )
         self.box.append(comments_container)
         add_style_contexts([comments_header, comments_container], self.css_provider)

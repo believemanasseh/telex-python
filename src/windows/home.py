@@ -20,7 +20,7 @@ from utils.common import (
 )
 from windows.auth import AuthWindow
 
-gi.require_versions({"Gtk": "4.0", "Adw": "1"})
+gi.require_versions({"Gtk": "4.0"})
 
 
 class HomeWindow(Gtk.ApplicationWindow):

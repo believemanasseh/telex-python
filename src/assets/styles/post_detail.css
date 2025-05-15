@@ -1,5 +1,6 @@
 .box {
   padding: 50px 0px;
+  margin: auto;
 }
 
 .post-container {
@@ -17,20 +18,16 @@
   font-weight: bold;
 }
 
-.comments-container {
-  width: 50vw;
-}
-
 .comment-box {
   border-radius: 8px;
   background-color: whitesmoke;
   padding: 10px;
+  min-width: 100px;
 }
 
 .comment-author {
   font-weight: bold;
   font-size: 14px;
-  color:  alpha(#2a2a2a, 0.3);
 }
 
 .comment-score {
