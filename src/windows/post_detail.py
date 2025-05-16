@@ -1,6 +1,6 @@
 """Window class for post detail widgets.
 
-Thism module provides:
+This module provides:
 - PostDetailWindow: window class for post detail
 """
 
@@ -16,7 +16,22 @@ from windows.home import HomeWindow
 
 
 class PostDetailWindow(Gtk.ApplicationWindow):
-    """Entry window class for post detail."""
+    """Window class for displaying detailed post content and comments.
+    
+    This class is responsible for retrieving and displaying a Reddit post's 
+    detailed content including the post itself and its comment tree. It shows
+    the post at the top and nested comments below it with appropriate 
+    indentation levels to indicate reply hierarchy. Comments include metadata 
+    such as author, score, and content, along with action buttons.
+    
+    Attributes:
+        base (HomeWindow): Reference to the base window instance
+        api (Reddit): Reddit API instance for data operations
+        css_provider (Gtk.CssProvider): Provider for styling post details
+        data (dict): Fetched post and comments data
+        box (Gtk.Box): Main container for post and comments
+        clamp (Adw.Clamp): Clamp widget to constrain the content width
+    """
 
     def __init__(self, base_window: HomeWindow, api: Reddit, post_id: str):
         """Initialises window for post details.
@@ -29,37 +44,69 @@ class PostDetailWindow(Gtk.ApplicationWindow):
         self.base = base_window
         self.api = api
         self.css_provider = load_css("/assets/styles/post_detail.css")
-
         self.data = self.__fetch_data(post_id)
-
         self.box = Gtk.Box(
             css_classes=["box"],
             orientation=Gtk.Orientation.VERTICAL,
             valign=Gtk.Align.START,
             vexpand=True,
-            margin_start=410,
-            margin_end=410,
         )
 
-    def __fetch_data(self, post_id: str) -> dict[str, int | dict] | None:
-        """Retrieves comments.
-
+        self.clamp = Adw.Clamp(child=self.box, maximum_size=100)
+        
+    def _on_window_size_changed(self, widget, allocation) -> None:
+        """Adjusts the margins based on window width.
+        
+        Dynamically adjusts the margins of the content box based on the window width
+        to ensure proper layout on different screen sizes.
+        
         Args:
-            post_id (str): Post ID
+            widget: The widget that triggered the event
+            allocation: The allocation of the widget
 
         Returns:
-            dict[str, int | dict] | None: Post data dictionary or None if not found
+            None: This function does not return anything
+        """
+        width = widget.get_width()
+        print(width, widget.get_allocated_width(), "width")
+        
+        # Adjust margins based on window width
+        if width < 1721:
+            # Small window - use small margins
+            self.box.set_margin_start(10)
+            self.box.set_margin_end(10)
+        else:
+            # Large window - use large margins
+            self.box.set_margin_start(410)
+            self.box.set_margin_end(410)
+
+    def __fetch_data(self, post_id: str) -> dict[str, int | dict] | None:
+        """Retrieves post details and comments from Reddit API.
+
+        Calls the Reddit API to get the complete post data and its comment tree
+        based on the provided post ID.
+
+        Args:
+            post_id (str): Unique identifier for the Reddit post
+
+        Returns:
+            dict[str, int | dict] | None: Post and comments data dictionary 
+                                          or None if not found
         """
         return self.api.retrieve_comments(post_id)
 
     def __load_comments(
         self, parent_box: Gtk.Box, comment_data: dict, nesting_level: int = 0
     ) -> None:
-        """Loads comments recursively.
+        """Loads and renders comments recursively with proper nesting.
+
+        Creates UI components for each comment including author information, 
+        comment content, score, and action buttons. Recursively processes reply 
+        chains with increased indentation to visually represent the comment hierarchy.
 
         Args:
-            parent_box (Gtk.Box): Gtk.Box instance
-            comment_data (dict): Comment data dictionary
+            parent_box (Gtk.Box): Container to add the comment widgets to
+            comment_data (dict): Comment data dictionary containing content and metadata
             nesting_level (int, optional): Current comment nesting level (0 for top-level comments)
         """
         if "kind" not in comment_data or comment_data["kind"] != "t1":
@@ -177,7 +224,16 @@ class PostDetailWindow(Gtk.ApplicationWindow):
                 self.__load_comments(parent_box, reply, nesting_level + 1)
 
     def render_page(self):
-        """Renders window."""
+        """Renders the post detail page with post content and comments.
+        
+        Builds the complete UI for the post detail view including:
+        - The post itself (reusing components from HomeWindow)
+        - A comments header
+        - The nested comment tree with proper indentation
+        
+        This method sets up the viewport and makes the content visible in the 
+        scrolled window from the base HomeWindow instance.
+        """
         post_data = self.data["json"][0]["data"]["children"][0]
 
         post_container = Gtk.Box(
@@ -188,8 +244,6 @@ class PostDetailWindow(Gtk.ApplicationWindow):
         )
 
         self.box.append(post_container)
-
-        # self.base.customise_titlebar()
 
         vote_btns_box = self.base.add_vote_buttons(post_data["data"]["score"])
         post_container.append(vote_btns_box)
@@ -207,12 +261,7 @@ class PostDetailWindow(Gtk.ApplicationWindow):
         post_container.append(post_metadata_box)
         add_style_contexts([self.box, post_container], self.css_provider)
 
-        self.base.viewport.set_child(self.box)
-        # self.base.base.set_titlebar(
-        #     Adw.HeaderBar(
-        #         decoration_layout="close,maximize,minimize", show_back_button=True
-        #     )
-        # )
+        self.base.viewport.set_child(self.clamp)
         self.base.scrolled_window.set_child(self.base.viewport)
         self.base.scrolled_window.set_child_visible(True)
 

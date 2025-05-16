@@ -48,7 +48,7 @@ class Telex(Adw.Application):
         necessary.
 
         Returns:
-            None
+            None: This method does not return a value.
         """
         win = self.props.active_window
         if not win:
@@ -65,7 +65,7 @@ class Telex(Adw.Application):
             _param: Parameter passed to the action (None in this case)
 
         Returns:
-            None
+            None: This method does not return a value.
         """
         self.quit()
 
@@ -79,7 +79,7 @@ class Telex(Adw.Application):
             _param: Parameter passed to the action (None in this case)
 
         Returns:
-            None
+            None: This method does not return a value.
         """
         about = Gtk.AboutDialog(version="1.0", authors=["Believe Manasseh"])
         about.present()
@@ -101,7 +101,7 @@ class Telex(Adw.Application):
             shortcuts: Optional list of keyboard accelerators (e.g. ["<primary>q"])
 
         Returns:
-            None
+            None: This method does not return a value.
         """
         action = Gio.SimpleAction.new(name, None)
         action.connect("activate", callback)

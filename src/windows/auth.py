@@ -18,12 +18,35 @@ from utils.common import add_style_context, load_css
 
 
 class AuthWindow(Gtk.ApplicationWindow):
-    """Window class for authentication and authorization."""
+    """Window class for authentication and authorisation.
+    
+    This class handles the Reddit OAuth authentication flow, presenting a login
+    button that opens a WebView with Reddit's authentication page. Once authenticated,
+    it exchanges the authorisation code for an access token, stores it securely using
+    AWS Secrets, and transitions to the home window.
+    
+    Attributes:
+        css_provider (Gtk.CssProvider): Provider for styling the auth window
+        header_bar (Adw.HeaderBar): The window's title bar
+        api (Reddit): Instance of the Reddit API service
+        aws_client (AWSClient): Client for AWS services (used for secret storage)
+        box (Gtk.Box): Main container for UI elements
+        reddit_btn (Gtk.Button): Button to initiate the OAuth flow
+        dialog (Gtk.MessageDialog): Dialog containing the WebView for OAuth
+    """
 
     __gtype_name__ = "AuthWindow"
 
     def __init__(self, application, **kwargs) -> None:
-        """Initialises authentication window."""
+        """Initialises the authentication window.
+        
+        Creates the window with appropriate styling, sets up the header bar,
+        initialises API clients, and creates the UI containing a Reddit login button.
+        
+        Args:
+            application: The parent GTK application
+            **kwargs: Additional arguments passed to the parent class constructor
+        """
         self.css_provider = load_css("/assets/styles/auth.css")
 
         self.header_bar = Adw.HeaderBar(
@@ -64,9 +87,9 @@ class AuthWindow(Gtk.ApplicationWindow):
     ) -> None:
         """Handler for URI load change signals.
 
-        Processes the authorization callback from Reddit's OAuth flow.
-        When the authorization code is received, it exchanges it for an access token,
-        stores the token, and initializes the home window.
+        Processes the authorisation callback from Reddit's OAuth flow.
+        When the authorisation code is received, it exchanges it for an access token,
+        stores the token, and initialises the home window.
 
         Args:
             widget (WebKit.WebView): The web view instance handling the OAuth flow
@@ -101,7 +124,7 @@ class AuthWindow(Gtk.ApplicationWindow):
     def __on_close_webview(self, _widget: WebKit.WebView) -> None:
         """Handler for WebView widget's close event.
 
-        Restores the opacity of the main authorization box when the
+        Restores the opacity of the main authorisation box when the
         WebView dialog is closed.
 
         Args:
@@ -110,7 +133,7 @@ class AuthWindow(Gtk.ApplicationWindow):
         self.box.set_opacity(1.0)
 
     def __on_render_page(self, _widget: Gtk.Widget) -> None:
-        """Renders OAuth page for Reddit authorization.
+        """Renders OAuth page for Reddit authorisation.
 
         Creates a dialog with a WebView that loads Reddit's OAuth page,
         allowing the user to authorize the application to access their

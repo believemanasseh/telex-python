@@ -26,10 +26,41 @@ from windows.auth import AuthWindow
 
 
 class HomeWindow(Gtk.ApplicationWindow):
-    """Base class for homepage."""
+    """Base class for homepage.
+    
+    This class is responsible for displaying the home page of the Reddit client.
+    It shows a list of Reddit posts with upvote/downvote buttons, post metadata,
+    action buttons, and provides navigation to post detail views. It also 
+    includes functionality for sorting posts, reloading content, and accessing
+    user profile options.
+
+    Attributes:
+        base (AuthWindow): Reference to the base application window
+        api (Reddit): Reference to the Reddit API for data operations
+        cursor (Gdk.Cursor): Custom cursor for interactive elements
+        css_provider (Gtk.CssProvider): Provider for styling the home page
+        data (dict): Fetched Reddit posts data based on current sort category
+        scrolled_window (Gtk.ScrolledWindow): Main scrollable container for posts
+        viewport (Gtk.Viewport): Viewport containing the posts
+    """
 
     def __init__(self, base_window: AuthWindow, api: Reddit):
-        """Maximises base application window and styles base box widget."""
+        """Initialise the Home window with base window and Reddit API.
+
+        This constructor sets up the home window by maximizing the base application window
+        and applying styles to the base box widget. It also fetches initial Reddit data.
+
+        Args:
+            base_window (AuthWindow): The base application window instance
+            api (Reddit): The Reddit API instance for fetching data
+
+        Attributes:
+            base: The base window reference
+            api: The Reddit API reference 
+            cursor: Custom pointer cursor
+            css_provider: CSS styles provider
+            data: Fetched Reddit posts data based on current sort category
+        """
         self.base = base_window
         self.api = api
         self.cursor = create_cursor("pointer")
@@ -112,7 +143,21 @@ class HomeWindow(Gtk.ApplicationWindow):
         num_of_comments: int,
         submission_time: str,
     ) -> Gtk.Box:
-        """Add widgets for post metadata (e.g. post title, post user, post subreddit)."""
+        """Add widgets for post metadata.
+        
+        Creates a container with post title, submission time, author username,
+        subreddit name, and action buttons for the post.
+        
+        Args:
+            title (str): The post title text
+            subreddit_name (str): The name of the subreddit with prefix (e.g. r/python)
+            user (str): The username of the post author
+            num_of_comments (int): The number of comments on the post
+            submission_time (str): Formatted time since submission
+            
+        Returns:
+            Gtk.Box: Container with all post metadata widgets arranged vertically
+        """
         post_metadata_box = Gtk.Box(
             css_classes=["post-metadata-box"],
             orientation=Gtk.Orientation.VERTICAL,
@@ -171,7 +216,17 @@ class HomeWindow(Gtk.ApplicationWindow):
         return post_metadata_box
 
     def add_action_btns(self, num_of_comments: int) -> Gtk.Box:
-        """Add widgets for action buttons (e.g. share, save, crosspost, etc)."""
+        """Add widgets for post action buttons.
+        
+        Creates a horizontal container with action buttons for the post,
+        including comments count, share, save, hide, report, and crosspost.
+        
+        Args:
+            num_of_comments (int): The number of comments to display in the first button
+            
+        Returns:
+            Gtk.Box: Horizontal container with all action buttons for the post
+        """
         post_action_btns_box = Gtk.Box(
             orientation=Gtk.Orientation.HORIZONTAL,
             halign=Gtk.Align.START,
@@ -202,9 +257,10 @@ class HomeWindow(Gtk.ApplicationWindow):
 
     def __add_profile_popover_child(self) -> Gtk.Box:
         """Creates profile popover child widget.
-
-        Creates a box containing the user profile information and menu options
-        for the profile popover menu.
+        
+        Creates a box containing the user profile information (profile picture, 
+        username, karma) and menu options (View Profile, Subreddits, Settings, 
+        About, Log Out) for the profile popover menu.
 
         Returns:
             Gtk.Box: Container with profile info and menu options
@@ -263,10 +319,12 @@ class HomeWindow(Gtk.ApplicationWindow):
     def __add_sort_popover_child(self) -> Gtk.Box:
         """Creates sort popover child widget.
 
-        Creates a box containing radio buttons for post sorting options.
+        Creates a box containing radio buttons for post sorting options
+        (Hot, New, Rising, etc.) allowing the user to change the post
+        sort order.
 
         Returns:
-            Gtk.Box: Container with post sorting options
+            Gtk.Box: Container with post sorting options as radio buttons
         """
         popover_child = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
 
@@ -308,10 +366,11 @@ class HomeWindow(Gtk.ApplicationWindow):
     def __add_menu_button_child(self) -> Gtk.Box:
         """Creates menu button child widget.
 
-        Creates a box containing the sort menu button's label and dropdown icon.
+        Creates a box containing the sort menu button's label showing the
+        current sort type and a dropdown icon to indicate it's expandable.
 
         Returns:
-            Gtk.Box: Container with sort button label and icon
+            Gtk.Box: Container with sort button label and dropdown icon
         """
         menu_btn_child = Gtk.Box(
             orientation=Gtk.Orientation.VERTICAL,
@@ -349,7 +408,9 @@ class HomeWindow(Gtk.ApplicationWindow):
     ):
         """Handles post click events.
 
-        Opens the post detail view when a post container is clicked.
+        Opens the post detail view when a post container is clicked by
+        retrieving the post ID from the data based on the widget's name
+        (which stores the index) and creating a new PostDetailWindow.
 
         Args:
             _gesture (Gtk.GestureClick): The click gesture that triggered the event
@@ -370,10 +431,11 @@ class HomeWindow(Gtk.ApplicationWindow):
         post_detail_window.render_page()
 
     def customise_titlebar(self) -> Gtk.HeaderBar:
-        """Customise titlebar widgets.
+        """Customizes the application headerbar.
 
-        Adds buttons and menus to the header bar including reload, sort,
-        search, and profile buttons.
+        Adds buttons and menus to the header bar including reload button, 
+        sort menu button with popover, search button, and profile menu 
+        button with popover containing user information and account options.
 
         Returns:
             Gtk.HeaderBar: Customized header bar for the application
@@ -414,10 +476,13 @@ class HomeWindow(Gtk.ApplicationWindow):
         return self.base.header_bar
 
     def render_page(self):
-        """Renders homepage.
+        """Renders the complete homepage.
 
         Creates the main layout for the homepage, customizes the titlebar,
         and displays the list of posts with scrolling functionality.
+        For each post in the data, creates a container with vote buttons,
+        thumbnail image, and metadata, and sets up click handling to open
+        the post details view.
         """
         self.customise_titlebar()
 
