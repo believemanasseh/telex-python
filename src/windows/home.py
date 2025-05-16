@@ -8,9 +8,9 @@ import gi
 
 import store
 
-gi.require_versions({"Gtk": "4.0", "Pango": "1.0"})
+gi.require_versions({"Gtk": "4.0", "Adw": "1", "Pango": "1.0"})
 
-from gi.repository import Gtk, Pango
+from gi.repository import Gtk, Pango, Adw
 
 from services import Reddit
 from utils.common import (
@@ -475,16 +475,21 @@ class HomeWindow(Gtk.ApplicationWindow):
 
         return self.base.header_bar
 
-    def render_page(self):
-        """Renders the complete homepage.
+    def render_page(self, customise_titlebar: bool = True) -> None:
+        """Creates the main layout for the homepage by setting up a vertical box container and 
+        populating it with post containers. Each post container includes vote buttons, 
+        a thumbnail image, and post metadata. The page supports vertical scrolling.
 
-        Creates the main layout for the homepage, customizes the titlebar,
-        and displays the list of posts with scrolling functionality.
-        For each post in the data, creates a container with vote buttons,
-        thumbnail image, and metadata, and sets up click handling to open
-        the post details view.
+        Args:
+            customise_titlebar (bool, optional): Whether to customise the window titlebar.
+                Defaults to True.
+
+        Returns:
+            None: This method does not return a value.
         """
-        self.customise_titlebar()
+
+        if customise_titlebar:
+            self.customise_titlebar()
 
         box = Gtk.Box(
             orientation=Gtk.Orientation.VERTICAL,
@@ -495,6 +500,8 @@ class HomeWindow(Gtk.ApplicationWindow):
             hexpand=True,
             vexpand=True,
         )
+        clamp = Adw.Clamp(child=box, maximum_size=1000)
+        
         add_style_context(box, self.css_provider)
 
         for index, data in enumerate(self.data["json"]["data"]["children"]):
@@ -537,7 +544,7 @@ class HomeWindow(Gtk.ApplicationWindow):
             post_container.append(post_metadata_box)
 
         self.viewport = Gtk.Viewport()
-        self.viewport.set_child(box)
+        self.viewport.set_child(clamp)
 
         self.scrolled_window = Gtk.ScrolledWindow(
             hscrollbar_policy=Gtk.PolicyType.NEVER,

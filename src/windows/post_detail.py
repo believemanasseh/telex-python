@@ -35,11 +35,19 @@ class PostDetailWindow(Gtk.ApplicationWindow):
 
     def __init__(self, base_window: HomeWindow, api: Reddit, post_id: str):
         """Initialises window for post details.
-
+        
         Args:
-            base_window (HomeWindow): Base window instance
-            api (Reddit): Reddit API instance
-            post_id (str): Post ID
+            base_window (HomeWindow): Parent window instance containing the main application window
+            api (Reddit): Reddit API instance for fetching post data
+            post_id (str): Unique identifier of the Reddit post to display
+        
+        Attributes:
+            base (HomeWindow): Reference to parent window
+            css_provider: CSS styles provider for the window
+            data: Post data fetched from Reddit
+            box (Gtk.Box): Vertical container for post content
+            clamp (Adw.Clamp): Width constraint container
+            back_button (Gtk.Button): Navigation button to return to home view
         """
         self.base = base_window
         self.api = api
@@ -51,34 +59,35 @@ class PostDetailWindow(Gtk.ApplicationWindow):
             valign=Gtk.Align.START,
             vexpand=True,
         )
+        self.clamp = Adw.Clamp(child=self.box, maximum_size=1000)
+        
+        # Add back navigation button
+        self.back_button = Gtk.Button(
+            icon_name="xyz.daimones.Telex.arrow-pointing-left",
+            tooltip_text="Back to Home"
+        )
+        self.back_button.connect("clicked", self.__on_back_clicked)
+        
+        self.base.base.header_bar.pack_start(self.back_button)
 
-        self.clamp = Adw.Clamp(child=self.box, maximum_size=100)
+    def __on_back_clicked(self, button: Gtk.Button):
+        """Handles back button click events.
         
-    def _on_window_size_changed(self, widget, allocation) -> None:
-        """Adjusts the margins based on window width.
-        
-        Dynamically adjusts the margins of the content box based on the window width
-        to ensure proper layout on different screen sizes.
+        Returns to the home view by restoring the HomeWindow view
+        and clearing the current post detail view.
         
         Args:
-            widget: The widget that triggered the event
-            allocation: The allocation of the widget
-
-        Returns:
-            None: This function does not return anything
+            button (Gtk.Button): The button that triggered the event
         """
-        width = widget.get_width()
-        print(width, widget.get_allocated_width(), "width")
+        # Remove the back button from header bar
+        self.base.base.header_bar.remove(self.back_button)
+    
+        # Remove post detail content
+        if self.base.scrolled_window.get_child():
+            self.base.scrolled_window.set_child(None)
         
-        # Adjust margins based on window width
-        if width < 1721:
-            # Small window - use small margins
-            self.box.set_margin_start(10)
-            self.box.set_margin_end(10)
-        else:
-            # Large window - use large margins
-            self.box.set_margin_start(410)
-            self.box.set_margin_end(410)
+        # Restore home window components
+        self.base.render_page(customise_titlebar=False)
 
     def __fetch_data(self, post_id: str) -> dict[str, int | dict] | None:
         """Retrieves post details and comments from Reddit API.
@@ -239,8 +248,7 @@ class PostDetailWindow(Gtk.ApplicationWindow):
         post_container = Gtk.Box(
             css_classes=["post-container"],
             orientation=Gtk.Orientation.HORIZONTAL,
-            spacing=10,
-            width_request=900,
+            spacing=10
         )
 
         self.box.append(post_container)
