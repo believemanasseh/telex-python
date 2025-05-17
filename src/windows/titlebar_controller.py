@@ -28,6 +28,7 @@ from services import Reddit
 from utils.common import add_style_context, load_css, load_image
 from utils.constants import SortType
 
+from .auth import AuthWindow
 from .home import HomeWindow
 
 
@@ -59,6 +60,7 @@ class TitlebarController:
 		    start_box (Gtk.Box): Left-side header container
 		    end_box (Gtk.Box): Right-side header container
 		    back_btn (Gtk.Button): Navigation back button
+			user_data (dict): User profile data retrieved from Reddit API
 		"""
 		self.header_bar = header_bar
 		self.api = api
@@ -67,6 +69,7 @@ class TitlebarController:
 		self.start_box: Gtk.Box | None = None
 		self.end_box: Gtk.Box | None = None
 		self.back_btn: Gtk.Button | None = None
+		self.user_data = self.api.retrieve_user_details()
 
 	def setup_titlebar(self) -> None:
 		"""Customises the application headerbar.
@@ -155,8 +158,10 @@ class TitlebarController:
 			valign=Gtk.Align.CENTER,
 			halign=Gtk.Align.CENTER,
 		)
-		box.append(Gtk.Label(label="u/believemanasseh", halign=Gtk.Align.START))
-		box.append(Gtk.Label(label="38 karma", halign=Gtk.Align.START))
+		display_name = self.user_data["json"]["subreddit"]["display_name_prefixed"]
+		total_karma = self.user_data["json"]["total_karma"]
+		box.append(Gtk.Label(label=display_name, halign=Gtk.Align.START))
+		box.append(Gtk.Label(label=f"{total_karma} karma", halign=Gtk.Align.START))
 		grid.attach(box, 1, 0, 1, 1)
 
 		popover_child.append(grid)
@@ -173,6 +178,7 @@ class TitlebarController:
 				menu_btn = Gtk.Button(
 					label=label, css_classes=["menu-btn-logout"], hexpand=True
 				)
+				menu_btn.connect("clicked", self.__on_logout_clicked)
 			else:
 				menu_btn = Gtk.Button(label=label, css_classes=["menu-btn"], hexpand=True)
 
@@ -338,3 +344,21 @@ class TitlebarController:
 
 		# Restore home window components
 		self.home_window.render_page(setup_titlebar=False)
+
+	def __on_logout_clicked(self, _button: Gtk.Button) -> None:
+		"""Handles logout button click events.
+
+		Logs out the user by:
+		- Clearing the access token from AWS Secrets
+		- Closing existing application window
+		- Restoring the auth screen with login button
+
+		Args:
+			_button (Gtk.Button): The button that triggered the event
+
+		Returns:
+			None: This method does not return a value.
+		"""
+		self.home_window.base.aws_client.delete_secret("telex-access-token")
+		self.home_window.base.close()
+		AuthWindow(application=self.home_window.application).present()

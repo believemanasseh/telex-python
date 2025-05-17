@@ -49,74 +49,91 @@ class Reddit:
 		"""
 		self.headers["Authorization"] = f"Bearer {token}"
 
-	def generate_access_token(self, code: str) -> dict[str, int | dict] | None:
+	def generate_access_token(self, code: str) -> dict[str, int | dict]:
 		"""Generates access token from authorization code.
 
 		Args:
 			code (str): Authorization code from Reddit OAuth flow
 
 		Returns:
-			dict[str, int | dict] | None: Response containing status code and token data
+			dict[str, int | dict]: Response containing status code and token data
 
 		Raises:
 			requests.RequestException: If the request to Reddit API fails
 		"""
-		url = self.domain.format("www") + "/api/v1/access_token"
-		data = {
-			"grant_type": "authorization_code",
-			"code": code,
-			"redirect_uri": "https://ab67-169-159-83-94.ngrok-free.app",
-		}
-
 		try:
+			url = self.domain.format("www") + "/api/v1/access_token"
+			data = {
+				"grant_type": "authorization_code",
+				"code": code,
+				"redirect_uri": "https://ab67-169-159-83-94.ngrok-free.app",
+			}
 			res = requests.post(url, data=data, headers=self.headers, timeout=30)
 		except requests.RequestException as e:
 			msg = "Failed to generate access token"
 			raise requests.RequestException(msg) from e
+		else:
+			return {"status_code": res.status_code, "json": res.json()}
 
-		return {"status_code": res.status_code, "json": res.json()}
-
-	def retrieve_listings(self, category: str) -> dict[str, int | dict] | None:
+	def retrieve_listings(self, category: str) -> dict[str, int | dict]:
 		"""Returns posts from specified category.
 
 		Args:
 			category (str): Category of listings to retrieve e.g. 'new', 'hot', 'rising'
 
 		Returns:
-			dict[str, int | dict] | None: Response containing status code and listing data
+			dict[str, int | dict]: Response containing status code and listing data
 
 		Raises:
 			requests.RequestException: If the request to Reddit API fails
 		"""
-		url = self.domain.format("oauth") + f"/{category}"
 		try:
+			url = self.domain.format("oauth") + f"/{category}"
 			res = requests.get(url, headers=self.headers, timeout=30)
 		except requests.RequestException as e:
 			msg = "Failed to retrieve listings"
 			raise requests.RequestException(msg) from e
+		else:
+			return {"status_code": res.status_code, "json": res.json()}
 
-		return {"status_code": res.status_code, "json": res.json()}
+	def retrieve_user_details(self) -> dict[str, int | dict]:
+		"""Returns user details.
 
-	def retrieve_comments(self, post_id: str) -> dict[str, int | dict] | None:
+		Returns:
+			dict[str, int | dict]: Response containing status code and user data
+
+		Raises:
+			requests.RequestException: If the request to Reddit API fails
+		"""
+		try:
+			url = self.domain.format("oauth") + "/api/v1/me"
+			res = requests.get(url, headers=self.headers, timeout=30)
+		except requests.RequestException as e:
+			msg = "Failed to retrieve user details"
+			raise requests.RequestException(msg) from e
+		else:
+			return {"status_code": res.status_code, "json": res.json()}
+
+	def retrieve_comments(self, post_id: str) -> dict[str, int | dict]:
 		"""Returns all comments for post.
 
 		Args:
 			post_id (str): Post ID
 
 		Returns:
-			dict[str, int | dict] | None: Post data dictionary or None if not found
+			dict[str, int | dict]: Post data dictionary or None if not found
 
 		Raises:
 			requests.RequestException: If the request fails
 		"""
-		url = self.domain.format("oauth") + f"/comments/{post_id}"
 		try:
+			url = self.domain.format("oauth") + f"/comments/{post_id}"
 			res = requests.get(url, headers=self.headers, timeout=30)
 		except requests.RequestException as e:
 			msg = "Failed to retrieve comments"
 			raise requests.RequestException(msg) from e
-
-		return {"status_code": res.status_code, "json": res.json()}
+		else:
+			return {"status_code": res.status_code, "json": res.json()}
 
 
 class AWSClient:
@@ -146,8 +163,8 @@ class AWSClient:
 			# Update secret if it already exists
 			if e.response["Error"]["Code"] == "ResourceExistsException":
 				return self.update_secret(secret_id=name, secret_string=secret_string)
-
-		return {"status": "success", "json": res}
+		else:
+			return {"status": "success", "json": res}
 
 	def get_secret(self, secret_id: str) -> dict:
 		"""Retrieves secret value from AWS Secrets Manager.
@@ -213,5 +230,5 @@ class AWSClient:
 		except ClientError as e:
 			msg = "Failed to delete secret"
 			raise ClientError(msg) from e
-
-		return {"status": "success", "json": res}
+		else:
+			return {"status": "success", "json": res}
