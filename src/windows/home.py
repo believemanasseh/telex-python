@@ -10,7 +10,7 @@ import store
 
 gi.require_versions({"Gtk": "4.0", "Adw": "1", "Pango": "1.0"})
 
-from gi.repository import Gtk, Pango, Adw
+from gi.repository import Adw, Gtk, Pango
 
 from services import Reddit
 from utils.common import (
@@ -27,10 +27,10 @@ from windows.auth import AuthWindow
 
 class HomeWindow(Gtk.ApplicationWindow):
     """Base class for homepage.
-    
+
     This class is responsible for displaying the home page of the Reddit client.
     It shows a list of Reddit posts with upvote/downvote buttons, post metadata,
-    action buttons, and provides navigation to post detail views. It also 
+    action buttons, and provides navigation to post detail views. It also
     includes functionality for sorting posts, reloading content, and accessing
     user profile options.
 
@@ -44,7 +44,9 @@ class HomeWindow(Gtk.ApplicationWindow):
         viewport (Gtk.Viewport): Viewport containing the posts
     """
 
-    def __init__(self,application: Adw.Application, base_window: AuthWindow, api: Reddit):
+    def __init__(
+        self, application: Adw.Application, base_window: AuthWindow, api: Reddit
+    ):
         """Initialise the Home window with base window and Reddit API.
 
         This constructor sets up the home window by maximizing the base application window
@@ -58,7 +60,7 @@ class HomeWindow(Gtk.ApplicationWindow):
         Attributes:
             application: The parent GTK application
             base: The base window reference
-            api: The Reddit API reference 
+            api: The Reddit API reference
             cursor: Custom pointer cursor
             css_provider: CSS styles provider
             data: Fetched Reddit posts data based on current sort category
@@ -70,11 +72,17 @@ class HomeWindow(Gtk.ApplicationWindow):
         self.cursor = create_cursor("pointer")
         self.css_provider = load_css("/assets/styles/home.css")
 
+        from windows.titlebar_controller import TitlebarController
+
+        self.titlebar_controller = TitlebarController(
+            header_bar=self.base.header_bar, home_window=self, api=self.api
+        )
+
         # Fetches data from Reddit
         category = store.post_sort_type[store.current_sort].lower()
-        self.data = self.__fetch_data(category)
+        self.data = self.fetch_data(category)
 
-    def __fetch_data(self, category: str) -> dict[str, int | dict] | None:
+    def fetch_data(self, category: str) -> dict[str, int | dict] | None:
         """Retrieves post listings from Reddit API.
 
         Args:
@@ -84,6 +92,15 @@ class HomeWindow(Gtk.ApplicationWindow):
             dict[str, int | dict] | None: Response containing status code and listing data
         """
         return self.api.retrieve_listings(category)
+
+    def reload_data(self) -> None:
+        """Reloads the data from Reddit API.
+
+        This method fetches the latest posts from the Reddit API and updates
+        the displayed content in the home window.
+        """
+        category = store.post_sort_type[store.current_sort].lower()
+        self.data = self.fetch_data(category)
 
     def add_post_image(self) -> Gtk.Box:
         """Creates a container for a post thumbnail image.
@@ -148,17 +165,17 @@ class HomeWindow(Gtk.ApplicationWindow):
         submission_time: str,
     ) -> Gtk.Box:
         """Add widgets for post metadata.
-        
+
         Creates a container with post title, submission time, author username,
         subreddit name, and action buttons for the post.
-        
+
         Args:
             title (str): The post title text
             subreddit_name (str): The name of the subreddit with prefix (e.g. r/python)
             user (str): The username of the post author
             num_of_comments (int): The number of comments on the post
             submission_time (str): Formatted time since submission
-            
+
         Returns:
             Gtk.Box: Container with all post metadata widgets arranged vertically
         """
@@ -221,13 +238,13 @@ class HomeWindow(Gtk.ApplicationWindow):
 
     def add_action_btns(self, num_of_comments: int) -> Gtk.Box:
         """Add widgets for post action buttons.
-        
+
         Creates a horizontal container with action buttons for the post,
         including comments count, share, save, hide, report, and crosspost.
-        
+
         Args:
             num_of_comments (int): The number of comments to display in the first button
-            
+
         Returns:
             Gtk.Box: Horizontal container with all action buttons for the post
         """
@@ -259,154 +276,6 @@ class HomeWindow(Gtk.ApplicationWindow):
 
         return post_action_btns_box
 
-    def __add_profile_popover_child(self) -> Gtk.Box:
-        """Creates profile popover child widget.
-        
-        Creates a box containing the user profile information (profile picture, 
-        username, karma) and menu options (View Profile, Subreddits, Settings, 
-        About, Log Out) for the profile popover menu.
-
-        Returns:
-            Gtk.Box: Container with profile info and menu options
-        """
-        popover_child = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-
-        grid = Gtk.Grid(column_spacing=30)
-        grid.insert_row(0)
-        grid.insert_column(0)
-        grid.insert_column(1)
-
-        user_profile_img = load_image(
-            "/assets/images/reddit-placeholder.png",
-            "placeholder",
-            css_classes=["user-profile-img"],
-        )
-        add_style_context(user_profile_img, self.css_provider)
-        grid.attach(user_profile_img, 0, 0, 1, 1)
-
-        box = Gtk.Box(
-            orientation=Gtk.Orientation.VERTICAL,
-            valign=Gtk.Align.CENTER,
-            halign=Gtk.Align.CENTER,
-        )
-        box.append(Gtk.Label(label="u/believemanasseh", halign=Gtk.Align.START))
-        box.append(Gtk.Label(label="38 karma", halign=Gtk.Align.START))
-        grid.attach(box, 1, 0, 1, 1)
-
-        popover_child.append(grid)
-
-        menu_labels = [
-            "View Profile",
-            "Subreddits",
-            "Settings",
-            "About",
-            "Log Out",
-        ]
-        for label in menu_labels:
-            if "Log" in label:
-                menu_btn = Gtk.Button(
-                    label=label, css_classes=["menu-btn-logout"], hexpand=True
-                )
-            else:
-                menu_btn = Gtk.Button(
-                    label=label, css_classes=["menu-btn"], hexpand=True
-                )
-
-            if menu_btn.get_child():
-                menu_btn.get_child().set_halign(Gtk.Align.START)
-
-            add_style_context(menu_btn, self.css_provider)
-            popover_child.append(menu_btn)
-
-        return popover_child
-
-    def __add_sort_popover_child(self) -> Gtk.Box:
-        """Creates sort popover child widget.
-
-        Creates a box containing radio buttons for post sorting options
-        (Hot, New, Rising, etc.) allowing the user to change the post
-        sort order.
-
-        Returns:
-            Gtk.Box: Container with post sorting options as radio buttons
-        """
-        popover_child = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-
-        active = True if store.current_sort == 0 else False
-        best_check_btn = Gtk.CheckButton(
-            active=active, name="0", label=store.post_sort_type[0]
-        )
-        best_check_btn.connect("toggled", self.__on_check_btn_toggled)
-
-        active = True if store.current_sort == 1 else False
-        new_check_btn = Gtk.CheckButton(active=active, name="1", label=store.post_sort_type[1])
-        new_check_btn.set_group(best_check_btn)
-        new_check_btn.connect("toggled", self.__on_check_btn_toggled)
-
-        active = True if store.current_sort == 2 else False
-        hot_check_btn = Gtk.CheckButton(
-            active=active, name="2", label=store.post_sort_type[2]
-        )
-        hot_check_btn.set_group(best_check_btn)
-        hot_check_btn.connect("toggled", self.__on_check_btn_toggled)
-
-        active = True if store.current_sort == 3 else False
-        top_check_btn = Gtk.CheckButton(
-            active=active, name="3", label=store.post_sort_type[3]
-        )
-        top_check_btn.set_group(hot_check_btn)
-        top_check_btn.connect("toggled", self.__on_check_btn_toggled)
-
-        active = True if store.current_sort == 4 else False
-        rising_check_btn = Gtk.CheckButton(
-            active=active, name="4", label=store.post_sort_type[4]
-        )
-        rising_check_btn.set_group(top_check_btn)
-        rising_check_btn.connect("toggled", self.__on_check_btn_toggled)
-
-        popover_child.append(best_check_btn)
-        popover_child.append(new_check_btn)
-        popover_child.append(hot_check_btn)
-        popover_child.append(top_check_btn)
-        popover_child.append(rising_check_btn)
-
-        return popover_child
-
-    def __add_menu_button_child(self) -> Gtk.Box:
-        """Creates menu button child widget.
-
-        Creates a box containing the sort menu button's label showing the
-        current sort type and a dropdown icon to indicate it's expandable.
-
-        Returns:
-            Gtk.Box: Container with sort button label and dropdown icon
-        """
-        menu_btn_child = Gtk.Box(
-            orientation=Gtk.Orientation.VERTICAL,
-            halign=Gtk.Align.CENTER,
-            valign=Gtk.Align.CENTER,
-        )
-
-        grid = Gtk.Grid(column_spacing=30)
-        grid.insert_row(0)
-        grid.insert_column(0)
-        grid.insert_column(1)
-
-        label = Gtk.Label(
-            label=store.post_sort_type[store.current_sort],
-            css_classes=["menu-btn-label"],
-        )
-        grid.attach(label, 0, 0, 1, 1)
-
-        image = Gtk.Image(icon_name="xyz.daimones.Telex.sort-down")
-        grid.attach(image, 1, 0, 1, 1)
-
-        menu_btn_child.append(grid)
-
-        add_style_context(label, self.css_provider)
-
-        return menu_btn_child
-    
     def __on_box_clicked(
         self,
         _gesture: Gtk.GestureClick,
@@ -434,105 +303,28 @@ class HomeWindow(Gtk.ApplicationWindow):
         post_id = self.data["json"]["data"]["children"][int(index)]["data"]["id"]
         self.scrolled_window.set_child_visible(False)
         post_detail_window = PostDetailWindow(
-            application=self.application, base_window=self, api=self.api, post_id=post_id
+            application=self.application,
+            base_window=self,
+            api=self.api,
+            post_id=post_id,
         )
         post_detail_window.render_page()
 
-    def __on_reload_clicked(self, _widget: Gtk.Button) -> None:
-        """Handles reload button click events.
-
-        Reloads the current page by fetching the latest data from Reddit
-        and re-rendering the page with the updated content.
-
-        Args:
-            _widget (Gtk.Button): The reload button that was clicked
-
-        Returns:
-            None: This method does not return a value.
-        """
-        category = store.post_sort_type[store.current_sort].lower()
-        self.data = self.__fetch_data(category)
-        self.render_page(customise_titlebar=False)
-
-    def __on_check_btn_toggled(self, widget: Gtk.CheckButton) -> None:  
-        """Handles radio button click events for sorting options.
-
-        Updates the current sort category based on the selected radio button
-        and reloads the page with the new sorting option.
-
-        Args:
-            widget (Gtk.CheckButton): The radio button that was clicked
-
-        Returns:
-            None: This method does not return a value.
-        """
-        if widget.get_active():
-            store.current_sort = int(widget.get_name())
-            self.__on_reload_clicked(widget)
-            self.base.header_bar.remove(self.start_box)
-            self.base.header_bar.remove(self.end_box)
-            self.customise_titlebar()
-
-    def customise_titlebar(self) -> Gtk.HeaderBar:
-        """Customises the application headerbar.
-
-        Adds buttons and menus to the header bar including reload button, 
-        sort menu button with popover, search button, and profile menu 
-        button with popover containing user information and account options.
-
-        Returns:
-            Gtk.HeaderBar: Customized header bar for the application
-        """
-        self.start_box = Gtk.Box(halign=True, orientation=Gtk.Orientation.HORIZONTAL)
-        reload_btn = Gtk.Button(icon_name="xyz.daimones.Telex.reload", tooltip_text="Reload")
-        reload_btn.connect("clicked", self.__on_reload_clicked)
-        self.start_box.append(reload_btn)
-
-        self.end_box = Gtk.Box(halign=True, orientation=Gtk.Orientation.HORIZONTAL)
-
-        menu_btn_child = self.__add_menu_button_child()
-        popover_child = self.__add_sort_popover_child()
-        self.end_box.append(
-            Gtk.MenuButton(
-                child=menu_btn_child,
-                tooltip_text="Sort posts",
-                popover=Gtk.Popover(child=popover_child),
-            )
-        )
-        self.end_box.append(
-            Gtk.Button(icon_name="xyz.daimones.Telex.search", tooltip_text="Search")
-        )
-
-        popover_child = self.__add_profile_popover_child()
-
-        self.end_box.append(
-            Gtk.MenuButton(
-                icon_name="xyz.daimones.Telex.profile",
-                tooltip_text="Profile",
-                popover=Gtk.Popover(child=popover_child),
-            )
-        )
-
-        self.base.header_bar.pack_start(self.start_box)
-        self.base.header_bar.pack_end(self.end_box)
-
-        return self.base.header_bar
-
-    def render_page(self, customise_titlebar: bool = True) -> None:
-        """Creates the main layout for the homepage by setting up a vertical box container and 
-        populating it with post containers. Each post container includes vote buttons, 
+    def render_page(self, setup_titlebar: bool = True) -> None:
+        """Creates the main layout for the homepage by setting up a vertical box container and
+        populating it with post containers. Each post container includes vote buttons,
         a thumbnail image, and post metadata. The page supports vertical scrolling.
 
         Args:
-            customise_titlebar (bool, optional): Whether to customise the window titlebar.
+            setup_titlebar (bool, optional): Whether to setup the window titlebar.
                 Defaults to True.
 
         Returns:
             None: This method does not return a value.
         """
 
-        if customise_titlebar:
-            self.customise_titlebar()
+        if setup_titlebar:
+            self.titlebar_controller.setup_titlebar()
 
         box = Gtk.Box(
             orientation=Gtk.Orientation.VERTICAL,
@@ -553,6 +345,7 @@ class HomeWindow(Gtk.ApplicationWindow):
                 orientation=Gtk.Orientation.HORIZONTAL,
                 spacing=10,
                 name=str(index),
+                width_request=1000,
             )
             add_style_context(post_container, self.css_provider)
 

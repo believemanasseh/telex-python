@@ -17,13 +17,13 @@ from windows.home import HomeWindow
 
 class PostDetailWindow(Gtk.ApplicationWindow):
     """Window class for displaying detailed post content and comments.
-    
-    This class is responsible for retrieving and displaying a Reddit post's 
+
+    This class is responsible for retrieving and displaying a Reddit post's
     detailed content including the post itself and its comment tree. It shows
-    the post at the top and nested comments below it with appropriate 
-    indentation levels to indicate reply hierarchy. Comments include metadata 
+    the post at the top and nested comments below it with appropriate
+    indentation levels to indicate reply hierarchy. Comments include metadata
     such as author, score, and content, along with action buttons.
-    
+
     Attributes:
         base (HomeWindow): Reference to the base window instance
         api (Reddit): Reddit API instance for data operations
@@ -33,15 +33,21 @@ class PostDetailWindow(Gtk.ApplicationWindow):
         clamp (Adw.Clamp): Clamp widget to constrain the content width
     """
 
-    def __init__(self, application: Adw.Application, base_window: HomeWindow, api: Reddit, post_id: str):
+    def __init__(
+        self,
+        application: Adw.Application,
+        base_window: HomeWindow,
+        api: Reddit,
+        post_id: str,
+    ):
         """Initialises window for post details.
-        
+
         Args:
             application (Adw.Application): The parent GTK application
             base_window (HomeWindow): Parent window instance containing the main application window
             api (Reddit): Reddit API instance for fetching post data
             post_id (str): Unique identifier of the Reddit post to display
-        
+
         Attributes:
             base (HomeWindow): Reference to parent window
             css_provider: CSS styles provider for the window
@@ -54,7 +60,7 @@ class PostDetailWindow(Gtk.ApplicationWindow):
         self.base = base_window
         self.api = api
         self.css_provider = load_css("/assets/styles/post_detail.css")
-        self.data = self.__fetch_data(post_id)
+        self.data = self.fetch_data(post_id)
         self.box = Gtk.Box(
             css_classes=["box"],
             orientation=Gtk.Orientation.VERTICAL,
@@ -62,36 +68,10 @@ class PostDetailWindow(Gtk.ApplicationWindow):
             vexpand=True,
         )
         self.clamp = Adw.Clamp(child=self.box, maximum_size=1000)
-        
-        # Add back navigation button
-        self.back_button = Gtk.Button(
-            icon_name="xyz.daimones.Telex.arrow-pointing-left",
-            tooltip_text="Back to Home"
-        )
-        self.back_button.connect("clicked", self.__on_back_clicked)
-        
-        self.base.base.header_bar.pack_start(self.back_button)
 
-    def __on_back_clicked(self, button: Gtk.Button):
-        """Handles back button click events.
-        
-        Returns to the home view by restoring the HomeWindow view
-        and clearing the current post detail view.
-        
-        Args:
-            button (Gtk.Button): The button that triggered the event
-        """
-        # Remove the back button from header bar
-        self.base.base.header_bar.remove(self.back_button)
-    
-        # Remove post detail content
-        if self.base.scrolled_window.get_child():
-            self.base.scrolled_window.set_child(None)
-        
-        # Restore home window components
-        self.base.render_page(customise_titlebar=False)
+        self.base.titlebar_controller.add_back_button()
 
-    def __fetch_data(self, post_id: str) -> dict[str, int | dict] | None:
+    def fetch_data(self, post_id: str) -> dict[str, int | dict] | None:
         """Retrieves post details and comments from Reddit API.
 
         Calls the Reddit API to get the complete post data and its comment tree
@@ -101,7 +81,7 @@ class PostDetailWindow(Gtk.ApplicationWindow):
             post_id (str): Unique identifier for the Reddit post
 
         Returns:
-            dict[str, int | dict] | None: Post and comments data dictionary 
+            dict[str, int | dict] | None: Post and comments data dictionary
                                           or None if not found
         """
         return self.api.retrieve_comments(post_id)
@@ -111,8 +91,8 @@ class PostDetailWindow(Gtk.ApplicationWindow):
     ) -> None:
         """Loads and renders comments recursively with proper nesting.
 
-        Creates UI components for each comment including author information, 
-        comment content, score, and action buttons. Recursively processes reply 
+        Creates UI components for each comment including author information,
+        comment content, score, and action buttons. Recursively processes reply
         chains with increased indentation to visually represent the comment hierarchy.
 
         Args:
@@ -236,13 +216,13 @@ class PostDetailWindow(Gtk.ApplicationWindow):
 
     def render_page(self):
         """Renders the post detail page with post content and comments.
-        
+
         Builds the complete UI for the post detail view including:
         - The post itself (reusing components from HomeWindow)
         - A comments header
         - The nested comment tree with proper indentation
-        
-        This method sets up the viewport and makes the content visible in the 
+
+        This method sets up the viewport and makes the content visible in the
         scrolled window from the base HomeWindow instance.
         """
         post_data = self.data["json"][0]["data"]["children"][0]
@@ -250,7 +230,7 @@ class PostDetailWindow(Gtk.ApplicationWindow):
         post_container = Gtk.Box(
             css_classes=["post-container"],
             orientation=Gtk.Orientation.HORIZONTAL,
-            spacing=10
+            spacing=10,
         )
 
         self.box.append(post_container)

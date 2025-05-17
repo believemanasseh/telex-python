@@ -19,12 +19,12 @@ from utils.common import add_style_context, load_css
 
 class AuthWindow(Gtk.ApplicationWindow):
     """Window class for authentication and authorisation.
-    
+
     This class handles the Reddit OAuth authentication flow, presenting a login
     button that opens a WebView with Reddit's authentication page. Once authenticated,
     it exchanges the authorisation code for an access token, stores it securely using
     AWS Secrets, and transitions to the home window.
-    
+
     Attributes:
         css_provider (Gtk.CssProvider): Provider for styling the auth window
         header_bar (Adw.HeaderBar): The window's title bar
@@ -39,10 +39,10 @@ class AuthWindow(Gtk.ApplicationWindow):
 
     def __init__(self, application: Adw.Application, **kwargs) -> None:
         """Initialises the authentication window.
-        
+
         Creates the window with appropriate styling, sets up the header bar,
         initialises API clients, and creates the UI containing a Reddit login button.
-        
+
         Args:
             application (Adw.Application): The parent GTK application
             **kwargs: Additional arguments passed to the parent class constructor
@@ -59,7 +59,7 @@ class AuthWindow(Gtk.ApplicationWindow):
         """
         self.application = application
         self.css_provider = load_css("/assets/styles/auth.css")
-        
+
         self.header_bar = Adw.HeaderBar(
             decoration_layout="close,maximize,minimize", show_back_button=True
         )
@@ -129,7 +129,9 @@ class AuthWindow(Gtk.ApplicationWindow):
                 self.box.remove(self.reddit_btn)
                 self.box.set_visible(False)
 
-                home_window = HomeWindow(application=self.application, base_window=self, api=self.api)
+                home_window = HomeWindow(
+                    application=self.application, base_window=self, api=self.api
+                )
                 home_window.render_page()
 
     def __on_close_webview(self, _widget: WebKit.WebView) -> None:
