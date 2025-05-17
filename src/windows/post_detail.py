@@ -33,10 +33,11 @@ class PostDetailWindow(Gtk.ApplicationWindow):
         clamp (Adw.Clamp): Clamp widget to constrain the content width
     """
 
-    def __init__(self, base_window: HomeWindow, api: Reddit, post_id: str):
+    def __init__(self, application: Adw.Application, base_window: HomeWindow, api: Reddit, post_id: str):
         """Initialises window for post details.
         
         Args:
+            application (Adw.Application): The parent GTK application
             base_window (HomeWindow): Parent window instance containing the main application window
             api (Reddit): Reddit API instance for fetching post data
             post_id (str): Unique identifier of the Reddit post to display
@@ -49,6 +50,7 @@ class PostDetailWindow(Gtk.ApplicationWindow):
             clamp (Adw.Clamp): Width constraint container
             back_button (Gtk.Button): Navigation button to return to home view
         """
+        super().__init__(application=application)
         self.base = base_window
         self.api = api
         self.css_provider = load_css("/assets/styles/post_detail.css")

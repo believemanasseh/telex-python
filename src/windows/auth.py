@@ -37,18 +37,29 @@ class AuthWindow(Gtk.ApplicationWindow):
 
     __gtype_name__ = "AuthWindow"
 
-    def __init__(self, application, **kwargs) -> None:
+    def __init__(self, application: Adw.Application, **kwargs) -> None:
         """Initialises the authentication window.
         
         Creates the window with appropriate styling, sets up the header bar,
         initialises API clients, and creates the UI containing a Reddit login button.
         
         Args:
-            application: The parent GTK application
+            application (Adw.Application): The parent GTK application
             **kwargs: Additional arguments passed to the parent class constructor
-        """
-        self.css_provider = load_css("/assets/styles/auth.css")
 
+        Attributes:
+            application (Adw.Application): The parent GTK application
+            css_provider (Gtk.CssProvider): Provider for styling the auth window
+            header_bar (Adw.HeaderBar): The window's title bar
+            api (Reddit): Instance of the Reddit API service
+            aws_client (AWSClient): Client for AWS services (used for secret storage)
+            box (Gtk.Box): Main container for UI elements
+            reddit_btn (Gtk.Button): Button to initiate the OAuth flow
+            dialog (Gtk.MessageDialog): Dialog containing the WebView for OAuth
+        """
+        self.application = application
+        self.css_provider = load_css("/assets/styles/auth.css")
+        
         self.header_bar = Adw.HeaderBar(
             decoration_layout="close,maximize,minimize", show_back_button=True
         )
@@ -118,7 +129,7 @@ class AuthWindow(Gtk.ApplicationWindow):
                 self.box.remove(self.reddit_btn)
                 self.box.set_visible(False)
 
-                home_window = HomeWindow(base_window=self, api=self.api)
+                home_window = HomeWindow(application=self.application, base_window=self, api=self.api)
                 home_window.render_page()
 
     def __on_close_webview(self, _widget: WebKit.WebView) -> None:

@@ -44,23 +44,27 @@ class HomeWindow(Gtk.ApplicationWindow):
         viewport (Gtk.Viewport): Viewport containing the posts
     """
 
-    def __init__(self, base_window: AuthWindow, api: Reddit):
+    def __init__(self,application: Adw.Application, base_window: AuthWindow, api: Reddit):
         """Initialise the Home window with base window and Reddit API.
 
         This constructor sets up the home window by maximizing the base application window
         and applying styles to the base box widget. It also fetches initial Reddit data.
 
         Args:
+            application (Adw.Application): The parent GTK application
             base_window (AuthWindow): The base application window instance
             api (Reddit): The Reddit API instance for fetching data
 
         Attributes:
+            application: The parent GTK application
             base: The base window reference
             api: The Reddit API reference 
             cursor: Custom pointer cursor
             css_provider: CSS styles provider
             data: Fetched Reddit posts data based on current sort category
         """
+        super().__init__(application=application)
+        self.application = application
         self.base = base_window
         self.api = api
         self.cursor = create_cursor("pointer")
@@ -328,38 +332,43 @@ class HomeWindow(Gtk.ApplicationWindow):
         """
         popover_child = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
 
-        check_btn = Gtk.CheckButton(
-            active=True, label=store.post_sort_type[store.current_sort]
+        active = True if store.current_sort == 0 else False
+        best_check_btn = Gtk.CheckButton(
+            active=active, name="0", label=store.post_sort_type[0]
         )
+        best_check_btn.connect("toggled", self.__on_check_btn_toggled)
 
-        store.current_sort += 1
-        check_btn1 = Gtk.CheckButton(active=False)
-        check_btn1.set_group(check_btn)
-        check_btn1.set_label(store.post_sort_type[store.current_sort])
+        active = True if store.current_sort == 1 else False
+        new_check_btn = Gtk.CheckButton(active=active, name="1", label=store.post_sort_type[1])
+        new_check_btn.set_group(best_check_btn)
+        new_check_btn.connect("toggled", self.__on_check_btn_toggled)
 
-        store.current_sort += 1
-        check_btn2 = Gtk.CheckButton(
-            active=False, label=store.post_sort_type[store.current_sort]
+        active = True if store.current_sort == 2 else False
+        hot_check_btn = Gtk.CheckButton(
+            active=active, name="2", label=store.post_sort_type[2]
         )
-        check_btn2.set_group(check_btn1)
+        hot_check_btn.set_group(best_check_btn)
+        hot_check_btn.connect("toggled", self.__on_check_btn_toggled)
 
-        store.current_sort += 1
-        check_btn3 = Gtk.CheckButton(
-            active=False, label=store.post_sort_type[store.current_sort]
+        active = True if store.current_sort == 3 else False
+        top_check_btn = Gtk.CheckButton(
+            active=active, name="3", label=store.post_sort_type[3]
         )
-        check_btn3.set_group(check_btn2)
+        top_check_btn.set_group(hot_check_btn)
+        top_check_btn.connect("toggled", self.__on_check_btn_toggled)
 
-        store.current_sort += 1
-        check_btn4 = Gtk.CheckButton(
-            active=False, label=store.post_sort_type[store.current_sort]
+        active = True if store.current_sort == 4 else False
+        rising_check_btn = Gtk.CheckButton(
+            active=active, name="4", label=store.post_sort_type[4]
         )
-        check_btn4.set_group(check_btn3)
+        rising_check_btn.set_group(top_check_btn)
+        rising_check_btn.connect("toggled", self.__on_check_btn_toggled)
 
-        popover_child.append(check_btn)
-        popover_child.append(check_btn1)
-        popover_child.append(check_btn2)
-        popover_child.append(check_btn3)
-        popover_child.append(check_btn4)
+        popover_child.append(best_check_btn)
+        popover_child.append(new_check_btn)
+        popover_child.append(hot_check_btn)
+        popover_child.append(top_check_btn)
+        popover_child.append(rising_check_btn)
 
         return popover_child
 
@@ -421,17 +430,51 @@ class HomeWindow(Gtk.ApplicationWindow):
         """
         from windows.post_detail import PostDetailWindow
 
-        store.current_sort = 0
         index = widget.get_name()
         post_id = self.data["json"]["data"]["children"][int(index)]["data"]["id"]
         self.scrolled_window.set_child_visible(False)
         post_detail_window = PostDetailWindow(
-            base_window=self, api=self.api, post_id=post_id
+            application=self.application, base_window=self, api=self.api, post_id=post_id
         )
         post_detail_window.render_page()
 
+    def __on_reload_clicked(self, _widget: Gtk.Button) -> None:
+        """Handles reload button click events.
+
+        Reloads the current page by fetching the latest data from Reddit
+        and re-rendering the page with the updated content.
+
+        Args:
+            _widget (Gtk.Button): The reload button that was clicked
+
+        Returns:
+            None: This method does not return a value.
+        """
+        category = store.post_sort_type[store.current_sort].lower()
+        self.data = self.__fetch_data(category)
+        self.render_page(customise_titlebar=False)
+
+    def __on_check_btn_toggled(self, widget: Gtk.CheckButton) -> None:  
+        """Handles radio button click events for sorting options.
+
+        Updates the current sort category based on the selected radio button
+        and reloads the page with the new sorting option.
+
+        Args:
+            widget (Gtk.CheckButton): The radio button that was clicked
+
+        Returns:
+            None: This method does not return a value.
+        """
+        if widget.get_active():
+            store.current_sort = int(widget.get_name())
+            self.__on_reload_clicked(widget)
+            self.base.header_bar.remove(self.start_box)
+            self.base.header_bar.remove(self.end_box)
+            self.customise_titlebar()
+
     def customise_titlebar(self) -> Gtk.HeaderBar:
-        """Customizes the application headerbar.
+        """Customises the application headerbar.
 
         Adds buttons and menus to the header bar including reload button, 
         sort menu button with popover, search button, and profile menu 
@@ -440,29 +483,29 @@ class HomeWindow(Gtk.ApplicationWindow):
         Returns:
             Gtk.HeaderBar: Customized header bar for the application
         """
-        start_box = Gtk.Box(halign=True, orientation=Gtk.Orientation.HORIZONTAL)
-        start_box.append(
-            Gtk.Button(icon_name="xyz.daimones.Telex.reload", tooltip_text="Reload")
-        )
+        self.start_box = Gtk.Box(halign=True, orientation=Gtk.Orientation.HORIZONTAL)
+        reload_btn = Gtk.Button(icon_name="xyz.daimones.Telex.reload", tooltip_text="Reload")
+        reload_btn.connect("clicked", self.__on_reload_clicked)
+        self.start_box.append(reload_btn)
 
-        end_box = Gtk.Box(halign=True, orientation=Gtk.Orientation.HORIZONTAL)
+        self.end_box = Gtk.Box(halign=True, orientation=Gtk.Orientation.HORIZONTAL)
 
         menu_btn_child = self.__add_menu_button_child()
         popover_child = self.__add_sort_popover_child()
-        end_box.append(
+        self.end_box.append(
             Gtk.MenuButton(
                 child=menu_btn_child,
                 tooltip_text="Sort posts",
                 popover=Gtk.Popover(child=popover_child),
             )
         )
-        end_box.append(
+        self.end_box.append(
             Gtk.Button(icon_name="xyz.daimones.Telex.search", tooltip_text="Search")
         )
 
         popover_child = self.__add_profile_popover_child()
 
-        end_box.append(
+        self.end_box.append(
             Gtk.MenuButton(
                 icon_name="xyz.daimones.Telex.profile",
                 tooltip_text="Profile",
@@ -470,8 +513,8 @@ class HomeWindow(Gtk.ApplicationWindow):
             )
         )
 
-        self.base.header_bar.pack_start(start_box)
-        self.base.header_bar.pack_end(end_box)
+        self.base.header_bar.pack_start(self.start_box)
+        self.base.header_bar.pack_end(self.end_box)
 
         return self.base.header_bar
 
@@ -501,7 +544,7 @@ class HomeWindow(Gtk.ApplicationWindow):
             vexpand=True,
         )
         clamp = Adw.Clamp(child=box, maximum_size=1000)
-        
+
         add_style_context(box, self.css_provider)
 
         for index, data in enumerate(self.data["json"]["data"]["children"]):
