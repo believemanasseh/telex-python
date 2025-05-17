@@ -10,3 +10,13 @@ class Seconds(IntEnum):
 	HOUR = 3600
 	DAY = 86400
 	WEEK = 604800
+
+
+class SortType(IntEnum):
+	"""Sort type constants for Reddit posts."""
+
+	BEST = 0
+	NEW = 1
+	HOT = 2
+	TOP = 3
+	RISING = 4

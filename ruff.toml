@@ -83,7 +83,7 @@ ignore = [
     "FBT001", # Allow boolean-typed positional argument in function definition
     "FBT002", # Allow boolean default positional argument in function definition
     "FBT003", # Allow boolean positional value in function call
-    "PLR0193", # Allow more than 5 function arguments
+    "PLR0913" # Allow more than 5 function arguments
 ]
 
 [lint.per-file-ignores]

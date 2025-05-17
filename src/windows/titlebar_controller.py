@@ -1,3 +1,21 @@
+"""Titlebar controller implementation for the Reddit client application.
+
+This module manages the application's header bar/titlebar functionality, including:
+
+- Dynamic header bar content management for different views
+- Post sorting controls with dropdown menu
+- Search functionality access
+- User profile menu and actions
+- Navigation controls (back button, reload)
+- Consistent styling across header elements
+
+The module maintains the header bar state and provides smooth transitions
+between different views while keeping a consistent user interface.
+
+Classes:
+    TitlebarController: Main class managing header bar content and behavior
+"""
+
 import gi
 
 import store
@@ -8,281 +26,315 @@ from gi.repository import Adw, Gtk
 
 from services import Reddit
 from utils.common import add_style_context, load_css, load_image
+from utils.constants import SortType
 
 from .home import HomeWindow
 
 
 class TitlebarController:
-    """Manages header_bar contents for both HomeWindow and PostDetailWindow."""
+	"""Controls and manages the application header bar functionality.
 
-    def __init__(self, header_bar: Adw.HeaderBar, home_window: HomeWindow, api: Reddit):
-        self.header_bar = header_bar
-        self.api = api
-        self.home_window = home_window
-        self.css_provider = load_css("/assets/styles/home.css")
-        self.start_box: Gtk.Box | None = None
-        self.end_box: Gtk.Box | None = None
-        self.back_btn: Gtk.Button | None = None
+	Provides complete header bar management including dynamic content updates,
+	navigation controls, sorting options, and user profile features. Handles
+	transitions between different views while maintaining state and providing
+	a consistent user experience.
+	"""
 
-    def setup_titlebar(self) -> None:
-        """Customises the application headerbar.
+	def __init__(self, header_bar: Adw.HeaderBar, home_window: HomeWindow, api: Reddit):
+		"""Initialize the header bar controller.
 
-        Adds buttons and menus to the header bar including reload button,
-        sort menu button with popover, search button, and profile menu
-        button with popover containing user information and account options.
-        """
-        # ── left─side (reload) ──
-        self.start_box = Gtk.Box(halign=True, orientation=Gtk.Orientation.HORIZONTAL)
-        reload_btn = Gtk.Button(
-            icon_name="xyz.daimones.Telex.reload", tooltip_text="Reload"
-        )
-        reload_btn.connect("clicked", self.__on_reload_clicked)
-        self.start_box.append(reload_btn)
-        self.header_bar.pack_start(self.start_box)
+		Sets up the header bar controller with necessary references and
+		initializes the base state for managing header bar content.
 
-        # ── right─side (sort, search, profile) ──
-        self.end_box = Gtk.Box(halign=True, orientation=Gtk.Orientation.HORIZONTAL)
+		Args:
+		    header_bar (Adw.HeaderBar): The application header bar to manage
+		    home_window (HomeWindow): Reference to the main application window
+		    api (Reddit): Reddit API service for data operations
 
-        # Sort menu button
-        menu_btn_child = self.__add_menu_button_child()
-        popover_child = self.__add_sort_popover_child()
-        self.end_box.append(
-            Gtk.MenuButton(
-                child=menu_btn_child,
-                tooltip_text="Sort posts",
-                popover=Gtk.Popover(child=popover_child),
-            )
-        )
+		Attributes:
+		    header_bar (Adw.HeaderBar): Main header bar widget
+		    api (Reddit): Reddit API service instance
+		    home_window (HomeWindow): Reference to main window
+		    css_provider (Gtk.CssProvider): Styling provider
+		    start_box (Gtk.Box): Left-side header container
+		    end_box (Gtk.Box): Right-side header container
+		    back_btn (Gtk.Button): Navigation back button
+		"""
+		self.header_bar = header_bar
+		self.api = api
+		self.home_window = home_window
+		self.css_provider = load_css("/assets/styles/home.css")
+		self.start_box: Gtk.Box | None = None
+		self.end_box: Gtk.Box | None = None
+		self.back_btn: Gtk.Button | None = None
 
-        # Search
-        self.end_box.append(
-            Gtk.Button(icon_name="xyz.daimones.Telex.search", tooltip_text="Search")
-        )
+	def setup_titlebar(self) -> None:
+		"""Customises the application headerbar.
 
-        # Profile popover
-        popover_child = self.__add_profile_popover_child()
-        self.end_box.append(
-            Gtk.MenuButton(
-                icon_name="xyz.daimones.Telex.profile",
-                tooltip_text="Profile",
-                popover=Gtk.Popover(child=popover_child),
-            )
-        )
+		Adds buttons and menus to the header bar including reload button,
+		sort menu button with popover, search button, and profile menu
+		button with popover containing user information and account options.
+		"""
+		# Left─side |reload|
+		self.start_box = Gtk.Box(halign=True, orientation=Gtk.Orientation.HORIZONTAL)
+		reload_btn = Gtk.Button(
+			icon_name="xyz.daimones.Telex.reload", tooltip_text="Reload"
+		)
+		reload_btn.connect("clicked", self.__on_reload_clicked)
+		self.start_box.append(reload_btn)
+		self.header_bar.pack_start(self.start_box)
 
-        self.header_bar.pack_end(self.end_box)
+		# Right─side |sort|search|profile|
+		self.end_box = Gtk.Box(halign=True, orientation=Gtk.Orientation.HORIZONTAL)
 
-    def add_back_button(self) -> Gtk.Button:
-        """Inserts a single back-arrow button at the left of the header."""
-        self.back_btn = Gtk.Button(
-            icon_name="xyz.daimones.Telex.arrow-pointing-left",
-            tooltip_text="Back to Home",
-        )
-        self.back_btn.connect("clicked", self.__on_back_clicked)
-        self.header_bar.pack_start(self.back_btn)
-        return self.back_btn
+		# Sort menu button
+		menu_btn_child = self.__add_menu_button_child()
+		popover_child = self.__add_sort_popover_child()
+		self.end_box.append(
+			Gtk.MenuButton(
+				child=menu_btn_child,
+				tooltip_text="Sort posts",
+				popover=Gtk.Popover(child=popover_child),
+			)
+		)
 
-    def __add_profile_popover_child(self) -> Gtk.Box:
-        """Creates profile popover child widget.
+		# Search
+		self.end_box.append(
+			Gtk.Button(icon_name="xyz.daimones.Telex.search", tooltip_text="Search")
+		)
 
-        Creates a box containing the user profile information (profile picture,
-        username, karma) and menu options (View Profile, Subreddits, Settings,
-        About, Log Out) for the profile popover menu.
+		# Profile popover
+		popover_child = self.__add_profile_popover_child()
+		self.end_box.append(
+			Gtk.MenuButton(
+				icon_name="xyz.daimones.Telex.profile",
+				tooltip_text="Profile",
+				popover=Gtk.Popover(child=popover_child),
+			)
+		)
 
-        Returns:
-            Gtk.Box: Container with profile info and menu options
-        """
-        popover_child = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+		self.header_bar.pack_end(self.end_box)
 
-        grid = Gtk.Grid(column_spacing=30)
-        grid.insert_row(0)
-        grid.insert_column(0)
-        grid.insert_column(1)
+	def add_back_button(self) -> Gtk.Button:
+		"""Inserts a single back-arrow button at the left of the header."""
+		self.back_btn = Gtk.Button(
+			icon_name="xyz.daimones.Telex.arrow-pointing-left",
+			tooltip_text="Back to Home",
+		)
+		self.back_btn.connect("clicked", self.__on_back_clicked)
+		self.header_bar.pack_start(self.back_btn)
+		return self.back_btn
 
-        user_profile_img = load_image(
-            "/assets/images/reddit-placeholder.png",
-            "placeholder",
-            css_classes=["user-profile-img"],
-        )
-        add_style_context(user_profile_img, self.css_provider)
-        grid.attach(user_profile_img, 0, 0, 1, 1)
+	def __add_profile_popover_child(self) -> Gtk.Box:
+		"""Creates profile popover child widget.
 
-        box = Gtk.Box(
-            orientation=Gtk.Orientation.VERTICAL,
-            valign=Gtk.Align.CENTER,
-            halign=Gtk.Align.CENTER,
-        )
-        box.append(Gtk.Label(label="u/believemanasseh", halign=Gtk.Align.START))
-        box.append(Gtk.Label(label="38 karma", halign=Gtk.Align.START))
-        grid.attach(box, 1, 0, 1, 1)
+		Creates a box containing the user profile information (profile picture,
+		username, karma) and menu options (View Profile, Subreddits, Settings,
+		About, Log Out) for the profile popover menu.
 
-        popover_child.append(grid)
+		Returns:
+		    Gtk.Box: Container with profile info and menu options
+		"""
+		popover_child = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
 
-        menu_labels = [
-            "View Profile",
-            "Subreddits",
-            "Settings",
-            "About",
-            "Log Out",
-        ]
-        for label in menu_labels:
-            if "Log" in label:
-                menu_btn = Gtk.Button(
-                    label=label, css_classes=["menu-btn-logout"], hexpand=True
-                )
-            else:
-                menu_btn = Gtk.Button(
-                    label=label, css_classes=["menu-btn"], hexpand=True
-                )
+		grid = Gtk.Grid(column_spacing=30)
+		grid.insert_row(0)
+		grid.insert_column(0)
+		grid.insert_column(1)
 
-            if menu_btn.get_child():
-                menu_btn.get_child().set_halign(Gtk.Align.START)
+		user_profile_img = load_image(
+			"/assets/images/reddit-placeholder.png",
+			"placeholder",
+			css_classes=["user-profile-img"],
+		)
+		add_style_context(user_profile_img, self.css_provider)
+		grid.attach(user_profile_img, 0, 0, 1, 1)
 
-            add_style_context(menu_btn, self.css_provider)
-            popover_child.append(menu_btn)
+		box = Gtk.Box(
+			orientation=Gtk.Orientation.VERTICAL,
+			valign=Gtk.Align.CENTER,
+			halign=Gtk.Align.CENTER,
+		)
+		box.append(Gtk.Label(label="u/believemanasseh", halign=Gtk.Align.START))
+		box.append(Gtk.Label(label="38 karma", halign=Gtk.Align.START))
+		grid.attach(box, 1, 0, 1, 1)
 
-        return popover_child
+		popover_child.append(grid)
 
-    def __add_sort_popover_child(self) -> Gtk.Box:
-        """Creates sort popover child widget.
+		menu_labels = [
+			"View Profile",
+			"Subreddits",
+			"Settings",
+			"About",
+			"Log Out",
+		]
+		for label in menu_labels:
+			if "Log" in label:
+				menu_btn = Gtk.Button(
+					label=label, css_classes=["menu-btn-logout"], hexpand=True
+				)
+			else:
+				menu_btn = Gtk.Button(label=label, css_classes=["menu-btn"], hexpand=True)
 
-        Creates a box containing radio buttons for post sorting options
-        (Hot, New, Rising, etc.) allowing the user to change the post
-        sort order.
+			if menu_btn.get_child():
+				menu_btn.get_child().set_halign(Gtk.Align.START)
 
-        Returns:
-            Gtk.Box: Container with post sorting options as radio buttons
-        """
-        popover_child = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+			add_style_context(menu_btn, self.css_provider)
+			popover_child.append(menu_btn)
 
-        active = True if store.current_sort == 0 else False
-        best_check_btn = Gtk.CheckButton(
-            active=active, name="0", label=store.post_sort_type[0]
-        )
-        best_check_btn.connect("toggled", self.__on_check_btn_toggled)
+		return popover_child
 
-        active = True if store.current_sort == 1 else False
-        new_check_btn = Gtk.CheckButton(
-            active=active, name="1", label=store.post_sort_type[1]
-        )
-        new_check_btn.set_group(best_check_btn)
-        new_check_btn.connect("toggled", self.__on_check_btn_toggled)
+	def __add_sort_popover_child(self) -> Gtk.Box:
+		"""Creates sort popover child widget.
 
-        active = True if store.current_sort == 2 else False
-        hot_check_btn = Gtk.CheckButton(
-            active=active, name="2", label=store.post_sort_type[2]
-        )
-        hot_check_btn.set_group(best_check_btn)
-        hot_check_btn.connect("toggled", self.__on_check_btn_toggled)
+		Creates a box containing radio buttons for post sorting options
+		(Hot, New, Rising, etc.) allowing the user to change the post
+		sort order.
 
-        active = True if store.current_sort == 3 else False
-        top_check_btn = Gtk.CheckButton(
-            active=active, name="3", label=store.post_sort_type[3]
-        )
-        top_check_btn.set_group(hot_check_btn)
-        top_check_btn.connect("toggled", self.__on_check_btn_toggled)
+		Returns:
+		    Gtk.Box: Container with post sorting options as radio buttons
+		"""
+		popover_child = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
 
-        active = True if store.current_sort == 4 else False
-        rising_check_btn = Gtk.CheckButton(
-            active=active, name="4", label=store.post_sort_type[4]
-        )
-        rising_check_btn.set_group(top_check_btn)
-        rising_check_btn.connect("toggled", self.__on_check_btn_toggled)
+		active = store.current_sort == SortType.BEST
+		best_check_btn = Gtk.CheckButton(
+			active=active,
+			name=str(SortType.BEST.value),
+			label=store.post_sort_type[SortType.BEST.value],
+		)
+		best_check_btn.connect("toggled", self.__on_check_btn_toggled)
 
-        popover_child.append(best_check_btn)
-        popover_child.append(new_check_btn)
-        popover_child.append(hot_check_btn)
-        popover_child.append(top_check_btn)
-        popover_child.append(rising_check_btn)
+		active = store.current_sort == SortType.NEW
+		new_check_btn = Gtk.CheckButton(
+			active=active,
+			name=str(SortType.NEW.value),
+			label=store.post_sort_type[SortType.NEW.value],
+		)
+		new_check_btn.set_group(best_check_btn)
+		new_check_btn.connect("toggled", self.__on_check_btn_toggled)
 
-        return popover_child
+		active = store.current_sort == SortType.HOT
+		hot_check_btn = Gtk.CheckButton(
+			active=active,
+			name=str(SortType.HOT.value),
+			label=store.post_sort_type[SortType.HOT.value],
+		)
+		hot_check_btn.set_group(best_check_btn)
+		hot_check_btn.connect("toggled", self.__on_check_btn_toggled)
 
-    def __add_menu_button_child(self) -> Gtk.Box:
-        """Creates menu button child widget.
+		active = store.current_sort == SortType.TOP
+		top_check_btn = Gtk.CheckButton(
+			active=active,
+			name=str(SortType.TOP.value),
+			label=store.post_sort_type[SortType.TOP.value],
+		)
+		top_check_btn.set_group(hot_check_btn)
+		top_check_btn.connect("toggled", self.__on_check_btn_toggled)
 
-        Creates a box containing the sort menu button's label showing the
-        current sort type and a dropdown icon to indicate it's expandable.
+		active = store.current_sort == SortType.RISING
+		rising_check_btn = Gtk.CheckButton(
+			active=active,
+			name=str(SortType.RISING.value),
+			label=store.post_sort_type[SortType.RISING.value],
+		)
+		rising_check_btn.set_group(top_check_btn)
+		rising_check_btn.connect("toggled", self.__on_check_btn_toggled)
 
-        Returns:
-            Gtk.Box: Container with sort button label and dropdown icon
-        """
-        menu_btn_child = Gtk.Box(
-            orientation=Gtk.Orientation.VERTICAL,
-            halign=Gtk.Align.CENTER,
-            valign=Gtk.Align.CENTER,
-        )
+		popover_child.append(best_check_btn)
+		popover_child.append(new_check_btn)
+		popover_child.append(hot_check_btn)
+		popover_child.append(top_check_btn)
+		popover_child.append(rising_check_btn)
 
-        grid = Gtk.Grid(column_spacing=30)
-        grid.insert_row(0)
-        grid.insert_column(0)
-        grid.insert_column(1)
+		return popover_child
 
-        label = Gtk.Label(
-            label=store.post_sort_type[store.current_sort],
-            css_classes=["menu-btn-label"],
-        )
-        grid.attach(label, 0, 0, 1, 1)
+	def __add_menu_button_child(self) -> Gtk.Box:
+		"""Creates menu button child widget.
 
-        image = Gtk.Image(icon_name="xyz.daimones.Telex.sort-down")
-        grid.attach(image, 1, 0, 1, 1)
+		Creates a box containing the sort menu button's label showing the
+		current sort type and a dropdown icon to indicate it's expandable.
 
-        menu_btn_child.append(grid)
+		Returns:
+		    Gtk.Box: Container with sort button label and dropdown icon
+		"""
+		menu_btn_child = Gtk.Box(
+			orientation=Gtk.Orientation.VERTICAL,
+			halign=Gtk.Align.CENTER,
+			valign=Gtk.Align.CENTER,
+		)
 
-        add_style_context(label, self.css_provider)
+		grid = Gtk.Grid(column_spacing=30)
+		grid.insert_row(0)
+		grid.insert_column(0)
+		grid.insert_column(1)
 
-        return menu_btn_child
+		label = Gtk.Label(
+			label=store.post_sort_type[store.current_sort],
+			css_classes=["menu-btn-label"],
+		)
+		grid.attach(label, 0, 0, 1, 1)
 
-    def __on_reload_clicked(self, _widget: Gtk.Button) -> None:
-        """Handles reload button click events.
+		image = Gtk.Image(icon_name="xyz.daimones.Telex.sort-down")
+		grid.attach(image, 1, 0, 1, 1)
 
-        Reloads the current page by fetching the latest data from Reddit
-        and re-rendering the page with the updated content.
+		menu_btn_child.append(grid)
 
-        Args:
-            _widget (Gtk.Button): The reload button that was clicked
+		add_style_context(label, self.css_provider)
 
-        Returns:
-            None: This method does not return a value.
-        """
-        self.home_window.reload_data()
-        self.home_window.render_page(setup_titlebar=False)
+		return menu_btn_child
 
-    def __on_check_btn_toggled(self, widget: Gtk.CheckButton) -> None:
-        """Handles radio button click events for sorting options.
+	def __on_reload_clicked(self, _widget: Gtk.Button) -> None:
+		"""Handles reload button click events.
 
-        Updates the current sort category based on the selected radio button
-        and reloads the page with the new sorting option.
+		Reloads the current page by fetching the latest data from Reddit
+		and re-rendering the page with the updated content.
 
-        Args:
-            widget (Gtk.CheckButton): The radio button that was clicked
+		Args:
+		    _widget (Gtk.Button): The reload button that was clicked
 
-        Returns:
-            None: This method does not return a value.
-        """
-        if widget.get_active():
-            store.current_sort = int(widget.get_name())
-            self.__on_reload_clicked(widget)
-            self.header_bar.remove(self.start_box)
-            self.header_bar.remove(self.end_box)
-            self.setup_titlebar()
+		Returns:
+		    None: This method does not return a value.
+		"""
+		self.home_window.reload_data()
+		self.home_window.render_page(setup_titlebar=False)
 
-    def __on_back_clicked(self, button: Gtk.Button) -> None:
-        """Handles back button click events.
+	def __on_check_btn_toggled(self, widget: Gtk.CheckButton) -> None:
+		"""Handles radio button click events for sorting options.
 
-        Returns to the home view by restoring the HomeWindow view
-        and clearing the current post detail view.
+		Updates the current sort category based on the selected radio button
+		and reloads the page with the new sorting option.
 
-        Args:
-            button (Gtk.Button): The button that triggered the event
+		Args:
+		    widget (Gtk.CheckButton): The radio button that was clicked
 
-        Returns:
-            None: This method does not return a value.
-        """
-        # Remove the back button from header bar
-        self.header_bar.remove(self.back_btn)
+		Returns:
+		    None: This method does not return a value.
+		"""
+		if widget.get_active():
+			store.current_sort = int(widget.get_name())
+			self.__on_reload_clicked(widget)
+			self.header_bar.remove(self.start_box)
+			self.header_bar.remove(self.end_box)
+			self.setup_titlebar()
 
-        # Remove post detail content
-        if self.home_window.scrolled_window.get_child():
-            self.home_window.scrolled_window.set_child(None)
+	def __on_back_clicked(self, _button: Gtk.Button) -> None:
+		"""Handles back button click events.
 
-        # Restore home window components
-        self.home_window.render_page(setup_titlebar=False)
+		Returns to the home view by restoring the HomeWindow view
+		and clearing the current post detail view.
+
+		Args:
+		    button (Gtk.Button): The button that triggered the event
+
+		Returns:
+		    None: This method does not return a value.
+		"""
+		# Remove the back button from header bar
+		self.header_bar.remove(self.back_btn)
+
+		# Remove post detail content
+		if self.home_window.scrolled_window.get_child():
+			self.home_window.scrolled_window.set_child(None)
+
+		# Restore home window components
+		self.home_window.render_page(setup_titlebar=False)

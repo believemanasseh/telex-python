@@ -1,20 +1,25 @@
-"""Common utility functions shared across the app.
+"""Utility functions for GTK widget management and UI operations.
 
-This module provides:
-- load_image: function to load image files
-- load_css: function to load css files
-- add_style_context: function to add style context to widget
-- add_style_contexts: function to add css style contexts to multiple widgets
-- create_cursor: function to create cursor from name
-- append_all: function to add multiple widgets to box
-- load_image_from_url_async: function to download image asynchronously from url
-- create_image_widget: function to create picture widget
-- get_submission_time: function to retrieve post submission time
+This module provides common utility functions for:
+
+UI Components:
+- Image loading and manipulation
+- CSS styling and theme management
+- Cursor creation and management
+- Widget container operations
+- Asynchronous image loading
+
+Time Formatting:
+- Post submission time formatting
+- Relative time calculations
+
+The module aims to centralise common UI operations and provide a consistent
+interface for widget styling and manipulation across the application.
 """
 
 import os
 from collections.abc import Callable, Sequence
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import gi
 import requests
@@ -26,128 +31,207 @@ gi.require_versions({"Gdk": "4.0"})
 
 
 def load_image(
-    img_path: str,
-    alt_text: str,
-    can_shrink: bool = True,
-    css_classes: list[str] | None = None,
-    css_provider: Gtk.CssProvider | None = None,
-    valign: Gtk.Align = Gtk.Align.CENTER,
+	img_path: str,
+	alt_text: str,
+	can_shrink: bool = True,
+	css_classes: list[str] | None = None,
+	css_provider: Gtk.CssProvider | None = None,
+	valign: Gtk.Align = Gtk.Align.CENTER,
 ) -> Gtk.Picture:
-    """Load image file from assets directory."""
-    abspath = os.path.abspath(__file__)
-    post_image = Gtk.Picture(
-        alternative_text=alt_text, can_shrink=can_shrink, valign=valign
-    ).new_for_filename(abspath[: len(abspath) - 16] + img_path)
+	"""Load and configure an image widget from a file.
 
-    if css_classes:
-        post_image.set_css_classes(css_classes)
+	Creates a Gtk.Picture widget from an image file with specified styling and
+	layout options. Handles loading from relative paths in assets directory.
 
-    if css_provider:
-        post_image.get_style_context().add_provider(
-            css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
-        )
+	Args:
+	    img_path: Relative path to image file from assets directory
+	    alt_text: Alternative text description of the image
+	    can_shrink: Whether image can shrink below natural size
+	    css_classes: Optional list of CSS classes to apply
+	    css_provider: Optional CSS provider for additional styling
+	    valign: Vertical alignment of image within container
 
-    return post_image
+	Returns:
+	    Gtk.Picture: Configured picture widget containing the loaded image
+	"""
+	abspath = os.path.abspath(__file__)
+	post_image = Gtk.Picture(
+		alternative_text=alt_text, can_shrink=can_shrink, valign=valign
+	).new_for_filename(abspath[: len(abspath) - 16] + img_path)
+
+	if css_classes:
+		post_image.set_css_classes(css_classes)
+
+	if css_provider:
+		post_image.get_style_context().add_provider(
+			css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+		)
+
+	return post_image
 
 
-def load_css(css_path) -> Gtk.CssProvider:
-    """Load css file from assets directory."""
-    css_provider = Gtk.CssProvider()
-    abspath = os.path.abspath(__file__)
-    css_provider.load_from_path(abspath[: len(abspath) - 16] + css_path)
-    return css_provider
+def load_css(css_path: str) -> Gtk.CssProvider:
+	"""Load and parse CSS styles from a file.
+
+	Creates a CSS provider from a CSS file for styling GTK widgets.
+	Handles relative paths from the assets directory.
+
+	Args:
+	    css_path: Relative path to CSS file from assets directory
+
+	Returns:
+	    Gtk.CssProvider: Configured CSS provider with loaded styles
+	"""
+	css_provider = Gtk.CssProvider()
+	abspath = os.path.abspath(__file__)
+	css_provider.load_from_path(abspath[: len(abspath) - 16] + css_path)
+	return css_provider
 
 
 def add_style_context(widget: Gtk.Widget, css_provider: Gtk.CssProvider) -> None:
-    """Add css style context to widget."""
-    widget.get_style_context().add_provider(
-        css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
-    )
+	"""Apply CSS styles to a single widget.
+
+	Adds a CSS provider to a widget's style context for custom styling.
+
+	Args:
+	    widget: Widget to style
+	    css_provider: CSS provider containing styles to apply
+	"""
+	widget.get_style_context().add_provider(
+		css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+	)
 
 
-def add_style_contexts(
-    widgets: list[Gtk.Widget], css_provider: Gtk.CssProvider
-) -> None:
-    """Add css style context to multiple widgets."""
-    for widget in widgets:
-        widget.get_style_context().add_provider(
-            css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
-        )
+def add_style_contexts(widgets: list[Gtk.Widget], css_provider: Gtk.CssProvider) -> None:
+	"""Apply CSS styles to multiple widgets.
+
+	Adds the same CSS provider to multiple widgets' style contexts.
+
+	Args:
+	    widgets: List of widgets to style
+	    css_provider: CSS provider containing styles to apply
+	"""
+	for widget in widgets:
+		widget.get_style_context().add_provider(
+			css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+		)
 
 
 def create_cursor(name: str) -> Gdk.Cursor | None:
-    """Creates cursor from name."""
-    return Gdk.Cursor.new_from_name(name)
+	"""Create a cursor object from a named cursor type.
+
+	Args:
+	    name: Standard cursor name (e.g. 'pointer', 'text')
+
+	Returns:
+	    Gdk.Cursor | None: Cursor object or None if name is invalid
+	"""
+	return Gdk.Cursor.new_from_name(name)
 
 
 def append_all(box: Gtk.Box, widgets: list[Gtk.Widget]) -> None:
-    """Append multiple widgets to box."""
-    for widget in widgets:
-        box.append(widget)
+	"""Add multiple widgets to a container box.
+
+	Appends a list of widgets to a GTK box container in sequence.
+
+	Args:
+	    box: Container box to add widgets to
+	    widgets: List of widgets to append
+	"""
+	for widget in widgets:
+		box.append(widget)
 
 
 def load_image_from_url_async(
-    url: str, callback: Callable[[GdkPixbuf.Pixbuf | None], None]
+	url: str, callback: Callable[[GdkPixbuf.Pixbuf | None], None]
 ) -> None:
-    """Download image asynchronously from a url."""
+	"""Asynchronously download and load an image from a URL.
 
-    def on_data_received(loader: GdkPixbuf.PixbufLoader, data: Sequence[int]):
-        loader.write(data)
+	Downloads image data in chunks and creates a pixbuf loader.
+	Calls provided callback with resulting pixbuf when complete.
 
-    def on_finished(loader: GdkPixbuf.PixbufLoader):
-        pixbuf = loader.get_pixbuf()
-        callback(pixbuf)
+	Args:
+	    url: URL of image to download
+	    callback: Function to call with loaded pixbuf or None on error
 
-    loader = GdkPixbuf.PixbufLoader()
-    loader.connect("data", on_data_received)
-    loader.connect("area-prepared", on_finished)
+	Raises:
+	    requests.RequestException: If download fails
+	"""
 
-    try:
-        response = requests.get(url, stream=True, timeout=30)
-        response.raise_for_status()
-        for chunk in response.iter_content(1024):
-            loader.write(chunk)
-        loader.close()
-    except requests.RequestException:
-        callback(None)
+	def on_data_received(loader: GdkPixbuf.PixbufLoader, data: Sequence[int]):
+		loader.write(data)
+
+	def on_finished(loader: GdkPixbuf.PixbufLoader):
+		pixbuf = loader.get_pixbuf()
+		callback(pixbuf)
+
+	loader = GdkPixbuf.PixbufLoader()
+	loader.connect("data", on_data_received)
+	loader.connect("area-prepared", on_finished)
+
+	try:
+		response = requests.get(url, stream=True, timeout=30)
+		response.raise_for_status()
+		for chunk in response.iter_content(1024):
+			loader.write(chunk)
+		loader.close()
+	except requests.RequestException:
+		callback(None)
 
 
 def create_image_widget(pixbuf: GdkPixbuf.Pixbuf | None = None) -> None:
-    """Creates the image widget."""
-    if pixbuf:
-        Gtk.Picture.new_for_pixbuf(pixbuf)
-        return
+	"""Create an image widget from a pixbuf or placeholder.
 
-    # Creates placeholder image
-    abspath = os.path.abspath(__file__)
-    Gtk.Picture(alternative_text="placeholder img").new_for_filename(
-        abspath[: len(abspath) - 16] + "/assets/images/placeholder.jpg"
-    )
+	Creates a Gtk.Picture widget either from provided pixbuf or
+	falls back to a placeholder image if pixbuf is None.
+
+	Args:
+	    pixbuf: Optional pixbuf to create image from
+	"""
+	if pixbuf:
+		Gtk.Picture.new_for_pixbuf(pixbuf)
+		return
+
+	# Creates placeholder image
+	abspath = os.path.abspath(__file__)
+	Gtk.Picture(alternative_text="placeholder img").new_for_filename(
+		abspath[: len(abspath) - 16] + "/assets/images/placeholder.jpg"
+	)
 
 
 def get_submission_time(utc_timestamp: int) -> str:
-    """Returns submission time of post."""
-    current_time = datetime.now(tz=timezone.utc)
-    event_time = datetime.fromtimestamp(utc_timestamp, tz=timezone.utc)
-    time_difference = current_time - event_time
-    total_seconds = abs(time_difference.total_seconds())
+	"""Format a UTC timestamp into a relative time string.
 
-    # Determine the scale -- minutes, hours, days, or weeks
-    if total_seconds < Seconds.MINUTE:
-        return "Less than a minute ago"
+	Converts a UTC timestamp into a human-readable relative time
+	(e.g. "5 minutes ago", "2 hours ago", "3 days ago").
 
-    if total_seconds < Seconds.HOUR:  # 60 seconds * 60 minutes
-        minutes = int(total_seconds // Seconds.MINUTE)
-        return f"{minutes} minute{'s' if minutes > 1 else ''} ago"
+	Args:
+	    utc_timestamp: UTC timestamp in seconds since epoch
 
-    if total_seconds < Seconds.DAY:  # 3600 seconds * 24 hours
-        hours = int(total_seconds // Seconds.HOUR)
-        return f"{hours} hour{'s' if hours > 1 else ''} ago"
+	Returns:
+	    str: Formatted relative time string
+	"""
+	current_time = datetime.now(tz=UTC)
+	event_time = datetime.fromtimestamp(utc_timestamp, tz=UTC)
+	time_difference = current_time - event_time
+	total_seconds = abs(time_difference.total_seconds())
 
-    if total_seconds < Seconds.WEEK:  # 86400 seconds * 7 days
-        days = int(total_seconds // Seconds.DAY)
-        return f"{days} day{'s' if days > 1 else ''} ago"
+	# Determine the scale -- minutes, hours, days, or weeks
+	if total_seconds < Seconds.MINUTE:
+		return "Less than a minute ago"
 
-    weeks = int(total_seconds // Seconds.WEEK)
+	if total_seconds < Seconds.HOUR:  # 60 seconds * 60 minutes
+		minutes = int(total_seconds // Seconds.MINUTE)
+		return f"{minutes} minute{'s' if minutes > 1 else ''} ago"
 
-    return f"{weeks} week{'s' if weeks > 1 else ''} ago"
+	if total_seconds < Seconds.DAY:  # 3600 seconds * 24 hours
+		hours = int(total_seconds // Seconds.HOUR)
+		return f"{hours} hour{'s' if hours > 1 else ''} ago"
+
+	if total_seconds < Seconds.WEEK:  # 86400 seconds * 7 days
+		days = int(total_seconds // Seconds.DAY)
+		return f"{days} day{'s' if days > 1 else ''} ago"
+
+	weeks = int(total_seconds // Seconds.WEEK)
+
+	return f"{weeks} week{'s' if weeks > 1 else ''} ago"

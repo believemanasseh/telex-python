@@ -1,8 +1,21 @@
-"""Contains classes for various third-party services used.
+"""Service integrations for external APIs and cloud services.
 
-This module provides:
-- Reddit: base Reddit class for all http operations
-- AWSClient: base class for AWS Secrets Manager
+This module implements client classes for external service integrations:
+
+Reddit API Client:
+- OAuth2 authentication flow
+- Post and comment data retrieval
+- Content interaction (voting, commenting)
+- User profile management
+
+AWS Services:
+- Secrets Manager operations
+- Secure credential storage
+- Secret lifecycle management
+- Error handling for AWS operations
+
+The module provides a clean interface for interacting with these services
+while handling authentication, error cases, and data formatting.
 """
 
 import base64
@@ -14,183 +27,191 @@ from botocore.exceptions import ClientError
 
 
 class Reddit:
-    """Base class for all operations on Reddit's API."""
+	"""Base class for all operations on Reddit's API."""
 
-    def __init__(self) -> None:
-        """Initializes request headers for Reddit API authentication."""
-        self.domain = "https://{0}.reddit.com"
-        self.system = platform.system()
-        base_encoded_string = base64.b64encode(b"xLfTJ9fCMdxmr5JCiNWMHQ:" + b"").decode(
-            "utf-8"
-        )
-        self.headers = {
-            "Authorization": "Basic " + base_encoded_string,
-            "User-Agent": f"{self.system.lower()}:telex:v0.1.0 (by /u/Intrepid-Set1590)",
-        }
+	def __init__(self) -> None:
+		"""Initialises request headers for Reddit API authentication."""
+		self.domain = "https://{0}.reddit.com"
+		self.system = platform.system()
+		base_encoded_string = base64.b64encode(b"xLfTJ9fCMdxmr5JCiNWMHQ:" + b"").decode(
+			"utf-8"
+		)
+		self.headers = {
+			"Authorization": "Basic " + base_encoded_string,
+			"User-Agent": f"{self.system.lower()}:telex:v0.1.0 (by /u/Intrepid-Set1590)",
+		}
 
-    def inject_token(self, token: str) -> None:
-        """Add access token to authorization header.
+	def inject_token(self, token: str) -> None:
+		"""Add access token to authorization header.
 
-        Args:
-            token (str): OAuth access token for Reddit API
-        """
-        self.headers["Authorization"] = f"Bearer {token}"
+		Args:
+			token (str): OAuth access token for Reddit API
+		"""
+		self.headers["Authorization"] = f"Bearer {token}"
 
-    def generate_access_token(self, code: str) -> dict[str, int | dict] | None:
-        """Generates access token from authorization code.
+	def generate_access_token(self, code: str) -> dict[str, int | dict] | None:
+		"""Generates access token from authorization code.
 
-        Args:
-            code (str): Authorization code from Reddit OAuth flow
+		Args:
+			code (str): Authorization code from Reddit OAuth flow
 
-        Returns:
-            dict[str, int | dict] | None: Response containing status code and token data
+		Returns:
+			dict[str, int | dict] | None: Response containing status code and token data
 
-        Raises:
-            requests.RequestException: If the request to Reddit API fails
-        """
-        url = self.domain.format("www") + "/api/v1/access_token"
-        data = {
-            "grant_type": "authorization_code",
-            "code": code,
-            "redirect_uri": "https://ab67-169-159-83-94.ngrok-free.app",
-        }
+		Raises:
+			requests.RequestException: If the request to Reddit API fails
+		"""
+		url = self.domain.format("www") + "/api/v1/access_token"
+		data = {
+			"grant_type": "authorization_code",
+			"code": code,
+			"redirect_uri": "https://ab67-169-159-83-94.ngrok-free.app",
+		}
 
-        try:
-            res = requests.post(url, data=data, headers=self.headers, timeout=30)
-        except requests.RequestException:
-            raise
+		try:
+			res = requests.post(url, data=data, headers=self.headers, timeout=30)
+		except requests.RequestException as e:
+			msg = "Failed to generate access token"
+			raise requests.RequestException(msg) from e
 
-        return {"status_code": res.status_code, "json": res.json()}
+		return {"status_code": res.status_code, "json": res.json()}
 
-    def retrieve_listings(self, category: str) -> dict[str, int | dict] | None:
-        """Returns posts from specified category.
+	def retrieve_listings(self, category: str) -> dict[str, int | dict] | None:
+		"""Returns posts from specified category.
 
-        Args:
-            category (str): Category of listings to retrieve (e.g., 'new', 'hot', 'rising')
+		Args:
+			category (str): Category of listings to retrieve e.g. 'new', 'hot', 'rising'
 
-        Returns:
-            dict[str, int | dict] | None: Response containing status code and listing data
+		Returns:
+			dict[str, int | dict] | None: Response containing status code and listing data
 
-        Raises:
-            requests.RequestException: If the request to Reddit API fails
-        """
-        url = self.domain.format("oauth") + f"/{category}"
-        try:
-            res = requests.get(url, headers=self.headers, timeout=30)
-        except requests.RequestException:
-            raise
-        return {"status_code": res.status_code, "json": res.json()}
+		Raises:
+			requests.RequestException: If the request to Reddit API fails
+		"""
+		url = self.domain.format("oauth") + f"/{category}"
+		try:
+			res = requests.get(url, headers=self.headers, timeout=30)
+		except requests.RequestException as e:
+			msg = "Failed to retrieve listings"
+			raise requests.RequestException(msg) from e
 
-    def retrieve_comments(self, post_id: str) -> dict[str, int | dict] | None:
-        """Returns all comments for post.
+		return {"status_code": res.status_code, "json": res.json()}
 
-        Args:
-            post_id (str): Post ID
+	def retrieve_comments(self, post_id: str) -> dict[str, int | dict] | None:
+		"""Returns all comments for post.
 
-        Returns:
-            dict[str, int | dict] | None: Post data dictionary or None if not found
+		Args:
+			post_id (str): Post ID
 
-        Raises:
-            requests.RequestException: If the request fails
-        """
-        url = self.domain.format("oauth") + f"/comments/{post_id}"
-        try:
-            res = requests.get(url, headers=self.headers, timeout=30)
-        except requests.RequestException:
-            raise
-        return {"status_code": res.status_code, "json": res.json()}
+		Returns:
+			dict[str, int | dict] | None: Post data dictionary or None if not found
+
+		Raises:
+			requests.RequestException: If the request fails
+		"""
+		url = self.domain.format("oauth") + f"/comments/{post_id}"
+		try:
+			res = requests.get(url, headers=self.headers, timeout=30)
+		except requests.RequestException as e:
+			msg = "Failed to retrieve comments"
+			raise requests.RequestException(msg) from e
+
+		return {"status_code": res.status_code, "json": res.json()}
 
 
 class AWSClient:
-    """Base class for AWS Secrets Manager service."""
+	"""Base class for AWS Secrets Manager service."""
 
-    def __init__(self):
-        """Initializes boto3 sdk session client for Secrets Manager."""
-        session = boto3.Session()
-        self.client = session.client(service_name="secretsmanager")
+	def __init__(self):
+		"""Initialises boto3 sdk session client for Secrets Manager."""
+		session = boto3.Session()
+		self.client = session.client(service_name="secretsmanager")
 
-    def create_secret(self, name: str, secret_string: str) -> dict:
-        """Creates a new secret in AWS Secrets Manager.
+	def create_secret(self, name: str, secret_string: str) -> dict:
+		"""Creates a new secret in AWS Secrets Manager.
 
-        Args:
-            name (str): Name identifier for the secret
-            secret_string (str): The secret value to store
+		Args:
+			name (str): Name identifier for the secret
+			secret_string (str): The secret value to store
 
-        Returns:
-            dict: Response containing status and result data
+		Returns:
+			dict: Response containing status and result data
 
-        Raises:
-            ClientError: If an AWS service error occurs (except ResourceExistsException)
-        """
-        try:
-            res = self.client.create_secret(Name=name, SecretString=secret_string)
-        except ClientError as e:
-            # Update secret if it already exists
-            if e.response["Error"]["Code"] == "ResourceExistsException":
-                return self.update_secret(secret_id=name, secret_string=secret_string)
+		Raises:
+			ClientError: If an AWS service error occurs (except ResourceExistsException)
+		"""
+		try:
+			res = self.client.create_secret(Name=name, SecretString=secret_string)
+		except ClientError as e:
+			# Update secret if it already exists
+			if e.response["Error"]["Code"] == "ResourceExistsException":
+				return self.update_secret(secret_id=name, secret_string=secret_string)
 
-        return {"status": "success", "json": res}
+		return {"status": "success", "json": res}
 
-    def get_secret(self, secret_id: str) -> dict:
-        """Retrieves secret value from AWS Secrets Manager.
+	def get_secret(self, secret_id: str) -> dict:
+		"""Retrieves secret value from AWS Secrets Manager.
 
-        Args:
-            secret_id (str): Identifier for the secret to retrieve
+		Args:
+			secret_id (str): Identifier for the secret to retrieve
 
-        Returns:
-            dict: Response containing status and retrieved secret value or error message
+		Returns:
+			dict: Response containing status and retrieved secret value or error message
 
-        Raises:
-            ClientError: If an AWS service error occurs
-        """
-        get_secret_value_response = self.client.get_secret_value(SecretId=secret_id)
+		Raises:
+			ClientError: If an AWS service error occurs
+		"""
+		get_secret_value_response = self.client.get_secret_value(SecretId=secret_id)
 
-        if "SecretString" not in get_secret_value_response:
-            return {"status": "error", "message": "Secret string not in response"}
+		if "SecretString" not in get_secret_value_response:
+			return {"status": "error", "message": "Secret string not in response"}
 
-        return {
-            "status": "success",
-            "secret_value": get_secret_value_response["SecretString"],
-        }
+		return {
+			"status": "success",
+			"secret_value": get_secret_value_response["SecretString"],
+		}
 
-    def update_secret(self, secret_id: str, secret_string: str) -> dict:
-        """Updates an existing secret value in AWS Secrets Manager.
+	def update_secret(self, secret_id: str, secret_string: str) -> dict:
+		"""Updates an existing secret value in AWS Secrets Manager.
 
-        Args:
-            secret_id (str): Identifier for the secret to update
-            secret_string (str): The new secret value
+		Args:
+			secret_id (str): Identifier for the secret to update
+			secret_string (str): The new secret value
 
-        Returns:
-            dict: Response from AWS Secrets Manager API
+		Returns:
+			dict: Response from AWS Secrets Manager API
 
-        Raises:
-            ClientError: If an AWS service error occurs
-        """
-        try:
-            return self.client.update_secret(
-                SecretId=secret_id, SecretString=secret_string
-            )
-        except ClientError:
-            raise
+		Raises:
+			ClientError: If an AWS service error occurs
+		"""
+		try:
+			return self.client.update_secret(
+				SecretId=secret_id, SecretString=secret_string
+			)
+		except ClientError as e:
+			msg = "Failed to update secret"
+			raise ClientError(msg) from e
 
-    def delete_secret(self, secret_id: str) -> dict:
-        """Deletes a secret from AWS Secrets Manager with recovery window.
+	def delete_secret(self, secret_id: str) -> dict:
+		"""Deletes a secret from AWS Secrets Manager with recovery window.
 
-        Args:
-            secret_id (str): Identifier for the secret to delete
+		Args:
+			secret_id (str): Identifier for the secret to delete
 
-        Returns:
-            dict: Response containing status and result data
+		Returns:
+			dict: Response containing status and result data
 
-        Raises:
-            ClientError: If an AWS service error occurs
-        """
-        try:
-            res = self.client.delete_secret(
-                SecretId=secret_id,
-                RecoveryWindowInDays=7,
-                ForceDeleteWithoutRecovery=False,
-            )
-        except ClientError:
-            raise
-        return {"status": "success", "json": res}
+		Raises:
+			ClientError: If an AWS service error occurs
+		"""
+		try:
+			res = self.client.delete_secret(
+				SecretId=secret_id,
+				RecoveryWindowInDays=7,
+				ForceDeleteWithoutRecovery=False,
+			)
+		except ClientError as e:
+			msg = "Failed to delete secret"
+			raise ClientError(msg) from e
+
+		return {"status": "success", "json": res}
