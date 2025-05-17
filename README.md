@@ -1,27 +1,84 @@
 # Telex
 
-Python implementation of a Reddit GUI client for Linux, Windows and MacOS operating systems.
+![License](https://img.shields.io/badge/license-GPL--3.0-blue.svg)
+![Python](https://img.shields.io/badge/python-3.11+-blue.svg)
+![GTK](https://img.shields.io/badge/gtk-4.0-green.svg)
+![Platform](https://img.shields.io/badge/platform-Linux%20|%20Windows%20|%20macOS-lightgrey.svg)
 
-## Dependencies
+A modern, native Reddit client built with GTK4, Libadwaita and Python. Telex provides a clean, fast, and feature-rich interface for browsing Reddit on Linux, Windows, and macOS.
 
-- gtk4 >= 4.5
-- libadwaita >= 1.1
-- python >= 3.11
-- requests
-- asyncio
-- boto3
+## Features
 
-## Development Purposes Only
+- Clean, native GTK4 interface
+- OAuth2 authentication with Reddit
+- Secure credential storage using AWS Secrets Manager
+- Responsive design that adapts to window size
+- Cross-platform support
 
-### Run locally with vscode extension
+### System Requirements
 
-For easy building and running of application, it is advisable to use the flatpak vscode extension. For more instructions, click [here](https://marketplace.visualstudio.com/items?itemName=bilelmoussaoui.flatpak-vscode).
+- GTK 4
+- Libadwaita 1.1
+- Python 3.11+
 
-### Install from source
+## Development
+
+Install system dependencies:
+
+```bash
+# Ubuntu/Debian
+sudo apt install libgtk-4-dev libgtk-4.0 gir1.2-gtk-4.0 libadwaita-1-dev
+
+# Fedora
+sudo dnf install gtk4-devel gobject-introspection gir1.2-gtk-4.0 libadwaita-devel
+
+# Arch Linux
+sudo pacman -S gtk4 gobject-introspection gir1.2-gtk-4.0 libadwaita
+```
+
+Clone the repository:
 
 ```bash
 git clone --single-branch -b main https://github.com/believemanasseh/telex-python
 cd telex-python
+```
+
+Install Python dependencies:
+
+```bash
+pipenv --python 3.11
+source .venv/bin/activate
+pipenv install --dev
+```
+
+Build and run:
+
+```bash
 chmod +x build.sh
 ./build.sh
 ```
+
+### VSCode Development
+
+For the best development experience, we recommend using Visual Studio Code with the Flatpak extension:
+
+1. Install the [Flatpak VSCode Extension](https://marketplace.visualstudio.com/items?itemName=bilelmoussaoui.flatpak-vscode)
+2. Open the project in VSCode
+3. Use the extension's build and run commands
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to your branch
+5. Create a Pull Request
+
+## License
+
+This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+- [GTK Team](https://gtk.org/) for the amazing GUI toolkit
+- [Reddit API](https://www.reddit.com/dev/api/) documentation
