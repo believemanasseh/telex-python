@@ -27,7 +27,7 @@ Install system dependencies:
 
 ```bash
 # Ubuntu/Debian
-sudo apt install libgtk-4-dev libgtk-4.0 gir1.2-gtk-4.0 libadwaita-1-dev
+sudo apt install libgtk-4-dev libgtk-4-1 gir1.2-gtk-4.0 libadwaita-1-dev
 
 # Fedora
 sudo dnf install gtk4-devel gobject-introspection gir1.2-gtk-4.0 libadwaita-devel
