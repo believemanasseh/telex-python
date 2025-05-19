@@ -5,7 +5,7 @@
 ![GTK](https://img.shields.io/badge/gtk-4.0-green.svg)
 ![Platform](https://img.shields.io/badge/platform-Linux%20|%20Windows%20|%20macOS-lightgrey.svg)
 
-A modern, native Reddit client built with GTK4, Libadwaita and Python. Telex provides a clean, fast, and feature-rich interface for browsing Reddit on Linux, Windows, and macOS.
+A modern, native Reddit client built with GTK4, LibAdwaita and Python. Telex provides a clean, fast, and feature-rich interface for browsing Reddit on Linux, Windows, and macOS.
 
 ## Features
 
@@ -27,13 +27,13 @@ Install system dependencies:
 
 ```bash
 # Ubuntu/Debian
-sudo apt install libgtk-4-dev libgtk-4-1 gir1.2-gtk-4.0 libadwaita-1-dev
+sudo apt install libgirepository-2.0-dev gcc libcairo2-dev pkg-config python3-dev gir1.2-gtk-4.0 libadwaita-1-dev
 
 # Fedora
-sudo dnf install gtk4-devel gobject-introspection gir1.2-gtk-4.0 libadwaita-devel
+sudo dnf install gcc gobject-introspection-devel cairo-gobject-devel pkg-config python3-devel gtk4 libadwaita-devel
 
 # Arch Linux
-sudo pacman -S gtk4 gobject-introspection gir1.2-gtk-4.0 libadwaita
+sudo pacman -S python cairo pkgconf gobject-introspection gtk4 libadwaita
 ```
 
 Clone the repository:
