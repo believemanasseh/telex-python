@@ -30,96 +30,97 @@ from windows.auth import AuthWindow
 
 
 class Telex(Adw.Application):
-    """The main application singleton class."""
+	"""The main application singleton class."""
 
-    def __init__(self) -> None:
-        """Initialises application and signal handlers."""
-        super().__init__(
-            application_id="xyz.daimones.Telex",
-            flags=Gio.ApplicationFlags.FLAGS_NONE,
-        )
-        self.create_action("quit", self.on_quit_action, ["<primary>q"])
-        self.create_action("about", self.on_about_action)
+	def __init__(self) -> None:
+		"""Initialises application and signal handlers."""
+		super().__init__(
+			application_id="xyz.daimones.Telex",
+			flags=Gio.ApplicationFlags.FLAGS_NONE,
+		)
+		self.create_action("quit", self.on_quit_action, ["<primary>q"])
+		self.create_action("about", self.on_about_action)
 
-    def do_activate(self):
-        """Called when the application is activated.
+	def do_activate(self):
+		"""Called when the application is activated.
 
-        We raise the application's main window, creating it if
-        necessary.
+		We raise the application's main window, creating it if
+		necessary.
 
-        Returns:
-            None: This method does not return a value.
-        """
-        win = self.props.active_window
-        if not win:
-            win = AuthWindow(application=self)
-        win.present()
+		Returns:
+		    None: This method does not return a value.
+		"""
+		win = self.props.active_window
+		if not win:
+			win = AuthWindow(application=self)
+		win.present()
 
-    def on_quit_action(self, _action, _param) -> None:
-        """Callback for app.quit action.
+	def on_quit_action(self, _action, _param) -> None:
+		"""Callback for app.quit action.
 
-        Called when the quit action is triggered through the UI or keyboard shortcut.
+		Called when the quit action is triggered through the UI or keyboard shortcut.
 
-        Args:
-            _action: The Gio.SimpleAction that was activated
-            _param: Parameter passed to the action (None in this case)
+		Args:
+		    _action: The Gio.SimpleAction that was activated
+		    _param: Parameter passed to the action (None in this case)
 
-        Returns:
-            None: This method does not return a value.
-        """
-        self.quit()
+		Returns:
+		    None: This method does not return a value.
+		"""
+		self.quit()
 
-    def on_about_action(self, _action, _param) -> None:
-        """Callback for the app.about action.
+	def on_about_action(self, _action, _param) -> None:
+		"""Callback for the app.about action.
 
-        Creates and displays the application's about dialog.
+		Creates and displays the application's about dialog.
 
-        Args:
-            _action: The Gio.SimpleAction that was activated
-            _param: Parameter passed to the action (None in this case)
+		Args:
+		    _action: The Gio.SimpleAction that was activated
+		    _param: Parameter passed to the action (None in this case)
 
-        Returns:
-            None: This method does not return a value.
-        """
-        about = Gtk.AboutDialog(version="1.0", authors=["Believe Manasseh"])
-        about.present()
+		Returns:
+		    None: This method does not return a value.
+		"""
+		about = Gtk.AboutDialog(version="1.0", authors=["Illucid Mind"])
+		about.present()
 
-    def create_action(
-        self,
-        name: str,
-        callback: Callable[[Any, Any], None],
-        shortcuts: list | None = None,
-    ) -> None:
-        """Add an application action.
+	def create_action(
+		self,
+		name: str,
+		callback: Callable[[Any, Any], None],
+		shortcuts: list | None = None,
+	) -> None:
+		"""Add an application action.
 
-        Creates a new Gio.SimpleAction, connects it to a callback function,
-        and adds it to the application with optional keyboard shortcuts.
+		Creates a new Gio.SimpleAction, connects it to a callback function,
+		and adds it to the application with optional keyboard shortcuts.
 
-        Args:
-            name: The name of the action
-            callback: The function to be called when the action is activated
-            shortcuts: Optional list of keyboard accelerators (e.g. ["<primary>q"])
+		Args:
+		    name: The name of the action
+		    callback: The function to be called when the action is activated
+		    shortcuts: Optional list of keyboard accelerators (e.g. ["<primary>q"])
 
-        Returns:
-            None: This method does not return a value.
-        """
-        action = Gio.SimpleAction.new(name, None)
-        action.connect("activate", callback)
-        self.add_action(action)
-        if shortcuts:
-            self.set_accels_for_action(f"app.{name}", shortcuts)
+		Returns:
+		    None: This method does not return a value.
+		"""
+		action = Gio.SimpleAction.new(name, None)
+		action.connect("activate", callback)
+		self.add_action(action)
+		if shortcuts:
+			self.set_accels_for_action(f"app.{name}", shortcuts)
 
 
-def main(_version) -> int:
-    """The application's entry point.
+def main() -> int:
+	"""The application's entry point.
 
-    Creates and runs the main Telex application.
+	Creates and runs the main Telex application.
 
-    Args:
-        _version: The application version (unused)
+	Returns:
+	    int: The application exit code
+	"""
+	app = Telex()
+	return app.run(sys.argv)
 
-    Returns:
-        int: The application exit code
-    """
-    app = Telex()
-    return app.run(sys.argv)
+
+if __name__ == "__main__":
+	main()

@@ -25,9 +25,11 @@ gi.require_versions({"Adw": "1", "Gtk": "4.0"})
 from gi.repository import Adw, Gtk
 
 from services import Reddit
+from utils import _
 from utils.common import add_style_context, load_css, load_image
 from utils.constants import SortType
 
+from . import _
 from .auth import AuthWindow
 from .home import HomeWindow
 
@@ -81,7 +83,7 @@ class TitlebarController:
 		# Left─side |reload|
 		self.start_box = Gtk.Box(halign=True, orientation=Gtk.Orientation.HORIZONTAL)
 		reload_btn = Gtk.Button(
-			icon_name="xyz.daimones.Telex.reload", tooltip_text="Reload"
+			icon_name="xyz.daimones.Telex.reload", tooltip_text=_("Reload")
 		)
 		reload_btn.connect("clicked", self.__on_reload_clicked)
 		self.start_box.append(reload_btn)
@@ -96,14 +98,14 @@ class TitlebarController:
 		self.end_box.append(
 			Gtk.MenuButton(
 				child=menu_btn_child,
-				tooltip_text="Sort posts",
+				tooltip_text=_("Sort posts"),
 				popover=Gtk.Popover(child=popover_child),
 			)
 		)
 
 		# Search
 		self.end_box.append(
-			Gtk.Button(icon_name="xyz.daimones.Telex.search", tooltip_text="Search")
+			Gtk.Button(icon_name="xyz.daimones.Telex.search", tooltip_text=_("Search"))
 		)
 
 		# Profile popover
@@ -111,7 +113,7 @@ class TitlebarController:
 		self.end_box.append(
 			Gtk.MenuButton(
 				icon_name="xyz.daimones.Telex.profile",
-				tooltip_text="Profile",
+				tooltip_text=_("Profile"),
 				popover=Gtk.Popover(child=popover_child),
 			)
 		)
@@ -122,7 +124,7 @@ class TitlebarController:
 		"""Inserts a single back-arrow button at the left of the header."""
 		self.back_btn = Gtk.Button(
 			icon_name="xyz.daimones.Telex.arrow-pointing-left",
-			tooltip_text="Back to Home",
+			tooltip_text=_("Back to Home"),
 		)
 		self.back_btn.connect("clicked", self.__on_back_clicked)
 		self.header_bar.pack_start(self.back_btn)
@@ -147,7 +149,7 @@ class TitlebarController:
 
 		user_profile_img = load_image(
 			"/assets/images/reddit-placeholder.png",
-			"placeholder",
+			_("placeholder"),
 			css_classes=["user-profile-img"],
 		)
 		add_style_context(user_profile_img, self.css_provider)
@@ -160,18 +162,18 @@ class TitlebarController:
 		)
 		display_name = self.user_data["json"]["subreddit"]["display_name_prefixed"]
 		total_karma = self.user_data["json"]["total_karma"]
-		box.append(Gtk.Label(label=display_name, halign=Gtk.Align.START))
-		box.append(Gtk.Label(label=f"{total_karma} karma", halign=Gtk.Align.START))
+		box.append(Gtk.Label(label=_("%s") % display_name, halign=Gtk.Align.START))
+		box.append(Gtk.Label(label=_("%d karma") % total_karma, halign=Gtk.Align.START))
 		grid.attach(box, 1, 0, 1, 1)
 
 		popover_child.append(grid)
 
 		menu_labels = [
-			"View Profile",
-			"Subreddits",
-			"Settings",
-			"About",
-			"Log Out",
+			_("View Profile"),
+			_("Subreddits"),
+			_("Settings"),
+			_("About"),
+			_("Log Out"),
 		]
 		for label in menu_labels:
 			if "Log" in label:
@@ -206,7 +208,7 @@ class TitlebarController:
 		best_check_btn = Gtk.CheckButton(
 			active=active,
 			name=str(SortType.BEST.value),
-			label=store.post_sort_type[SortType.BEST.value],
+			label=_("%s") % store.post_sort_type[SortType.BEST.value],
 		)
 		best_check_btn.connect("toggled", self.__on_check_btn_toggled)
 
@@ -214,7 +216,7 @@ class TitlebarController:
 		new_check_btn = Gtk.CheckButton(
 			active=active,
 			name=str(SortType.NEW.value),
-			label=store.post_sort_type[SortType.NEW.value],
+			label=_("%s") % store.post_sort_type[SortType.NEW.value],
 		)
 		new_check_btn.set_group(best_check_btn)
 		new_check_btn.connect("toggled", self.__on_check_btn_toggled)
@@ -223,7 +225,7 @@ class TitlebarController:
 		hot_check_btn = Gtk.CheckButton(
 			active=active,
 			name=str(SortType.HOT.value),
-			label=store.post_sort_type[SortType.HOT.value],
+			label=_("%s") % store.post_sort_type[SortType.HOT.value],
 		)
 		hot_check_btn.set_group(best_check_btn)
 		hot_check_btn.connect("toggled", self.__on_check_btn_toggled)
@@ -232,7 +234,7 @@ class TitlebarController:
 		top_check_btn = Gtk.CheckButton(
 			active=active,
 			name=str(SortType.TOP.value),
-			label=store.post_sort_type[SortType.TOP.value],
+			label=_("%s") % store.post_sort_type[SortType.TOP.value],
 		)
 		top_check_btn.set_group(hot_check_btn)
 		top_check_btn.connect("toggled", self.__on_check_btn_toggled)
@@ -241,7 +243,7 @@ class TitlebarController:
 		rising_check_btn = Gtk.CheckButton(
 			active=active,
 			name=str(SortType.RISING.value),
-			label=store.post_sort_type[SortType.RISING.value],
+			label=_("%s") % store.post_sort_type[SortType.RISING.value],
 		)
 		rising_check_btn.set_group(top_check_btn)
 		rising_check_btn.connect("toggled", self.__on_check_btn_toggled)
@@ -275,7 +277,7 @@ class TitlebarController:
 		grid.insert_column(1)
 
 		label = Gtk.Label(
-			label=store.post_sort_type[store.current_sort],
+			label=_("%s") % store.post_sort_type[store.current_sort],
 			css_classes=["menu-btn-label"],
 		)
 		grid.attach(label, 0, 0, 1, 1)

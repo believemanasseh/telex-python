@@ -29,6 +29,7 @@ from datetime import UTC, datetime
 
 from gi.repository import Gdk, GdkPixbuf, Gtk
 
+from . import _
 from .constants import Seconds
 
 
@@ -58,7 +59,7 @@ def load_image(
 	"""
 	abspath = os.path.abspath(__file__)
 	post_image = Gtk.Picture(
-		alternative_text=alt_text, can_shrink=can_shrink, valign=valign
+		alternative_text=_("%s") % alt_text, can_shrink=can_shrink, valign=valign
 	).new_for_filename(abspath[: len(abspath) - 16] + img_path)
 
 	if css_classes:
@@ -196,7 +197,7 @@ def create_image_widget(pixbuf: GdkPixbuf.Pixbuf | None = None) -> None:
 
 	# Creates placeholder image
 	abspath = os.path.abspath(__file__)
-	Gtk.Picture(alternative_text="placeholder img").new_for_filename(
+	Gtk.Picture(alternative_text=_("placeholder img")).new_for_filename(
 		abspath[: len(abspath) - 16] + "/assets/images/placeholder.jpg"
 	)
 
@@ -220,20 +221,22 @@ def get_submission_time(utc_timestamp: int) -> str:
 
 	# Determine the scale -- minutes, hours, days, or weeks
 	if total_seconds < Seconds.MINUTE:
-		return "Less than a minute ago"
+		return _("Less than a minute ago")
 
 	if total_seconds < Seconds.HOUR:  # 60 seconds * 60 minutes
 		minutes = int(total_seconds // Seconds.MINUTE)
-		return f"{minutes} minute{'s' if minutes > 1 else ''} ago"
+		return _("{minutes} minute{s} ago").format(
+			minutes=minutes, s="s" if minutes > 1 else ""
+		)
 
 	if total_seconds < Seconds.DAY:  # 3600 seconds * 24 hours
 		hours = int(total_seconds // Seconds.HOUR)
-		return f"{hours} hour{'s' if hours > 1 else ''} ago"
+		return _("{hours} hour{s} ago").format(hours=hours, s="s" if hours > 1 else "")
 
 	if total_seconds < Seconds.WEEK:  # 86400 seconds * 7 days
 		days = int(total_seconds // Seconds.DAY)
-		return f"{days} day{'s' if days > 1 else ''} ago"
+		return _("{days} day{s} ago").format(days=days, s="s" if days > 1 else "")
 
 	weeks = int(total_seconds // Seconds.WEEK)
 
-	return f"{weeks} week{'s' if weeks > 1 else ''} ago"
+	return _("{weeks} week{s} ago").format(weeks=weeks, s="s" if weeks > 1 else "")

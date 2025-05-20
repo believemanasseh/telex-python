@@ -15,7 +15,6 @@ Classes:
     AuthWindow: Main window class implementing the authentication flow
 """
 
-import os
 from http import HTTPStatus
 
 import gi
@@ -25,6 +24,8 @@ gi.require_versions({"Adw": "1", "Gtk": "4.0", "WebKit": "6.0"})
 from gi.repository import Adw, Gtk, WebKit
 
 from services import AWSClient, Reddit
+from settings import app_settings
+from utils import _
 from utils.common import add_style_context, load_css
 
 
@@ -79,7 +80,7 @@ class AuthWindow(Gtk.ApplicationWindow):
 			application=application,
 			default_height=600,
 			default_width=600,
-			title="Telex",
+			title=_("Telex"),
 			titlebar=self.header_bar,
 			icon_name="reddit-icon",
 			**kwargs,
@@ -95,7 +96,7 @@ class AuthWindow(Gtk.ApplicationWindow):
 		)
 		self.set_child(self.box)
 		self.reddit_btn = Gtk.Button(
-			label="Continue with Reddit",
+			label=_("Continue with Reddit"),
 			name="reddit-btn",
 			css_classes=["reddit-btn"],
 			width_request=200,
@@ -173,14 +174,14 @@ class AuthWindow(Gtk.ApplicationWindow):
 		)
 		self.dialog.connect("close-request", self.__on_close_webview)
 
-		uri = WebKit.URIRequest(uri=os.getenv("AUTHORISATION_URL", ""))
-		settings = WebKit.Settings(
+		uri = WebKit.URIRequest(uri=app_settings.AUTHORISATION_URL)
+		webkit_settings = WebKit.Settings(
 			allow_modal_dialogs=True,
 			enable_fullscreen=False,
 			enable_javascript=True,
 			enable_media=True,
 		)
-		web_view = WebKit.WebView(visible=True, settings=settings)
+		web_view = WebKit.WebView(visible=True, settings=webkit_settings)
 		web_view.connect("load-changed", self.__on_load_changed)
 		web_view.load_request(uri)
 		self.box.set_opacity(0.5)

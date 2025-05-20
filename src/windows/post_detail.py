@@ -24,8 +24,11 @@ gi.require_versions({"Gtk": "4.0", "Adw": "1"})
 from gi.repository import Adw, Gtk
 
 from services import Reddit
+from utils import _
 from utils.common import add_style_contexts, get_submission_time, load_css, load_image
 from windows.home import HomeWindow
+
+from . import _
 
 
 class PostDetailWindow(Gtk.ApplicationWindow):
@@ -148,7 +151,7 @@ class PostDetailWindow(Gtk.ApplicationWindow):
 		# Add user avatar
 		avatar = load_image(
 			"/assets/images/reddit-placeholder.png",
-			"User avatar",
+			_("User avatar"),
 			css_classes=["comment-avatar"],
 			css_provider=self.css_provider,
 		)
@@ -156,7 +159,7 @@ class PostDetailWindow(Gtk.ApplicationWindow):
 
 		# Add author name
 		author_label = Gtk.Label(
-			label=author,
+			label=_("%s") % author,
 			halign=Gtk.Align.START,
 			css_classes=["comment-author"],
 		)
@@ -164,7 +167,7 @@ class PostDetailWindow(Gtk.ApplicationWindow):
 
 		# Add score
 		score_label = Gtk.Label(
-			label=f"· {score} points",
+			label=_("· %d points") % score,
 			halign=Gtk.Align.START,
 			css_classes=["comment-score"],
 		)
@@ -172,7 +175,7 @@ class PostDetailWindow(Gtk.ApplicationWindow):
 
 		# Add body text
 		body_label = Gtk.Label(
-			label=body,
+			label=_("%s") % body,
 			halign=Gtk.Align.START,
 			max_width_chars=160,
 			wrap=True,
@@ -190,7 +193,7 @@ class PostDetailWindow(Gtk.ApplicationWindow):
 
 		# Add reply button
 		reply_button = Gtk.Button(
-			label="Reply",
+			label=_("Reply"),
 			css_classes=["comment-action-button"],
 		)
 		actions_box.append(reply_button)

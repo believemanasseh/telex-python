@@ -23,6 +23,7 @@ gi.require_versions({"Gtk": "4.0", "Adw": "1", "Pango": "1.0"})
 from gi.repository import Adw, Gtk, Pango
 
 from services import Reddit
+from utils import _
 from utils.common import (
 	add_style_context,
 	add_style_contexts,
@@ -129,7 +130,7 @@ class HomeWindow(Gtk.ApplicationWindow):
 
 		post_image = load_image(
 			"/assets/images/reddit-placeholder.png",
-			"Reddit placeholder",
+			_("Reddit placeholder"),
 			css_classes=["post-image"],
 			css_provider=self.css_provider,
 		)
@@ -157,7 +158,7 @@ class HomeWindow(Gtk.ApplicationWindow):
 		upvote_btn = Gtk.Button(icon_name="xyz.daimones.Telex.upvote")
 		box.append(upvote_btn)
 
-		score_count = Gtk.Label(label=f"{score}", css_classes=["score-count"])
+		score_count = Gtk.Label(label=_("%d") % score, css_classes=["score-count"])
 		add_style_context(score_count, self.css_provider)
 		box.append(score_count)
 
@@ -198,7 +199,7 @@ class HomeWindow(Gtk.ApplicationWindow):
 		add_style_context(post_metadata_box, self.css_provider)
 
 		post_title = Gtk.Label(
-			label=title,
+			label=_("%s") % title,
 			css_classes=["post-title"],
 			wrap=True,
 			hexpand=True,
@@ -211,25 +212,25 @@ class HomeWindow(Gtk.ApplicationWindow):
 		post_metadata_box.append(post_title)
 		post_box = Gtk.Box(margin_top=5, orientation=Gtk.Orientation.HORIZONTAL)
 		post_time = Gtk.Label(
-			label=f"submitted {submission_time} by ",
+			label=_("submitted %s by ") % submission_time,
 			css_classes=["post-metadata"],
 			halign=Gtk.Align.START,
 			margin_top=5,
 		)
 
 		post_user = Gtk.Label(
-			label=f"{user} ",
+			label=_("%s ") % user,
 			css_classes=["post-user"],
 			cursor=self.cursor,
 			margin_top=5,
 		)
 		add_style_context(post_user, self.css_provider)
 
-		post_text = Gtk.Label(label="to ", css_classes=["post-metadata"], margin_top=5)
+		post_text = Gtk.Label(label=_("to "), css_classes=["post-metadata"], margin_top=5)
 		add_style_contexts([post_time, post_text], self.css_provider)
 
 		post_subreddit = Gtk.Label(
-			label=subreddit_name,
+			label=_("%s") % subreddit_name,
 			css_classes=["post-subreddit"],
 			cursor=self.cursor,
 			margin_top=5,
@@ -265,12 +266,12 @@ class HomeWindow(Gtk.ApplicationWindow):
 		)
 
 		labels = [
-			f"{num_of_comments} comment{'s' if num_of_comments > 1 else ''} ",
-			"share ",
-			"save ",
-			"hide ",
-			"report ",
-			"crosspost ",
+			_("%d comment%s ") % (num_of_comments, "s" if num_of_comments > 1 else ""),
+			_("share "),
+			_("save "),
+			_("hide "),
+			_("report "),
+			_("crosspost "),
 		]
 
 		for label in labels:
