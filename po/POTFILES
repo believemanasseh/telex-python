@@ -1,7 +1,5 @@
-data/xyz.daimones.Telex.desktop.in
-data/xyz.daimones.Telex.appdata.xml.in
-data/xyz.daimones.Telex.gschema.xml
 src/windows/home.py
-src/windows/onboarding.py
-src/app.py
-src/window.py
+src/windows/auth.py
+src/windows/post_detail.py
+src/windows/titlebar_controller.py
+src/utils/common.py
