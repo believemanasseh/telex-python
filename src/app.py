@@ -16,6 +16,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 SPDX-License-Identifier: GPL-3.0-or-later
 """
 
+import logging
 import sys
 from collections.abc import Callable
 from typing import Any
@@ -27,6 +28,12 @@ gi.require_versions({"Gtk": "4.0", "Adw": "1", "Gio": "2.0"})
 from gi.repository import Adw, Gio, Gtk
 
 from windows.auth import AuthWindow
+
+logging.basicConfig(
+	level=logging.INFO,
+	format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+	handlers=[logging.StreamHandler(sys.stdout), logging.FileHandler("telex.log")],
+)
 
 
 class Telex(Adw.Application):
@@ -110,17 +117,25 @@ class Telex(Adw.Application):
 			self.set_accels_for_action(f"app.{name}", shortcuts)
 
 
-def main() -> int:
+def main(_version) -> int:
 	"""The application's entry point.
 
 	Creates and runs the main Telex application.
 
+	Args:
+	    _version: The version of the application
+
 	Returns:
 	    int: The application exit code
 	"""
+	logging.info("Starting Telex application")
+	logging.info("Version: %s", _version)
+	logging.info("Python version: %s", sys.version)
+	logging.info("GTK version: %d.%d", Gtk.get_major_version(), Gtk.get_minor_version())
+	logging.info("PyGObject version: %s", gi.__version__)
 	app = Telex()
 	return app.run(sys.argv)
 
 
 if __name__ == "__main__":
-	main()
+	main("0.1.0")

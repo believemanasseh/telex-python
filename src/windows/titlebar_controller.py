@@ -29,7 +29,6 @@ from utils import _
 from utils.common import add_style_context, load_css, load_image
 from utils.constants import SortType
 
-from . import _
 from .auth import AuthWindow
 from .home import HomeWindow
 

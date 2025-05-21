@@ -15,6 +15,7 @@ Classes:
     AuthWindow: Main window class implementing the authentication flow
 """
 
+import logging
 from http import HTTPStatus
 
 import gi
@@ -27,6 +28,8 @@ from services import AWSClient, Reddit
 from settings import app_settings
 from utils import _
 from utils.common import add_style_context, load_css
+
+logger = logging.getLogger(__name__)
 
 
 class AuthWindow(Gtk.ApplicationWindow):
@@ -130,7 +133,7 @@ class AuthWindow(Gtk.ApplicationWindow):
 
 			if res["status_code"] == HTTPStatus.OK:
 				access_token = res["json"]["access_token"]
-				print(f"Access token: {access_token}")
+				logger.info("Access token: %s", access_token)
 				self.api.inject_token(access_token)
 				self.aws_client.create_secret("telex-access-token", access_token)
 

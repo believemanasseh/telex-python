@@ -33,3 +33,8 @@ build
 .env.local
 .env.development
 .env.production
+# Coverage
+.coverage
+
+# Logs
+*.log
