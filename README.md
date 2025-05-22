@@ -1,7 +1,7 @@
 # Telex
 
 ![License](https://img.shields.io/badge/license-GPL--3.0-blue.svg)
-![Python](https://img.shields.io/badge/python-3.11+-blue.svg)
+![Python](https://img.shields.io/badge/python-3.12+-blue.svg)
 ![GTK](https://img.shields.io/badge/gtk-4.0-green.svg)
 ![Platform](https://img.shields.io/badge/platform-Linux%20|%20Windows%20|%20macOS-lightgrey.svg)
 
