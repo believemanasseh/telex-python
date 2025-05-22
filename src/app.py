@@ -16,6 +16,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 SPDX-License-Identifier: GPL-3.0-or-later
 """
 
+import asyncio
 import logging
 import sys
 from collections.abc import Callable
@@ -25,9 +26,8 @@ import gi
 
 gi.require_versions({"Gtk": "4.0", "Adw": "1", "Gio": "2.0"})
 
+from gi.events import GLibEventLoopPolicy
 from gi.repository import Adw, Gio, Gtk
-
-from windows.auth import AuthWindow
 
 logging.basicConfig(
 	level=logging.INFO,
@@ -40,13 +40,26 @@ class Telex(Adw.Application):
 	"""The main application singleton class."""
 
 	def __init__(self) -> None:
-		"""Initialises application and signal handlers."""
+		"""Initialises application and signal handlers.
+
+		Creates the main application instance, sets up the GLib event loop
+		policy, and registers application actions. The application is
+		designed to be a singleton, ensuring only one instance runs at a time.
+
+		Attributes:
+		    loop (asyncio.AbstractEventLoop): The event loop for the application
+		"""
 		super().__init__(
 			application_id="xyz.daimones.Telex",
 			flags=Gio.ApplicationFlags.FLAGS_NONE,
 		)
 		self.create_action("quit", self.on_quit_action, ["<primary>q"])
 		self.create_action("about", self.on_about_action)
+
+		logging.info("Setting GLib event loop policy")
+		policy = GLibEventLoopPolicy()
+		asyncio.set_event_loop_policy(policy)
+		self.loop = policy.get_event_loop()
 
 	def do_activate(self):
 		"""Called when the application is activated.
@@ -59,6 +72,8 @@ class Telex(Adw.Application):
 		"""
 		win = self.props.active_window
 		if not win:
+			from windows.auth import AuthWindow
+
 			win = AuthWindow(application=self)
 		win.present()
 
@@ -117,22 +132,23 @@ class Telex(Adw.Application):
 			self.set_accels_for_action(f"app.{name}", shortcuts)
 
 
-def main(_version) -> int:
+def main(version) -> int:
 	"""The application's entry point.
 
 	Creates and runs the main Telex application.
 
 	Args:
-	    _version: The version of the application
+	    version: The version of the application
 
 	Returns:
 	    int: The application exit code
 	"""
 	logging.info("Starting Telex application")
-	logging.info("Version: %s", _version)
+	logging.info("Version: %s", version)
 	logging.info("Python version: %s", sys.version)
 	logging.info("GTK version: %d.%d", Gtk.get_major_version(), Gtk.get_minor_version())
 	logging.info("PyGObject version: %s", gi.__version__)
+
 	app = Telex()
 	return app.run(sys.argv)
 

@@ -13,7 +13,7 @@ The module maintains the header bar state and provides smooth transitions
 between different views while keeping a consistent user interface.
 
 Classes:
-    TitlebarController: Main class managing header bar content and behavior
+	TitlebarController: Main class managing header bar content and behavior
 """
 
 import gi
@@ -49,18 +49,18 @@ class TitlebarController:
 		initializes the base state for managing header bar content.
 
 		Args:
-		    header_bar (Adw.HeaderBar): The application header bar to manage
-		    home_window (HomeWindow): Reference to the main application window
-		    api (Reddit): Reddit API service for data operations
+			header_bar (Adw.HeaderBar): The application header bar to manage
+			home_window (HomeWindow): Reference to the main application window
+			api (Reddit): Reddit API service for data operations
 
 		Attributes:
-		    header_bar (Adw.HeaderBar): Main header bar widget
-		    api (Reddit): Reddit API service instance
-		    home_window (HomeWindow): Reference to main window
-		    css_provider (Gtk.CssProvider): Styling provider
-		    start_box (Gtk.Box): Left-side header container
-		    end_box (Gtk.Box): Right-side header container
-		    back_btn (Gtk.Button): Navigation back button
+			header_bar (Adw.HeaderBar): Main header bar widget
+			api (Reddit): Reddit API service instance
+			home_window (HomeWindow): Reference to main window
+			css_provider (Gtk.CssProvider): Styling provider
+			start_box (Gtk.Box): Left-side header container
+			end_box (Gtk.Box): Right-side header container
+			back_btn (Gtk.Button): Navigation back button
 			user_data (dict): User profile data retrieved from Reddit API
 		"""
 		self.header_bar = header_bar
@@ -70,7 +70,21 @@ class TitlebarController:
 		self.start_box: Gtk.Box | None = None
 		self.end_box: Gtk.Box | None = None
 		self.back_btn: Gtk.Button | None = None
-		self.user_data = self.api.retrieve_user_details()
+		self.user_data = None
+
+		self.home_window.application.loop.create_task(self.retrieve_user_data())
+
+	async def retrieve_user_data(self) -> dict:
+		"""Fetches user profile data from Reddit API.
+
+		Retrieves the current user's profile information including
+		display name and karma points. This data is used to populate
+		the profile menu in the header bar.
+
+		Returns:
+			dict: User profile data retrieved from Reddit API
+		"""
+		self.user_data = await self.api.retrieve_user_details()
 
 	def setup_titlebar(self) -> None:
 		"""Customises the application headerbar.
@@ -137,7 +151,7 @@ class TitlebarController:
 		About, Log Out) for the profile popover menu.
 
 		Returns:
-		    Gtk.Box: Container with profile info and menu options
+			Gtk.Box: Container with profile info and menu options
 		"""
 		popover_child = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
 
@@ -199,7 +213,7 @@ class TitlebarController:
 		sort order.
 
 		Returns:
-		    Gtk.Box: Container with post sorting options as radio buttons
+			Gtk.Box: Container with post sorting options as radio buttons
 		"""
 		popover_child = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
 
@@ -262,7 +276,7 @@ class TitlebarController:
 		current sort type and a dropdown icon to indicate it's expandable.
 
 		Returns:
-		    Gtk.Box: Container with sort button label and dropdown icon
+			Gtk.Box: Container with sort button label and dropdown icon
 		"""
 		menu_btn_child = Gtk.Box(
 			orientation=Gtk.Orientation.VERTICAL,
@@ -297,13 +311,14 @@ class TitlebarController:
 		and re-rendering the page with the updated content.
 
 		Args:
-		    _widget (Gtk.Button): The reload button that was clicked
+			_widget (Gtk.Button): The reload button that was clicked
 
 		Returns:
-		    None: This method does not return a value.
+			None: This method does not return a value.
 		"""
-		self.home_window.reload_data()
-		self.home_window.render_page(setup_titlebar=False)
+		self.home_window.application.loop.create_task(
+			self.home_window.render_page(setup_titlebar=False)
+		)
 
 	def __on_check_btn_toggled(self, widget: Gtk.CheckButton) -> None:
 		"""Handles radio button click events for sorting options.
@@ -312,10 +327,10 @@ class TitlebarController:
 		and reloads the page with the new sorting option.
 
 		Args:
-		    widget (Gtk.CheckButton): The radio button that was clicked
+			widget (Gtk.CheckButton): The radio button that was clicked
 
 		Returns:
-		    None: This method does not return a value.
+			None: This method does not return a value.
 		"""
 		if widget.get_active():
 			store.current_sort = int(widget.get_name())
@@ -331,10 +346,10 @@ class TitlebarController:
 		and clearing the current post detail view.
 
 		Args:
-		    button (Gtk.Button): The button that triggered the event
+			button (Gtk.Button): The button that triggered the event
 
 		Returns:
-		    None: This method does not return a value.
+			None: This method does not return a value.
 		"""
 		# Remove the back button from header bar
 		self.header_bar.remove(self.back_btn)
@@ -344,7 +359,9 @@ class TitlebarController:
 			self.home_window.scrolled_window.set_child(None)
 
 		# Restore home window components
-		self.home_window.render_page(setup_titlebar=False)
+		self.home_window.application.loop.create_task(
+			self.home_window.render_page(setup_titlebar=False)
+		)
 
 	def __on_logout_clicked(self, _button: Gtk.Button) -> None:
 		"""Handles logout button click events.

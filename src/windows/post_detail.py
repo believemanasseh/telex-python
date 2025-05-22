@@ -23,12 +23,11 @@ gi.require_versions({"Gtk": "4.0", "Adw": "1"})
 
 from gi.repository import Adw, Gtk
 
+from app import Telex
 from services import Reddit
 from utils import _
 from utils.common import add_style_contexts, get_submission_time, load_css, load_image
 from windows.home import HomeWindow
-
-from . import _
 
 
 class PostDetailWindow(Gtk.ApplicationWindow):
@@ -51,7 +50,7 @@ class PostDetailWindow(Gtk.ApplicationWindow):
 
 	def __init__(
 		self,
-		application: Adw.Application,
+		application: Telex,
 		base_window: HomeWindow,
 		api: Reddit,
 		post_id: str,
@@ -67,17 +66,19 @@ class PostDetailWindow(Gtk.ApplicationWindow):
 
 		Attributes:
 		    base (HomeWindow): Reference to parent window
+			api (Reddit): Reddit API instance for data operations
+			application (Adw.Application): The parent GTK application
 		    css_provider: CSS styles provider for the window
-		    data: Post data fetched from Reddit
+			post_id (str): Unique identifier for the Reddit post
 		    box (Gtk.Box): Vertical container for post content
 		    clamp (Adw.Clamp): Width constraint container
-		    back_button (Gtk.Button): Navigation button to return to home view
 		"""
 		super().__init__(application=application)
 		self.base = base_window
 		self.api = api
+		self.application = application
 		self.css_provider = load_css("/assets/styles/post_detail.css")
-		self.data = self.fetch_data(post_id)
+		self.post_id = post_id
 		self.box = Gtk.Box(
 			css_classes=["box"],
 			orientation=Gtk.Orientation.VERTICAL,
@@ -88,7 +89,7 @@ class PostDetailWindow(Gtk.ApplicationWindow):
 
 		self.base.titlebar_controller.add_back_button()
 
-	def fetch_data(self, post_id: str) -> dict[str, int | dict] | None:
+	async def fetch_data(self, post_id: str) -> dict[str, int | dict]:
 		"""Retrieves post details and comments from Reddit API.
 
 		Calls the Reddit API to get the complete post data and its comment tree
@@ -98,10 +99,9 @@ class PostDetailWindow(Gtk.ApplicationWindow):
 		    post_id (str): Unique identifier for the Reddit post
 
 		Returns:
-		    dict[str, int | dict] | None: Post and comments data dictionary
-		                                  or None if not found
+		    dict[str, int | dict]: Post and comments data dictionary
 		"""
-		return self.api.retrieve_comments(post_id)
+		return await self.api.retrieve_comments(post_id)
 
 	def __load_comments(
 		self, parent_box: Gtk.Box, comment_data: dict, nesting_level: int = 0
@@ -231,7 +231,7 @@ class PostDetailWindow(Gtk.ApplicationWindow):
 			for reply in children:
 				self.__load_comments(parent_box, reply, nesting_level + 1)
 
-	def render_page(self):
+	async def render_page(self):
 		"""Renders the post detail page with post content and comments.
 
 		Builds the complete UI for the post detail view including:
@@ -242,12 +242,15 @@ class PostDetailWindow(Gtk.ApplicationWindow):
 		This method sets up the viewport and makes the content visible in the
 		scrolled window from the base HomeWindow instance.
 		"""
-		post_data = self.data["json"][0]["data"]["children"][0]
+		data = await self.fetch_data(self.post_id)
+		post_data = data["json"][0]["data"]["children"][0]
 
 		post_container = Gtk.Box(
 			css_classes=["post-container"],
 			orientation=Gtk.Orientation.HORIZONTAL,
 			spacing=10,
+			width_request=1000,
+			visible=True,
 		)
 
 		self.box.append(post_container)
@@ -270,7 +273,6 @@ class PostDetailWindow(Gtk.ApplicationWindow):
 
 		self.base.viewport.set_child(self.clamp)
 		self.base.scrolled_window.set_child(self.base.viewport)
-		self.base.scrolled_window.set_child_visible(True)
 
 		# Create a comments section header
 		comments_header = Gtk.Label(
@@ -289,11 +291,12 @@ class PostDetailWindow(Gtk.ApplicationWindow):
 			spacing=10,
 			valign=Gtk.Align.START,
 			halign=Gtk.Align.CENTER,
+			width_request=1000,
 		)
 		self.box.append(comments_container)
 		add_style_contexts([comments_header, comments_container], self.css_provider)
 
 		# Load comments
-		comments_data = self.data["json"][1]["data"]["children"]
+		comments_data = data["json"][1]["data"]["children"]
 		for comment in comments_data:
 			self.__load_comments(comments_container, comment, 0)

@@ -22,6 +22,7 @@ gi.require_versions({"Gtk": "4.0", "Adw": "1", "Pango": "1.0"})
 
 from gi.repository import Adw, Gtk, Pango
 
+from app import Telex
 from services import Reddit
 from utils import _
 from utils.common import (
@@ -55,9 +56,7 @@ class HomeWindow(Gtk.ApplicationWindow):
 		viewport (Gtk.Viewport): Viewport containing the posts
 	"""
 
-	def __init__(
-		self, application: Adw.Application, base_window: AuthWindow, api: Reddit
-	):
+	def __init__(self, application: Telex, base_window: AuthWindow, api: Reddit):
 		"""Initialise the Home window with base window and Reddit API.
 
 		This constructor sets up the home window by maximizing the base application window
@@ -89,11 +88,7 @@ class HomeWindow(Gtk.ApplicationWindow):
 			header_bar=self.base.header_bar, home_window=self, api=self.api
 		)
 
-		# Fetches data from Reddit
-		category = store.post_sort_type[store.current_sort].lower()
-		self.data = self.fetch_data(category)
-
-	def fetch_data(self, category: str) -> dict[str, int | dict] | None:
+	async def fetch_data(self, category: str) -> dict[str, int | dict] | None:
 		"""Retrieves post listings from Reddit API.
 
 		Args:
@@ -102,16 +97,16 @@ class HomeWindow(Gtk.ApplicationWindow):
 		Returns:
 			dict[str, int | dict] | None: Response containing status code and listing data
 		"""
-		return self.api.retrieve_listings(category)
+		return await self.api.retrieve_listings(category)
 
-	def reload_data(self) -> None:
+	async def reload_data(self) -> None:
 		"""Reloads the data from Reddit API.
 
 		This method fetches the latest posts from the Reddit API and updates
 		the displayed content in the home window.
 		"""
 		category = store.post_sort_type[store.current_sort].lower()
-		self.data = self.fetch_data(category)
+		self.data = await self.fetch_data(category)
 
 	def add_post_image(self) -> Gtk.Box:
 		"""Creates a container for a post thumbnail image.
@@ -312,16 +307,16 @@ class HomeWindow(Gtk.ApplicationWindow):
 
 		index = widget.get_name()
 		post_id = self.data["json"]["data"]["children"][int(index)]["data"]["id"]
-		self.scrolled_window.set_child_visible(False)
-		post_detail_window = PostDetailWindow(
+		self.scrolled_window.set_child(None)
+		post_detail = PostDetailWindow(
 			application=self.application,
 			base_window=self,
 			api=self.api,
 			post_id=post_id,
 		)
-		post_detail_window.render_page()
+		self.application.loop.create_task(post_detail.render_page())
 
-	def render_page(self, setup_titlebar: bool = True) -> None:
+	async def render_page(self, setup_titlebar: bool = True) -> None:
 		"""Creates the main layout for the homepage with a vertical box container.
 
 		Creates a scrollable page layout containing post containers. Each post
@@ -335,6 +330,8 @@ class HomeWindow(Gtk.ApplicationWindow):
 		Returns:
 			None: This method does not return a value.
 		"""
+		await self.reload_data()
+
 		if setup_titlebar:
 			self.titlebar_controller.setup_titlebar()
 

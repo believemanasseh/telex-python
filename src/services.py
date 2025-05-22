@@ -22,6 +22,7 @@ import base64
 import platform
 
 import boto3
+import httpx
 import requests
 from botocore.exceptions import ClientError
 
@@ -49,7 +50,7 @@ class Reddit:
 		"""
 		self.headers["Authorization"] = f"Bearer {token}"
 
-	def generate_access_token(self, code: str) -> dict[str, int | dict]:
+	async def generate_access_token(self, code: str) -> dict[str, int | dict]:
 		"""Generates access token from authorization code.
 
 		Args:
@@ -59,7 +60,7 @@ class Reddit:
 			dict[str, int | dict]: Response containing status code and token data
 
 		Raises:
-			requests.RequestException: If the request to Reddit API fails
+			httpx.RequestError: If the request to Reddit API fails
 		"""
 		try:
 			url = self.domain.format("www") + "/api/v1/access_token"
@@ -68,14 +69,14 @@ class Reddit:
 				"code": code,
 				"redirect_uri": "https://ab67-169-159-83-94.ngrok-free.app",
 			}
-			res = requests.post(url, data=data, headers=self.headers, timeout=30)
-		except requests.RequestException as e:
+			async with httpx.AsyncClient() as client:
+				res = await client.post(url, data=data, headers=self.headers, timeout=30)
+				return {"status_code": res.status_code, "json": res.json()}
+		except httpx.RequestError as e:
 			msg = "Failed to generate access token"
-			raise requests.RequestException(msg) from e
-		else:
-			return {"status_code": res.status_code, "json": res.json()}
+			raise httpx.RequestError(msg) from e
 
-	def retrieve_listings(self, category: str) -> dict[str, int | dict]:
+	async def retrieve_listings(self, category: str) -> dict[str, int | dict]:
 		"""Returns posts from specified category.
 
 		Args:
@@ -85,18 +86,18 @@ class Reddit:
 			dict[str, int | dict]: Response containing status code and listing data
 
 		Raises:
-			requests.RequestException: If the request to Reddit API fails
+			httpx.RequestError: If the request to Reddit API fails
 		"""
 		try:
 			url = self.domain.format("oauth") + f"/{category}"
-			res = requests.get(url, headers=self.headers, timeout=30)
-		except requests.RequestException as e:
+			async with httpx.AsyncClient() as client:
+				res = await client.get(url, headers=self.headers, timeout=30)
+				return {"status_code": res.status_code, "json": res.json()}
+		except httpx.RequestError as e:
 			msg = "Failed to retrieve listings"
-			raise requests.RequestException(msg) from e
-		else:
-			return {"status_code": res.status_code, "json": res.json()}
+			raise httpx.RequestError(msg) from e
 
-	def retrieve_user_details(self) -> dict[str, int | dict]:
+	async def retrieve_user_details(self) -> dict[str, int | dict]:
 		"""Returns user details.
 
 		Returns:
@@ -107,14 +108,14 @@ class Reddit:
 		"""
 		try:
 			url = self.domain.format("oauth") + "/api/v1/me"
-			res = requests.get(url, headers=self.headers, timeout=30)
+			async with httpx.AsyncClient() as client:
+				res = await client.get(url, headers=self.headers, timeout=30)
+				return {"status_code": res.status_code, "json": res.json()}
 		except requests.RequestException as e:
 			msg = "Failed to retrieve user details"
 			raise requests.RequestException(msg) from e
-		else:
-			return {"status_code": res.status_code, "json": res.json()}
 
-	def retrieve_comments(self, post_id: str) -> dict[str, int | dict]:
+	async def retrieve_comments(self, post_id: str) -> dict[str, int | dict]:
 		"""Returns all comments for post.
 
 		Args:
@@ -128,12 +129,12 @@ class Reddit:
 		"""
 		try:
 			url = self.domain.format("oauth") + f"/comments/{post_id}"
-			res = requests.get(url, headers=self.headers, timeout=30)
+			async with httpx.AsyncClient() as client:
+				res = await client.get(url, headers=self.headers, timeout=30)
+				return {"status_code": res.status_code, "json": res.json()}
 		except requests.RequestException as e:
 			msg = "Failed to retrieve comments"
 			raise requests.RequestException(msg) from e
-		else:
-			return {"status_code": res.status_code, "json": res.json()}
 
 
 class AWSClient:

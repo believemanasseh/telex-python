@@ -22,10 +22,11 @@ import gi
 
 gi.require_versions({"Adw": "1", "Gtk": "4.0", "WebKit": "6.0"})
 
+import os
+
 from gi.repository import Adw, Gtk, WebKit
 
 from services import AWSClient, Reddit
-from settings import app_settings
 from utils import _
 from utils.common import add_style_context, load_css
 
@@ -50,9 +51,11 @@ class AuthWindow(Gtk.ApplicationWindow):
 	    dialog (Gtk.MessageDialog): Dialog containing the WebView for OAuth
 	"""
 
+	from app import Telex
+
 	__gtype_name__ = "AuthWindow"
 
-	def __init__(self, application: Adw.Application, **kwargs) -> None:
+	def __init__(self, application: Telex, **kwargs) -> None:
 		"""Initialises the authentication window.
 
 		Creates the window with appropriate styling, sets up the header bar,
@@ -75,9 +78,7 @@ class AuthWindow(Gtk.ApplicationWindow):
 		self.application = application
 		self.css_provider = load_css("/assets/styles/auth.css")
 
-		self.header_bar = Adw.HeaderBar(
-			decoration_layout="close,maximize,minimize", show_back_button=True
-		)
+		self.header_bar = Adw.HeaderBar(show_back_button=True)
 
 		super().__init__(
 			application=application,
@@ -108,6 +109,34 @@ class AuthWindow(Gtk.ApplicationWindow):
 		self.box.append(self.reddit_btn)
 		self.reddit_btn.connect("clicked", self.__on_render_page)
 
+	async def __handle_auth_code(self, auth_code: str) -> None:
+		"""Handles the authorisation code received from Reddit.
+
+		Exchanges the authorisation code for an access token, stores it
+		securely using AWS Secrets, and transitions to the home window.
+
+		Args:
+		    auth_code (str): The authorisation code received from Reddit
+		"""
+		res = await self.api.generate_access_token(auth_code)
+		if res["status_code"] == HTTPStatus.OK:
+			access_token = res["json"]["access_token"]
+			logger.info("Access token: %s", access_token)
+			self.api.inject_token(access_token)
+			self.aws_client.create_secret("telex-access-token", access_token)
+
+			self.dialog.close()
+
+			self.box.remove(self.reddit_btn)
+			self.box.set_visible(False)
+
+			from windows.home import HomeWindow
+
+			home_window = HomeWindow(
+				application=self.application, base_window=self, api=self.api
+			)
+			self.application.loop.create_task(home_window.render_page())
+
 	def __on_load_changed(self, widget: WebKit.WebView, event: WebKit.LoadEvent) -> None:
 		"""Handler for URI load change signals.
 
@@ -119,8 +148,6 @@ class AuthWindow(Gtk.ApplicationWindow):
 		    widget (WebKit.WebView): The web view instance handling the OAuth flow
 		    event (WebKit.LoadEvent): The load event type that triggered this handler
 		"""
-		from windows.home import HomeWindow
-
 		uri = widget.get_uri()
 
 		# Retrieve access token
@@ -129,23 +156,7 @@ class AuthWindow(Gtk.ApplicationWindow):
 			start_index = uri.index("code=") + len("code=")
 			end_index = uri.index("#")
 			auth_code = uri[start_index:end_index]
-			res = self.api.generate_access_token(auth_code)
-
-			if res["status_code"] == HTTPStatus.OK:
-				access_token = res["json"]["access_token"]
-				logger.info("Access token: %s", access_token)
-				self.api.inject_token(access_token)
-				self.aws_client.create_secret("telex-access-token", access_token)
-
-				self.dialog.close()
-
-				self.box.remove(self.reddit_btn)
-				self.box.set_visible(False)
-
-				home_window = HomeWindow(
-					application=self.application, base_window=self, api=self.api
-				)
-				home_window.render_page()
+			self.application.loop.create_task(self.__handle_auth_code(auth_code))
 
 	def __on_close_webview(self, _widget: WebKit.WebView) -> None:
 		"""Handler for WebView widget's close event.
@@ -177,7 +188,7 @@ class AuthWindow(Gtk.ApplicationWindow):
 		)
 		self.dialog.connect("close-request", self.__on_close_webview)
 
-		uri = WebKit.URIRequest(uri=app_settings.AUTHORISATION_URL)
+		uri = WebKit.URIRequest(uri=os.getenv("AUTHORISATION_URL", ""))
 		webkit_settings = WebKit.Settings(
 			allow_modal_dialogs=True,
 			enable_fullscreen=False,
