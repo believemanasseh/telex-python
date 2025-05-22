@@ -1,7 +1,9 @@
 asyncio==3.4.3
 boto3==1.35.81
+httpx==0.28.1
 mypy==1.11.0
-PyGObject==3.46.0
-PyGObject-stubs==2.10.0
+meson-python==0.18.0
+PyGObject==3.52.3
+PyGObject-stubs==2.13.0
 requests==2.31.0
 types-requests==2.32.0.20240712

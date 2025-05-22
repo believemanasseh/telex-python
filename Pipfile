@@ -4,10 +4,11 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+httpx = "==0.28.1"
 asyncio = "==3.4.3"
 boto3 = "==1.35.81"
-PyGObject = "==3.46.0"
-PyGObject-stubs = "==2.10.0"
+PyGObject = "==3.52.3"
+PyGObject-stubs = "==2.13.0"
 requests = "==2.31.0"
 mypy = "==1.11.0"
 pydantic-settings = "==2.9.1"
@@ -17,5 +18,5 @@ types-requests = "==2.32.0.20240712"
 coverage = "==7.8.0"
 
 [requires]
-python_version = "3.11"
-python_version_full = "3.11.4"
+python_version = "3.12"
+python_version_full = "3.12.3"

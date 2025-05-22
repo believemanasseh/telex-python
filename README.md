@@ -19,7 +19,7 @@ A modern, native Reddit client built with GTK4, LibAdwaita and Python. Telex pro
 
 - GTK 4
 - Libadwaita 1.1
-- Python 3.11+
+- Python 3.12+
 
 ## Development
 
@@ -46,16 +46,22 @@ cd telex-python
 Install Python dependencies:
 
 ```bash
-pipenv --python 3.11
+pipenv --python 3.12
 source .venv/bin/activate
 pipenv install --dev
 ```
 
-Build and run:
+Build with meson and run:
 
 ```bash
 chmod +x build.sh
 ./build.sh
+```
+
+Alternatively, you can run entrypoint:
+
+```bash
+python src/app.py
 ```
 
 ### VSCode Development

@@ -1,7 +1,7 @@
 {
     "id": "xyz.daimones.Telex",
     "runtime": "org.gnome.Platform",
-    "runtime-version": "45",
+    "runtime-version": "48",
     "sdk": "org.gnome.Sdk",
     "command": "telex",
     "finish-args": [
