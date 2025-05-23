@@ -22,6 +22,8 @@ import os
 import gi
 import requests
 
+import store
+
 gi.require_versions({"Gdk": "4.0"})
 
 from collections.abc import Callable, Sequence
@@ -240,3 +242,14 @@ def get_submission_time(utc_timestamp: int) -> str:
 	weeks = int(total_seconds // Seconds.WEEK)
 
 	return _("{weeks} week{s} ago").format(weeks=weeks, s="s" if weeks > 1 else "")
+
+
+def set_current_window(window: str) -> None:
+	"""Set the current window for the application.
+
+	Sets the current window to be used for GTK operations.
+
+	Args:
+	    window: The name of the current window
+	"""
+	store.current_window = window
