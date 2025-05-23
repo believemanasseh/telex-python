@@ -5,5 +5,6 @@ mypy==1.11.0
 meson-python==0.18.0
 PyGObject==3.52.3
 PyGObject-stubs==2.13.0
+python-dotenv==1.1.0
 requests==2.31.0
 types-requests==2.32.0.20240712
