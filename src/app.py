@@ -56,6 +56,7 @@ class Telex(Adw.Application):
 		)
 		self.create_action("quit", self.on_quit_action, ["<primary>q"])
 		self.create_action("about", self.on_about_action, ["<primary>a"])
+		self.create_action("prefs", self.on_prefs_action, ["<primary>p"])
 
 		logging.info("Setting GLib event loop policy")
 		policy = GLibEventLoopPolicy()
@@ -119,6 +120,25 @@ class Telex(Adw.Application):
 			logo_icon_name="xyz.daimones.Telex.logo",
 		)
 		about.present()
+
+	def on_prefs_action(
+		self, _action: Gio.SimpleAction, _param: GLib.Variant | None = None
+	) -> None:
+		"""Callback for the app.prefs action.
+
+		Creates and displays the application's preferences window.
+
+		Args:
+			_action: The Gio.SimpleAction that was activated
+			_param: Parameter passed to the action (None in this case)
+
+		Returns:
+			None: This method does not return a value.
+		"""
+		from windows.preferences import PreferencesWindow
+
+		prefs = PreferencesWindow(transient_for=self.props.active_window)
+		prefs.present()
 
 	def create_action(
 		self,

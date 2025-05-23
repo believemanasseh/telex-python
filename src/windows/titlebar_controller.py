@@ -194,7 +194,7 @@ class TitlebarController:
 		menu_labels = [
 			_("View Profile"),
 			_("Subreddits"),
-			_("Settings"),
+			_("Preferences"),
 			_("About"),
 			_("Log Out"),
 		]
@@ -210,6 +210,11 @@ class TitlebarController:
 				if "About" in label:
 					menu_btn.connect(
 						"clicked", self.home_window.application.on_about_action
+					)
+
+				if "Preferences" in label:
+					menu_btn.connect(
+						"clicked", self.home_window.application.on_prefs_action
 					)
 
 			if menu_btn.get_child():
