@@ -23,6 +23,7 @@ from collections.abc import Callable
 from typing import Any
 
 import gi
+from dotenv import load_dotenv
 
 gi.require_versions({"Gtk": "4.0", "Adw": "1", "Gio": "2.0", "Gdk": "4.0", "GLib": "2.0"})
 
@@ -111,7 +112,7 @@ class Telex(Adw.Application):
 			version="0.1.0",
 			authors=["Illucid Mind"],
 			program_name="Telex",
-			comments="A modern Telegram client",
+			comments="A modern Reddit client",
 			copyright="© 2022 Illucid Mind",
 			license_type=Gtk.License.GPL_3_0,
 			website="https://telex.diamones.xyz",
@@ -156,6 +157,7 @@ def main(version) -> int:
 	Returns:
 		int: The application exit code
 	"""
+	load_dotenv()
 	logging.info("Starting Telex application")
 	logging.info("Version: %s", version)
 	logging.info("Python version: %s", sys.version)

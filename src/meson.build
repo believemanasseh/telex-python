@@ -22,7 +22,6 @@ telex_python_sources = [
   'app.py',
   'store.py',
   'services.py',
-  'settings.py',
 ]
 install_data(telex_python_sources, install_dir: moduledir)
 
