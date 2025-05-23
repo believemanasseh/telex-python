@@ -42,6 +42,8 @@ class TitlebarController:
 	a consistent user experience.
 	"""
 
+	from .post_detail import PostDetailWindow
+
 	def __init__(self, header_bar: Adw.HeaderBar, home_window: HomeWindow, api: Reddit):
 		"""Initialize the header bar controller.
 
@@ -133,6 +135,14 @@ class TitlebarController:
 
 		self.header_bar.pack_end(self.end_box)
 
+	def inject_post_detail(self, post_detail_window: PostDetailWindow) -> None:
+		"""Injects the post detail view into the header bar.
+
+		Adds a back button to the header bar for navigation and
+		removes the existing sort and search buttons.
+		"""
+		self.post_detail_window = post_detail_window
+
 	def add_back_button(self) -> Gtk.Button:
 		"""Inserts a single back-arrow button at the left of the header."""
 		self.back_btn = Gtk.Button(
@@ -188,6 +198,7 @@ class TitlebarController:
 			_("About"),
 			_("Log Out"),
 		]
+
 		for label in menu_labels:
 			if "Log" in label:
 				menu_btn = Gtk.Button(
@@ -196,6 +207,10 @@ class TitlebarController:
 				menu_btn.connect("clicked", self.__on_logout_clicked)
 			else:
 				menu_btn = Gtk.Button(label=label, css_classes=["menu-btn"], hexpand=True)
+				if "About" in label:
+					menu_btn.connect(
+						"clicked", self.home_window.application.on_about_action
+					)
 
 			if menu_btn.get_child():
 				menu_btn.get_child().set_halign(Gtk.Align.START)
@@ -316,9 +331,14 @@ class TitlebarController:
 		Returns:
 			None: This method does not return a value.
 		"""
-		self.home_window.application.loop.create_task(
-			self.home_window.render_page(setup_titlebar=False)
-		)
+		if store.current_window == "post_detail":
+			self.home_window.application.loop.create_task(
+				self.post_detail_window.render_page()
+			)
+		else:
+			self.home_window.application.loop.create_task(
+				self.home_window.render_page(setup_titlebar=False)
+			)
 
 	def __on_check_btn_toggled(self, widget: Gtk.CheckButton) -> None:
 		"""Handles radio button click events for sorting options.
@@ -346,7 +366,7 @@ class TitlebarController:
 		and clearing the current post detail view.
 
 		Args:
-			button (Gtk.Button): The button that triggered the event
+			_button (Gtk.Button): The button that triggered the event
 
 		Returns:
 			None: This method does not return a value.
@@ -360,7 +380,7 @@ class TitlebarController:
 
 		# Restore home window components
 		self.home_window.application.loop.create_task(
-			self.home_window.render_page(setup_titlebar=False)
+			self.home_window.render_page(setup_titlebar=False, set_current_window=True)
 		)
 
 	def __on_logout_clicked(self, _button: Gtk.Button) -> None:

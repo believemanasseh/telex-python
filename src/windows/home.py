@@ -34,6 +34,9 @@ from utils.common import (
 	load_css,
 	load_image,
 )
+from utils.common import (
+	set_current_window as set_current_window_func,
+)
 from windows.auth import AuthWindow
 
 
@@ -75,6 +78,7 @@ class HomeWindow(Gtk.ApplicationWindow):
 			css_provider: CSS styles provider
 			data: Fetched Reddit posts data based on current sort category
 		"""
+		set_current_window_func("home")
 		super().__init__(application=application)
 		self.application = application
 		self.base = base_window
@@ -316,7 +320,9 @@ class HomeWindow(Gtk.ApplicationWindow):
 		)
 		self.application.loop.create_task(post_detail.render_page())
 
-	async def render_page(self, setup_titlebar: bool = True) -> None:
+	async def render_page(
+		self, setup_titlebar: bool = True, set_current_window: bool = False
+	) -> None:
 		"""Creates the main layout for the homepage with a vertical box container.
 
 		Creates a scrollable page layout containing post containers. Each post
@@ -326,10 +332,14 @@ class HomeWindow(Gtk.ApplicationWindow):
 		Args:
 			setup_titlebar (bool, optional): Whether to setup the window titlebar.
 				Defaults to True.
+			set_current_window (bool, optional): Whether to set the current window.
 
 		Returns:
 			None: This method does not return a value.
 		"""
+		if set_current_window:
+			set_current_window_func("home")
+
 		await self.reload_data()
 
 		if setup_titlebar:

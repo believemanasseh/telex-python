@@ -26,7 +26,13 @@ from gi.repository import Adw, Gtk
 from app import Telex
 from services import Reddit
 from utils import _
-from utils.common import add_style_contexts, get_submission_time, load_css, load_image
+from utils.common import (
+	add_style_contexts,
+	get_submission_time,
+	load_css,
+	load_image,
+	set_current_window,
+)
 from windows.home import HomeWindow
 
 
@@ -73,6 +79,7 @@ class PostDetailWindow(Gtk.ApplicationWindow):
 		    box (Gtk.Box): Vertical container for post content
 		    clamp (Adw.Clamp): Width constraint container
 		"""
+		set_current_window("post_detail")
 		super().__init__(application=application)
 		self.base = base_window
 		self.api = api
@@ -88,6 +95,7 @@ class PostDetailWindow(Gtk.ApplicationWindow):
 		self.clamp = Adw.Clamp(child=self.box, maximum_size=1000)
 
 		self.base.titlebar_controller.add_back_button()
+		self.base.titlebar_controller.inject_post_detail(self)
 
 	async def fetch_data(self, post_id: str) -> dict[str, int | dict]:
 		"""Retrieves post details and comments from Reddit API.

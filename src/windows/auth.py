@@ -28,7 +28,7 @@ from gi.repository import Adw, Gtk, WebKit
 
 from services import AWSClient, Reddit
 from utils import _
-from utils.common import add_style_context, load_css
+from utils.common import add_style_context, load_css, set_current_window
 
 logger = logging.getLogger(__name__)
 
@@ -75,6 +75,7 @@ class AuthWindow(Gtk.ApplicationWindow):
 		    reddit_btn (Gtk.Button): Button to initiate the OAuth flow
 		    dialog (Gtk.MessageDialog): Dialog containing the WebView for OAuth
 		"""
+		set_current_window("auth")
 		self.application = application
 		self.css_provider = load_css("/assets/styles/auth.css")
 
@@ -86,9 +87,11 @@ class AuthWindow(Gtk.ApplicationWindow):
 			default_width=600,
 			title=_("Telex"),
 			titlebar=self.header_bar,
-			icon_name="reddit-icon",
 			**kwargs,
 		)
+
+		self.set_default_icon_name("xyz.daimones.Telex.logo")
+
 		self.api = Reddit()
 		self.aws_client = AWSClient()
 		self.box = Gtk.Box(
