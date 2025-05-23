@@ -24,10 +24,10 @@ from typing import Any
 
 import gi
 
-gi.require_versions({"Gtk": "4.0", "Adw": "1", "Gio": "2.0"})
+gi.require_versions({"Gtk": "4.0", "Adw": "1", "Gio": "2.0", "Gdk": "4.0", "GLib": "2.0"})
 
 from gi.events import GLibEventLoopPolicy
-from gi.repository import Adw, Gio, Gtk
+from gi.repository import Adw, GLib, Gio, Gtk
 
 logging.basicConfig(
 	level=logging.INFO,
@@ -47,14 +47,14 @@ class Telex(Adw.Application):
 		designed to be a singleton, ensuring only one instance runs at a time.
 
 		Attributes:
-		    loop (asyncio.AbstractEventLoop): The event loop for the application
+			loop (asyncio.AbstractEventLoop): The event loop for the application
 		"""
 		super().__init__(
 			application_id="xyz.daimones.Telex",
 			flags=Gio.ApplicationFlags.FLAGS_NONE,
 		)
 		self.create_action("quit", self.on_quit_action, ["<primary>q"])
-		self.create_action("about", self.on_about_action)
+		self.create_action("about", self.on_about_action, ["<primary>a"])
 
 		logging.info("Setting GLib event loop policy")
 		policy = GLibEventLoopPolicy()
@@ -68,7 +68,7 @@ class Telex(Adw.Application):
 		necessary.
 
 		Returns:
-		    None: This method does not return a value.
+			None: This method does not return a value.
 		"""
 		win = self.props.active_window
 		if not win:
@@ -77,33 +77,46 @@ class Telex(Adw.Application):
 			win = AuthWindow(application=self)
 		win.present()
 
-	def on_quit_action(self, _action, _param) -> None:
+	def on_quit_action(
+		self, _action: Gio.SimpleAction, _param: GLib.Variant | None = None
+	) -> None:
 		"""Callback for app.quit action.
 
 		Called when the quit action is triggered through the UI or keyboard shortcut.
 
 		Args:
-		    _action: The Gio.SimpleAction that was activated
-		    _param: Parameter passed to the action (None in this case)
+			_action: The Gio.SimpleAction that was activated
+			_param: Parameter passed to the action (None in this case)
 
 		Returns:
-		    None: This method does not return a value.
+			None: This method does not return a value.
 		"""
 		self.quit()
 
-	def on_about_action(self, _action, _param) -> None:
+	def on_about_action(
+		self, _action: Gio.SimpleAction, _param: GLib.Variant | None = None
+	) -> None:
 		"""Callback for the app.about action.
 
 		Creates and displays the application's about dialog.
 
 		Args:
-		    _action: The Gio.SimpleAction that was activated
-		    _param: Parameter passed to the action (None in this case)
+			_action: The Gio.SimpleAction that was activated
+			_param: Parameter passed to the action (None in this case)
 
 		Returns:
-		    None: This method does not return a value.
+			None: This method does not return a value.
 		"""
-		about = Gtk.AboutDialog(version="1.0", authors=["Illucid Mind"])
+		about = Gtk.AboutDialog(
+			version="0.1.0",
+			authors=["Illucid Mind"],
+			program_name="Telex",
+			comments="A modern Telegram client",
+			copyright="© 2022 Illucid Mind",
+			license_type=Gtk.License.GPL_3_0,
+			website="https://telex.diamones.xyz",
+			logo_icon_name="xyz.daimones.Telex.logo",
+		)
 		about.present()
 
 	def create_action(
@@ -118,12 +131,12 @@ class Telex(Adw.Application):
 		and adds it to the application with optional keyboard shortcuts.
 
 		Args:
-		    name: The name of the action
-		    callback: The function to be called when the action is activated
-		    shortcuts: Optional list of keyboard accelerators (e.g. ["<primary>q"])
+			name: The name of the action
+			callback: The function to be called when the action is activated
+			shortcuts: Optional list of keyboard accelerators (e.g. ["<primary>q"])
 
 		Returns:
-		    None: This method does not return a value.
+			None: This method does not return a value.
 		"""
 		action = Gio.SimpleAction.new(name, None)
 		action.connect("activate", callback)
@@ -138,10 +151,10 @@ def main(version) -> int:
 	Creates and runs the main Telex application.
 
 	Args:
-	    version: The version of the application
+		version: The version of the application
 
 	Returns:
-	    int: The application exit code
+		int: The application exit code
 	"""
 	logging.info("Starting Telex application")
 	logging.info("Version: %s", version)
