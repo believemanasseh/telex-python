@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist gettext-domain="telex">
 	<schema id="xyz.daimones.Telex" path="/xyz/daimones/telex/">
-	</schema>
+		<key name="dark-mode" type="b">
+			<default>false</default>
+				<summary>Dark Mode</summary>
+			<description>Use dark color scheme</description>
+		</key>
+		<key name="show-nsfw" type="b">
+			<default>false</default>
+				<summary>Show NSFW Content</summary>
+			<description>Show NSFW posts in feed</description>
+		</key>
+		</schema>
 </schemalist>

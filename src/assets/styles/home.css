@@ -1,15 +1,25 @@
 .box {
     padding: 50px 0px;
 }
-
+/* 
 .post-container {
+    border-radius: 15px;
     background-color: whitesmoke;
     color: #000000;
-    border-radius: 15px;
 }
 
 .post-container:hover {
     background-color: #d2d2d2;
+} */
+
+.post-container {
+    border-radius: 15px;
+    background-color: @theme_base_color;
+    color: @theme_fg_color;    
+}
+
+.post-container:hover {
+    background-color: mix(@theme_fg_color, @theme_base_color, 0.95);
 }
 
 .icon-box {
@@ -30,7 +40,7 @@
 }
 
 .post-title {
-    color: #000000;
+    color: @theme_fg_color;
     font-weight: 600;
     font-size: 15px;
 }
@@ -47,22 +57,21 @@
 }
 
 .post-metadata {
-    color: rgb(67, 66, 66);
+    color: alpha(@theme_fg_color, 0.7);
 }
 
 .menu-btn, .menu-btn-logout {
-    background-color: #FFFFFF;
+    background-color:  @theme_base_color;
     font-weight: 500;
 }
 
 .menu-btn:hover {
-    background-color: whitesmoke;
+    background-color: mix(@theme_fg_color, @theme_base_color, 0.95);
 }
 
 .menu-btn-logout:hover {
-    border: 1px solid red;
-    color: red;
-
+    border: 1px solid @error_color;
+    color: @error_color;
 }
 
 .user-profile-img {

@@ -1,10 +1,10 @@
 .reddit-btn {
-    background-color: #FFFFFF;
-    color: #000000;
-    border: 1px solid #000000;
+    background-color: @theme_base_color;
+    color: @theme_fg_color;
+    border: 1px solid @theme_fg_color;
 }
 
 .reddit-btn:hover {
-    background-color: #000000;
-    color: #FFFFFF;
+    background-color: @theme_fg_color;
+    color: @theme_base_color;
 }

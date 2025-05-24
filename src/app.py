@@ -25,7 +25,7 @@ from typing import Any
 import gi
 from dotenv import load_dotenv
 
-gi.require_versions({"Gtk": "4.0", "Adw": "1", "Gio": "2.0", "Gdk": "4.0", "GLib": "2.0"})
+gi.require_versions({"Gtk": "4.0", "Adw": "1", "Gio": "2.0", "GLib": "2.0"})
 
 from gi.events import GLibEventLoopPolicy
 from gi.repository import Adw, GLib, Gio, Gtk
@@ -62,6 +62,23 @@ class Telex(Adw.Application):
 		policy = GLibEventLoopPolicy()
 		asyncio.set_event_loop_policy(policy)
 		self.loop = policy.get_event_loop()
+
+		# from windows.auth import AuthWindow
+		# from windows.home import HomeWindow
+
+		# Get style manager and set initial theme
+		self.settings = Gio.Settings("xyz.daimones.Telex")
+		style_manager = Adw.StyleManager.get_default()
+		# auth_window = AuthWindow(application=self)
+		# home_window = HomeWindow(self, auth_window, auth_window.api)
+		# style_manager.connect(
+		# 	"notify::dark",
+		# 	lambda _, __: home_window.update_container_styles(style_manager.get_dark()),
+		# )
+		if self.settings.get_boolean("dark-mode"):
+			style_manager.set_color_scheme(Adw.ColorScheme.FORCE_DARK)
+		else:
+			style_manager.set_color_scheme(Adw.ColorScheme.DEFAULT)
 
 	def do_activate(self):
 		"""Called when the application is activated.
@@ -137,8 +154,10 @@ class Telex(Adw.Application):
 		"""
 		from windows.preferences import PreferencesWindow
 
-		prefs = PreferencesWindow(transient_for=self.props.active_window)
-		prefs.present()
+		prefs_window = PreferencesWindow(
+			transient_for=self.props.active_window, settings=self.settings
+		)
+		prefs_window.present()
 
 	def create_action(
 		self,

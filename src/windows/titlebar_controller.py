@@ -98,7 +98,9 @@ class TitlebarController:
 		# Left─side |reload|
 		self.start_box = Gtk.Box(halign=True, orientation=Gtk.Orientation.HORIZONTAL)
 		reload_btn = Gtk.Button(
-			icon_name="xyz.daimones.Telex.reload", tooltip_text=_("Reload")
+			icon_name="xyz.daimones.Telex.reload",
+			margin_start=5,
+			tooltip_text=_("Reload"),
 		)
 		reload_btn.connect("clicked", self.__on_reload_clicked)
 		self.start_box.append(reload_btn)
@@ -115,12 +117,17 @@ class TitlebarController:
 				child=menu_btn_child,
 				tooltip_text=_("Sort posts"),
 				popover=Gtk.Popover(child=popover_child),
+				margin_end=5,
 			)
 		)
 
 		# Search
 		self.end_box.append(
-			Gtk.Button(icon_name="xyz.daimones.Telex.search", tooltip_text=_("Search"))
+			Gtk.Button(
+				icon_name="xyz.daimones.Telex.search",
+				margin_end=5,
+				tooltip_text=_("Search"),
+			)
 		)
 
 		# Profile popover
@@ -130,6 +137,7 @@ class TitlebarController:
 				icon_name="xyz.daimones.Telex.profile",
 				tooltip_text=_("Profile"),
 				popover=Gtk.Popover(child=popover_child),
+				margin_end=5,
 			)
 		)
 
@@ -148,6 +156,7 @@ class TitlebarController:
 		self.back_btn = Gtk.Button(
 			icon_name="xyz.daimones.Telex.arrow-pointing-left",
 			tooltip_text=_("Back to Home"),
+			margin_start=5,
 		)
 		self.back_btn.connect("clicked", self.__on_back_clicked)
 		self.header_bar.pack_start(self.back_btn)
@@ -202,11 +211,16 @@ class TitlebarController:
 		for label in menu_labels:
 			if "Log" in label:
 				menu_btn = Gtk.Button(
-					label=label, css_classes=["menu-btn-logout"], hexpand=True
+					label=label,
+					css_classes=["menu-btn-logout"],
+					margin_top=5,
+					hexpand=True,
 				)
 				menu_btn.connect("clicked", self.__on_logout_clicked)
 			else:
-				menu_btn = Gtk.Button(label=label, css_classes=["menu-btn"], hexpand=True)
+				menu_btn = Gtk.Button(
+					label=label, css_classes=["menu-btn"], margin_top=5, hexpand=True
+				)
 				if "About" in label:
 					menu_btn.connect(
 						"clicked", self.home_window.application.on_about_action

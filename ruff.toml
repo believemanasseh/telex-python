@@ -2,7 +2,7 @@
 line-length = 90
 
 # Always generate Python 3.11-compatible code
-target-version = "py311"
+target-version = "py312"
 
 # Files to lint
 include = ["*.py"]
