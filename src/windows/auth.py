@@ -75,7 +75,7 @@ class AuthWindow(Gtk.ApplicationWindow):
 		    reddit_btn (Gtk.Button): Button to initiate the OAuth flow
 		    dialog (Gtk.MessageDialog): Dialog containing the WebView for OAuth
 		"""
-		set_current_window("auth")
+		set_current_window("auth", self)
 		self.application = application
 		self.css_provider = load_css("/assets/styles/auth.css")
 
@@ -105,7 +105,11 @@ class AuthWindow(Gtk.ApplicationWindow):
 		self.reddit_btn = Gtk.Button(
 			label=_("Continue with Reddit"),
 			name="reddit-btn",
-			css_classes=["reddit-btn"],
+			css_classes=[
+				"reddit-btn-dark"
+				if self.application.settings.get_boolean("dark-mode")
+				else "reddit-btn"
+			],
 			width_request=200,
 		)
 		add_style_context(self.reddit_btn, self.css_provider)

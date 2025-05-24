@@ -78,7 +78,7 @@ class HomeWindow(Gtk.ApplicationWindow):
 			css_provider: CSS styles provider
 			data: Fetched Reddit posts data based on current sort category
 		"""
-		set_current_window_func("home")
+		set_current_window_func("home", self)
 		super().__init__(application=application)
 		self.application = application
 		self.base = base_window
@@ -330,30 +330,10 @@ class HomeWindow(Gtk.ApplicationWindow):
 		)
 		self.application.loop.create_task(post_detail.render_page())
 
-	def update_container_styles(self, is_dark: bool) -> None:
-		"""Update post container styles based on theme.
-
-		Updates the CSS classes of post containers to match the current theme
-		by toggling between 'post-container' and 'post-container-dark'.
-
-		Args:
-			is_dark (bool): Whether the current theme is dark mode or not.
-
-		Returns:
-			None: This method does not return a value.
-		"""
-		for child in self.box.observe_children():
-			if isinstance(child, Gtk.Box):
-				current_classes = child.get_css_classes()
-				if any(cls.startswith("post-container") for cls in current_classes):
-					child.remove_css_class("post-container")
-					child.remove_css_class("post-container-dark")
-					child.add_css_class(
-						"post-container-dark" if is_dark else "post-container"
-					)
-
 	async def render_page(
-		self, setup_titlebar: bool = True, set_current_window: bool = False
+		self,
+		setup_titlebar: bool = True,
+		set_current_window: bool = False,
 	) -> None:
 		"""Creates the main layout for the homepage with a vertical box container.
 
@@ -365,14 +345,15 @@ class HomeWindow(Gtk.ApplicationWindow):
 			setup_titlebar (bool, optional): Whether to setup the window titlebar.
 				Defaults to True.
 			set_current_window (bool, optional): Whether to set the current window.
+				Defaults to False.
 
 		Returns:
 			None: This method does not return a value.
 		"""
+		await self.reload_data()
+
 		if set_current_window:
 			set_current_window_func("home")
-
-		await self.reload_data()
 
 		if setup_titlebar:
 			self.titlebar_controller.setup_titlebar()

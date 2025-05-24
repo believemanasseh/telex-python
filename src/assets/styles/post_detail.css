@@ -2,13 +2,13 @@
   padding: 50px 0px;
 }
 
-/* .post-container {
+.post-container {
   background-color: whitesmoke;
   color: #000000;
   border-radius: 15px;
-} */
+}
 
-.post-container {
+.post-container-dark {
   background-color: @theme_base_color;
   color: @theme_fg_color;
   border-radius: 15px;
@@ -19,14 +19,14 @@
   font-weight: bold;
 }
 
-/* .comment-box {
+.comment-box {
   border-radius: 8px;
   background-color: whitesmoke;
   padding: 10px;
   min-width: 100px;
-} */
+}
 
-.comment-box{
+.comment-box-dark{
   border-radius: 8px;
   background-color: @theme_base_color;
   padding: 10px;
@@ -38,13 +38,13 @@
   font-size: 14px;
   color: rgb(0, 123, 255);
 }
-/* 
+
 .comment-score {
   font-size: 12px;
   color: #aaa;
-} */
+}
 
-.comment-score {
+.comment-score-dark {
   font-size: 12px;
   color: alpha(@theme_fg_color, 0.7);
 }

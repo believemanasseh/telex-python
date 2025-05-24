@@ -16,7 +16,7 @@ from gi.repository import Adw, GObject, Gio
 class PreferencesWindow(Adw.PreferencesWindow):
 	"""Preferences window for Telex application."""
 
-	def __init__(self, **kwargs):
+	def __init__(self, **kwargs) -> None:
 		"""Initialise the preferences window.
 
 		Args:
@@ -45,7 +45,7 @@ class PreferencesWindow(Adw.PreferencesWindow):
 
 		# Dark Mode Switch
 		dark_mode_row = Adw.ActionRow(title="Dark Mode", subtitle="Use dark color scheme")
-		dark_switch = Adw.SwitchRow()
+		dark_switch = Adw.SwitchRow(can_focus=False)
 		dark_mode_row.add_suffix(dark_switch)
 		appearance_group.add(dark_mode_row)
 		self.settings.bind(
@@ -71,13 +71,16 @@ class PreferencesWindow(Adw.PreferencesWindow):
 		switch: Adw.SwitchRow,
 		_pspec: GObject.ParamSpec,
 		style_manager: Adw.StyleManager,
-	):
+	) -> None:
 		"""Callback for dark mode switch change.
 
 		Args:
 			switch: The switch that was toggled.
 			_pspec: Parameter specification (unused).
 			style_manager: The style manager to update.
+
+		Returns:
+			None: This method does not return a value.
 		"""
 		if switch.get_active():
 			logging.info("Dark mode enabled")
@@ -88,5 +91,5 @@ class PreferencesWindow(Adw.PreferencesWindow):
 			self.settings.set_boolean("dark-mode", False)
 			style_manager.set_color_scheme(Adw.ColorScheme.DEFAULT)
 
-		logging.info("Saving settings")
 		self.settings.sync()
+		logging.info("Settings synced")

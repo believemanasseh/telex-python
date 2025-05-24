@@ -79,7 +79,7 @@ class PostDetailWindow(Gtk.ApplicationWindow):
 		    box (Gtk.Box): Vertical container for post content
 		    clamp (Adw.Clamp): Width constraint container
 		"""
-		set_current_window("post_detail")
+		set_current_window("post_detail", self)
 		super().__init__(application=application)
 		self.base = base_window
 		self.api = api
@@ -145,7 +145,11 @@ class PostDetailWindow(Gtk.ApplicationWindow):
 			spacing=8,
 			margin_start=nesting_level * 30,
 			margin_bottom=15,
-			css_classes=["comment-box"],
+			css_classes=[
+				"comment-box-dark"
+				if self.application.settings.get_boolean("dark-mode")
+				else "comment-box"
+			],
 		)
 
 		# Create header box for author and metadata
@@ -177,7 +181,11 @@ class PostDetailWindow(Gtk.ApplicationWindow):
 		score_label = Gtk.Label(
 			label=_("· %d points") % score,
 			halign=Gtk.Align.START,
-			css_classes=["comment-score"],
+			css_classes=[
+				"comment-score-dark"
+				if self.application.settings.get_boolean("dark-mode")
+				else "comment-score"
+			],
 		)
 		header_box.append(score_label)
 
@@ -254,7 +262,11 @@ class PostDetailWindow(Gtk.ApplicationWindow):
 		post_data = data["json"][0]["data"]["children"][0]
 
 		post_container = Gtk.Box(
-			css_classes=["post-container"],
+			css_classes=[
+				"post-container-dark"
+				if self.application.settings.get_boolean("dark-mode")
+				else "post-container"
+			],
 			orientation=Gtk.Orientation.HORIZONTAL,
 			spacing=10,
 			width_request=1000,

@@ -1,7 +1,7 @@
 .box {
     padding: 50px 0px;
 }
-/* 
+
 .post-container {
     border-radius: 15px;
     background-color: whitesmoke;
@@ -10,15 +10,15 @@
 
 .post-container:hover {
     background-color: #d2d2d2;
-} */
+}
 
-.post-container {
+.post-container-dark {
     border-radius: 15px;
     background-color: @theme_base_color;
     color: @theme_fg_color;    
 }
 
-.post-container:hover {
+.post-container-dark:hover {
     background-color: mix(@theme_fg_color, @theme_base_color, 0.95);
 }
 

@@ -8,3 +8,14 @@
     background-color: @theme_fg_color;
     color: @theme_base_color;
 }
+
+.reddit-btn-dark {
+    background-color: #000000;
+    color: #FFFFFF;
+    border: 1px solid #FFFFFF;
+}
+
+.reddit-btn-dark:hover {
+    background-color: #252424;
+    color: #FFFFFF;
+}

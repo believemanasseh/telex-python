@@ -95,5 +95,12 @@ convention = "google"
 [lint.isort]
 case-sensitive = true
 
+[lint.mccabe]
+# Flag errors (`C901`) whenever the complexity level exceeds 15
+max-complexity = 15
+
+[lint.pylint]
+max-branches = 15
+
 [format]
 indent-style = "tab"

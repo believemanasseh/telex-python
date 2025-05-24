@@ -25,6 +25,8 @@ from typing import Any
 import gi
 from dotenv import load_dotenv
 
+import store
+
 gi.require_versions({"Gtk": "4.0", "Adw": "1", "Gio": "2.0", "GLib": "2.0"})
 
 from gi.events import GLibEventLoopPolicy
@@ -63,18 +65,13 @@ class Telex(Adw.Application):
 		asyncio.set_event_loop_policy(policy)
 		self.loop = policy.get_event_loop()
 
-		# from windows.auth import AuthWindow
-		# from windows.home import HomeWindow
-
 		# Get style manager and set initial theme
 		self.settings = Gio.Settings("xyz.daimones.Telex")
 		style_manager = Adw.StyleManager.get_default()
-		# auth_window = AuthWindow(application=self)
-		# home_window = HomeWindow(self, auth_window, auth_window.api)
-		# style_manager.connect(
-		# 	"notify::dark",
-		# 	lambda _, __: home_window.update_container_styles(style_manager.get_dark()),
-		# )
+		style_manager.connect(
+			"notify::dark",
+			lambda _, __: self.__update_container_styles(style_manager.get_dark()),
+		)
 		if self.settings.get_boolean("dark-mode"):
 			style_manager.set_color_scheme(Adw.ColorScheme.FORCE_DARK)
 		else:
@@ -158,6 +155,65 @@ class Telex(Adw.Application):
 			transient_for=self.props.active_window, settings=self.settings
 		)
 		prefs_window.present()
+
+	def __update_container_styles(self, is_dark: bool) -> None:
+		"""Update post container styles based on theme.
+
+		Updates the CSS classes of post containers to match the current theme
+		by toggling between 'post-container' and 'post-container-dark'.
+
+		Args:
+			is_dark (bool): Whether the current theme is dark mode or not.
+
+		Returns:
+			None: This method does not return a value.
+		"""
+		if store.auth_window:
+			for child in store.auth_window.box.observe_children():
+				if isinstance(child, Gtk.Button):
+					current_classes = child.get_css_classes()
+					if any(cls.startswith("reddit-btn") for cls in current_classes):
+						child.remove_css_class("reddit-btn")
+						child.remove_css_class("reddit-btn-dark")
+						child.add_css_class(
+							"reddit-btn-dark" if is_dark else "reddit-btn"
+						)
+
+		if store.home_window:
+			for child in store.home_window.box.observe_children():
+				if isinstance(child, Gtk.Box):
+					current_classes = child.get_css_classes()
+					if any(cls.startswith("post-container") for cls in current_classes):
+						child.remove_css_class("post-container")
+						child.remove_css_class("post-container-dark")
+						child.add_css_class(
+							"post-container-dark" if is_dark else "post-container"
+						)
+
+		if store.post_detail_window:
+			for child in store.post_detail_window.box.observe_children():
+				if isinstance(child, Gtk.Box):
+					current_classes = child.get_css_classes()
+					if any(cls.startswith("post-container") for cls in current_classes):
+						child.remove_css_class("post-container")
+						child.remove_css_class("post-container-dark")
+						child.add_css_class(
+							"post-container-dark" if is_dark else "post-container"
+						)
+
+					if any(cls.startswith("comment-box") for cls in current_classes):
+						child.remove_css_class("comment-box")
+						child.remove_css_class("comment-box-dark")
+						child.add_css_class(
+							"comment-box-dark" if is_dark else "comment-box"
+						)
+
+					if any(cls.startswith("comment-score") for cls in current_classes):
+						child.remove_css_class("comment-score")
+						child.remove_css_class("comment-score-dark")
+						child.add_css_class(
+							"comment-score-dark" if is_dark else "comment-score"
+						)
 
 	def create_action(
 		self,

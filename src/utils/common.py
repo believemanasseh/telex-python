@@ -244,12 +244,24 @@ def get_submission_time(utc_timestamp: int) -> str:
 	return _("{weeks} week{s} ago").format(weeks=weeks, s="s" if weeks > 1 else "")
 
 
-def set_current_window(window: str) -> None:
+def set_current_window(window_name: str, widget: Gtk.Widget) -> None:
 	"""Set the current window for the application.
 
 	Sets the current window to be used for GTK operations.
 
 	Args:
-	    window: The name of the current window
+		window_name: The name of the current window.
+		widget: The GTK window instance to set as current.
+
+	Returns:
+		None: This function does not return a value.
 	"""
-	store.current_window = window
+	if window_name == "auth":
+		store.current_window = window_name
+		store.auth_window = widget
+	elif window_name == "home":
+		store.current_window = window_name
+		store.home_window = widget
+	else:
+		store.current_window = window_name
+		store.post_detail_window = widget
