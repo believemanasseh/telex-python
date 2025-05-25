@@ -87,6 +87,7 @@ class TitlebarController:
 			dict: User profile data retrieved from Reddit API
 		"""
 		self.user_data = await self.api.retrieve_user_details()
+		store.current_user = self.user_data["json"]["name"]
 
 	def setup_titlebar(self) -> None:
 		"""Customises the application headerbar.
@@ -230,6 +231,9 @@ class TitlebarController:
 					menu_btn.connect(
 						"clicked", self.home_window.application.on_prefs_action
 					)
+
+				if "Profile" in label:
+					menu_btn.connect("clicked", self.__on_view_profile_clicked)
 
 			if menu_btn.get_child():
 				menu_btn.get_child().set_halign(Gtk.Align.START)
@@ -419,3 +423,20 @@ class TitlebarController:
 		self.home_window.base.aws_client.delete_secret("telex-access-token")
 		self.home_window.base.close()
 		AuthWindow(application=self.home_window.application).present()
+
+	def __on_view_profile_clicked(self, _button: Gtk.Button) -> None:
+		"""Handles view profile button click events.
+
+		Opens the user profile window to display the user's Reddit profile
+		and settings.
+
+		Args:
+			_button (Gtk.Button): The button that triggered the event
+
+		Returns:
+			None: This method does not return a value.
+		"""
+		from windows.profile import ProfileWindow
+
+		profile_window = ProfileWindow(base_window=self.home_window, api=self.api)
+		self.home_window.application.loop.create_task(profile_window.render_page())

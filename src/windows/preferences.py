@@ -45,7 +45,7 @@ class PreferencesWindow(Adw.PreferencesWindow):
 
 		# Dark Mode Switch
 		dark_mode_row = Adw.ActionRow(title="Dark Mode", subtitle="Use dark color scheme")
-		dark_switch = Adw.SwitchRow(can_focus=False)
+		dark_switch = Adw.SwitchRow()
 		dark_mode_row.add_suffix(dark_switch)
 		appearance_group.add(dark_mode_row)
 		self.settings.bind(

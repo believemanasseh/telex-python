@@ -44,14 +44,6 @@ class PostDetailWindow(Gtk.ApplicationWindow):
 	the post at the top and nested comments below it with appropriate
 	indentation levels to indicate reply hierarchy. Comments include metadata
 	such as author, score, and content, along with action buttons.
-
-	Attributes:
-	    base (HomeWindow): Reference to the base window instance
-	    api (Reddit): Reddit API instance for data operations
-	    css_provider (Gtk.CssProvider): Provider for styling post details
-	    data (dict): Fetched post and comments data
-	    box (Gtk.Box): Main container for post and comments
-	    clamp (Adw.Clamp): Clamp widget to constrain the content width
 	"""
 
 	def __init__(

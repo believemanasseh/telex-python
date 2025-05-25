@@ -1,0 +1,291 @@
+"""Profile window module for the Telex application.
+
+This module provides the ProfileWindow class which handles user profile
+management and settings within the Telex application interface.
+"""
+
+import gi
+import httpx
+
+import store
+
+gi.require_versions({"Gtk": "4.0", "Adw": "1"})
+
+from gi.repository import Adw, Gtk
+
+from services import Reddit
+from utils import _
+from utils.common import add_style_contexts, create_cursor, load_css, load_image
+from windows.home import HomeWindow
+
+
+class ProfileWindow(Gtk.ApplicationWindow):
+	"""ProfileWindow class for managing user profile settings."""
+
+	def __init__(self, base_window: HomeWindow, api: Reddit) -> None:
+		"""Initialises the Profile Window.
+
+		This window is used to display and manage user profile settings.
+		It inherits from Gtk.ApplicationWindow and is designed to be part of
+		the Telex application. The window can be used to render user profile
+		data and allow users to update their settings.
+
+		Args:
+			base_window (HomeWindow): The base window instance for the application.
+			api (Reddit): The Reddit API instance for user data operations.
+
+		Attributes:
+			application (Adw.Application): The parent GTK application.
+			base (HomeWindow): Reference to the base window instance.
+			api (Reddit): Reddit API instance for data operations.
+			data (dict): Stores user profile data fetched from the API.
+			css_provider (Gtk.CssProvider): CSS styles provider for the window.
+			cursor (Gtk.Cursor): Custom cursor for clickable elements in the window.
+		"""
+		super().__init__(application=base_window.application)
+
+		self.application = base_window.application
+		self.base = base_window
+		self.api = api
+		self.data = None
+		self.css_provider = load_css("/assets/styles/profile.css")
+		self.cursor = create_cursor("pointer")
+
+	async def fetch_data(self) -> None:
+		"""Fetches user profile data from Reddit API.
+
+		This method retrieves the user profile data for the specified username
+		and stores it in the `data` attribute. It can be used to populate the
+		profile window with user information.
+		"""
+		try:
+			return await self.api.retrieve_about_details(store.current_user)
+		except httpx.RequestError as e:
+			msg = "Failed to fetch user profile data"
+			raise httpx.RequestError(msg) from e
+
+	def _create_overview_page(self) -> Gtk.Box:
+		"""Creates the overview tab content."""
+		box = Gtk.Box(
+			orientation=Gtk.Orientation.VERTICAL,
+			spacing=10,
+			margin_start=20,
+			margin_end=20,
+			margin_top=20,
+			margin_bottom=20,
+		)
+		box.append(Gtk.Label(label="User overview will be displayed here."))
+		return box
+
+	def _create_posts_page(self) -> Gtk.Box:
+		"""Creates the posts tab content."""
+		box = Gtk.Box(
+			orientation=Gtk.Orientation.VERTICAL,
+			spacing=10,
+			margin_start=20,
+			margin_end=20,
+			margin_top=20,
+			margin_bottom=20,
+		)
+		box.append(Gtk.Label(label="Posts will be displayed here."))
+		return box
+
+	def _create_comments_page(self) -> Gtk.Box:
+		"""Creates the comments tab content."""
+		box = Gtk.Box(
+			orientation=Gtk.Orientation.VERTICAL,
+			spacing=10,
+			margin_start=20,
+			margin_end=20,
+			margin_top=20,
+			margin_bottom=20,
+		)
+		box.append(Gtk.Label(label="Comments will be displayed here."))
+		return box
+
+	def _create_upvoted_page(self) -> Gtk.Box:
+		"""Creates the upvoted posts tab content."""
+		box = Gtk.Box(
+			orientation=Gtk.Orientation.VERTICAL,
+			spacing=10,
+			margin_start=20,
+			margin_end=20,
+			margin_top=20,
+			margin_bottom=20,
+		)
+		box.append(Gtk.Label(label="Upvoted posts will be displayed here."))
+		return box
+
+	def _create_downvoted_page(self) -> Gtk.Box:
+		"""Creates the downvoted posts tab content."""
+		box = Gtk.Box(
+			orientation=Gtk.Orientation.VERTICAL,
+			spacing=10,
+			margin_start=20,
+			margin_end=20,
+			margin_top=20,
+			margin_bottom=20,
+		)
+		box.append(Gtk.Label(label="Downvoted posts will be displayed here."))
+		return box
+
+	def __change_tab(self, label: Gtk.Label) -> None:
+		"""Changes the active tab based on the clicked label.
+
+		Args:
+			label (Gtk.Label): The label that was clicked to change the tab.
+
+		Returns:
+			None: This method does not return a value.
+		"""
+		tab_name = label.get_label().lower()
+		self.box.remove(self.main_content)
+
+		if tab_name == "overview":
+			self.main_content = self._create_overview_page()
+		elif tab_name == "posts":
+			self.main_content = self._create_posts_page()
+		elif tab_name == "comments":
+			self.main_content = self._create_comments_page()
+		elif tab_name == "upvoted":
+			self.main_content = self._create_upvoted_page()
+		elif tab_name == "downvoted":
+			self.main_content = self._create_downvoted_page()
+
+		self.box.append(self.main_content)
+
+	def __on_label_clicked(
+		self,
+		_gesture: Gtk.GestureClick,
+		_n_press: int,
+		_x: float,
+		_y: float,
+		widget: Gtk.Label,
+	) -> None:
+		"""Handles label click events to change the active tab.
+
+		Args:
+			_gesture (Gtk.GestureClick): The click gesture that triggered the event.
+			_n_press (int): The number of times the label has been pressed.
+			_x (float): The x-coordinate of the click event.
+			_y (float): The y-coordinate of the click event.
+			widget (Gtk.Widget): The label widget that was clicked.
+
+		Returns:
+			None: This method does not return a value.
+		"""
+		self.__change_tab(widget)
+
+	async def render_page(self):
+		"""Renders the profile page."""
+		self.data = await self.fetch_data()
+
+		vbox = Gtk.Box(
+			orientation=Gtk.Orientation.VERTICAL,
+			spacing=20,
+			margin_start=20,
+			margin_end=20,
+			margin_top=50,
+			margin_bottom=20,
+			width_request=1000,
+		)
+
+		# Create a horizontal box for user avatar and name
+		hbox = Gtk.Box(
+			orientation=Gtk.Orientation.HORIZONTAL,
+			spacing=10,
+			margin_bottom=20,
+			width_request=1000,
+		)
+
+		user_img = load_image(
+			"/assets/images/reddit-placeholder.png",
+			_("Reddit placeholder"),
+			css_classes=["user-avatar"],
+			css_provider=self.css_provider,
+		)
+		user_img.set_tooltip_text(_("User avatar"))
+		user_img.set_size_request(100, 100)
+
+		hbox.append(user_img)
+
+		# Create a vertical box for user information
+		box = Gtk.Box(
+			orientation=Gtk.Orientation.VERTICAL,
+			valign=Gtk.Align.CENTER,
+			halign=Gtk.Align.START,
+			spacing=5,
+		)
+		name = self.data["json"]["data"]["name"]
+		display_name = self.data["json"]["data"]["subreddit"]["display_name_prefixed"]
+		profile_name = Gtk.Label(label=_("%s") % name, css_classes=["profile-name"])
+		profile_display_name = Gtk.Label(
+			label=_("%s") % display_name,
+			css_classes=["profile-display-name"],
+			halign=Gtk.Align.START,
+		)
+		box.append(profile_name)
+		box.append(profile_display_name)
+
+		add_style_contexts([profile_name, profile_display_name], self.css_provider)
+
+		hbox.append(box)
+		vbox.append(hbox)
+
+		tabs_hbox = Gtk.Box(
+			orientation=Gtk.Orientation.HORIZONTAL,
+			spacing=10,
+			halign=Gtk.Align.START,
+			valign=Gtk.Align.START,
+			width_request=1000,
+		)
+
+		labels = [
+			_("Overview"),
+			_("Posts"),
+			_("Comments"),
+			_("Upvoted"),
+			_("Downvoted"),
+		]
+
+		for label in labels:
+			label_widget = Gtk.Label(
+				label=label,
+				css_classes=["profile-tab-label"],
+				margin_end=20,
+				cursor=self.cursor,
+			)
+			label_widget.set_tooltip_text(_("Click to view {}").format(label.lower()))
+			click_controller = Gtk.GestureClick()
+			click_controller.connect(
+				"pressed",
+				lambda gesture,
+				n_press,
+				x,
+				y,
+				widget=label_widget: self.__on_label_clicked(
+					gesture, n_press, x, y, widget
+				),
+			)
+			label_widget.add_controller(click_controller)
+			tabs_hbox.append(label_widget)
+
+		vbox.append(tabs_hbox)
+
+		self.box = Gtk.Box(
+			orientation=Gtk.Orientation.VERTICAL,
+			spacing=10,
+			halign=Gtk.Align.CENTER,
+			valign=Gtk.Align.START,
+			width_request=1000,
+		)
+		self.main_content = self._create_overview_page()
+		self.box.append(self.main_content)
+		vbox.append(self.box)
+
+		clamp = Adw.Clamp(child=vbox, maximum_size=1000)
+		viewport = Gtk.Viewport()
+		viewport.set_child(clamp)
+
+		self.base.scrolled_window.set_child(None)
+		self.base.scrolled_window.set_child(viewport)

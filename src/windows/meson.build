@@ -7,7 +7,8 @@ telex_python_sources = [
     'home.py',
     'post_detail.py',
     'titlebar_controller.py',
-    'preferences.py'
+    'preferences.py',
+    'profile.py'
 ]
 
 install_data(telex_python_sources, install_dir: moduledir)

@@ -136,6 +136,27 @@ class Reddit:
 			msg = "Failed to retrieve comments"
 			raise requests.RequestException(msg) from e
 
+	async def retrieve_about_details(self, username: str) -> dict[str, int | dict]:
+		"""Returns about details for a user.
+
+		Args:
+			username (str): Reddit username
+
+		Returns:
+			dict[str, int | dict]: Response containing status code and user data
+
+		Raises:
+			httpx.RequestError: If the request to Reddit API fails
+		"""
+		try:
+			url = self.domain.format("oauth") + f"/user/{username}/about"
+			async with httpx.AsyncClient() as client:
+				res = await client.get(url, headers=self.headers, timeout=30)
+				return {"status_code": res.status_code, "json": res.json()}
+		except httpx.RequestError as e:
+			msg = "Failed to retrieve about details"
+			raise httpx.RequestError(msg) from e
+
 
 class AWSClient:
 	"""Base class for AWS Secrets Manager service."""
