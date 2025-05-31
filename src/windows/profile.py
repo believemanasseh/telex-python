@@ -72,7 +72,7 @@ class ProfileWindow(Gtk.ApplicationWindow):
 			msg = "Failed to fetch user profile data"
 			raise httpx.RequestError(msg) from e
 
-	def _create_overview_page(self) -> Gtk.Box:
+	def create_overview_page(self) -> Gtk.Box:
 		"""Creates the overview tab content."""
 		box = Gtk.Box(
 			orientation=Gtk.Orientation.VERTICAL,
@@ -85,7 +85,7 @@ class ProfileWindow(Gtk.ApplicationWindow):
 		box.append(Gtk.Label(label="User overview will be displayed here."))
 		return box
 
-	def _create_posts_page(self) -> Gtk.Box:
+	def create_posts_page(self) -> Gtk.Box:
 		"""Creates the posts tab content."""
 		box = Gtk.Box(
 			orientation=Gtk.Orientation.VERTICAL,
@@ -98,7 +98,7 @@ class ProfileWindow(Gtk.ApplicationWindow):
 		box.append(Gtk.Label(label="Posts will be displayed here."))
 		return box
 
-	def _create_comments_page(self) -> Gtk.Box:
+	def create_comments_page(self) -> Gtk.Box:
 		"""Creates the comments tab content."""
 		box = Gtk.Box(
 			orientation=Gtk.Orientation.VERTICAL,
@@ -111,7 +111,7 @@ class ProfileWindow(Gtk.ApplicationWindow):
 		box.append(Gtk.Label(label="Comments will be displayed here."))
 		return box
 
-	def _create_upvoted_page(self) -> Gtk.Box:
+	def create_upvoted_page(self) -> Gtk.Box:
 		"""Creates the upvoted posts tab content."""
 		box = Gtk.Box(
 			orientation=Gtk.Orientation.VERTICAL,
@@ -124,7 +124,7 @@ class ProfileWindow(Gtk.ApplicationWindow):
 		box.append(Gtk.Label(label="Upvoted posts will be displayed here."))
 		return box
 
-	def _create_downvoted_page(self) -> Gtk.Box:
+	def create_downvoted_page(self) -> Gtk.Box:
 		"""Creates the downvoted posts tab content."""
 		box = Gtk.Box(
 			orientation=Gtk.Orientation.VERTICAL,
@@ -137,48 +137,7 @@ class ProfileWindow(Gtk.ApplicationWindow):
 		box.append(Gtk.Label(label="Downvoted posts will be displayed here."))
 		return box
 
-	def __change_tab(self, label: Gtk.Label) -> None:
-		"""Changes the active tab based on the clicked label.
-
-		Args:
-			label (Gtk.Label): The label that was clicked to change the tab.
-
-		Returns:
-			None: This method does not return a value.
-		"""
-		tab_name = label.get_label().lower()
-
-		# Update CSS classes
-		if self.current_tab_widget:
-			self.current_tab_widget.remove_css_class("current-tab")
-
-		# Set new current tab
-		label.add_css_class("current-tab")
-		self.current_tab_widget = label
-
-		if self.main_content.get_parent() == self.box:
-			self.box.remove(self.main_content)
-
-		if tab_name == "overview":
-			self.main_content = self._create_overview_page()
-			store.current_profile_tab = "overview"
-		elif tab_name == "posts":
-			self.main_content = self._create_posts_page()
-			store.current_profile_tab = "posts"
-		elif tab_name == "comments":
-			self.main_content = self._create_comments_page()
-			store.current_profile_tab = "comments"
-		elif tab_name == "upvoted":
-			self.main_content = self._create_upvoted_page()
-			store.current_profile_tab = "upvoted"
-		elif tab_name == "downvoted":
-			self.main_content = self._create_downvoted_page()
-			store.current_profile_tab = "downvoted"
-
-		self.box.append(self.main_content)
-		self.application.loop.create_task(self.render_page())
-
-	def __on_label_clicked(
+	def __on_tab_clicked(
 		self,
 		_gesture: Gtk.GestureClick,
 		_n_press: int,
@@ -186,7 +145,7 @@ class ProfileWindow(Gtk.ApplicationWindow):
 		_y: float,
 		widget: Gtk.Label,
 	) -> None:
-		"""Handles label click events to change the active tab.
+		"""Handles tab click events to change the active tab.
 
 		Args:
 			_gesture (Gtk.GestureClick): The click gesture that triggered the event.
@@ -198,10 +157,46 @@ class ProfileWindow(Gtk.ApplicationWindow):
 		Returns:
 			None: This method does not return a value.
 		"""
-		self.__change_tab(widget)
+		tab_name = widget.get_label().lower()
+
+		# Update CSS classes
+		if self.current_tab_widget:
+			self.current_tab_widget.remove_css_class("current-tab")
+		widget.add_css_class("current-tab")
+
+		self.current_tab_widget = widget
+
+		if self.main_content.get_parent() == self.box:
+			self.box.remove(self.main_content)
+
+		if tab_name == "overview":
+			self.main_content = self.create_overview_page()
+			store.current_profile_tab = "overview"
+		elif tab_name == "posts":
+			self.main_content = self.create_posts_page()
+			store.current_profile_tab = "posts"
+		elif tab_name == "comments":
+			self.main_content = self.create_comments_page()
+			store.current_profile_tab = "comments"
+		elif tab_name == "upvoted":
+			self.main_content = self.create_upvoted_page()
+			store.current_profile_tab = "upvoted"
+		elif tab_name == "downvoted":
+			self.main_content = self.create_downvoted_page()
+			store.current_profile_tab = "downvoted"
+
+		self.box.append(self.main_content)
+		self.application.loop.create_task(self.render_page())
 
 	async def render_page(self):
-		"""Renders the profile page."""
+		"""Renders the profile page.
+
+		This method fetches the user profile data and constructs the UI
+		for the profile window. It includes user information, tabs for
+		overview, posts, comments, upvoted, and downvoted content.
+		It sets up the main content area and adds it to the scrolled window
+		of the base window.
+		"""
 		self.data = await self.fetch_data()
 
 		self.base.scrolled_window.set_child(None)
@@ -294,11 +289,7 @@ class ProfileWindow(Gtk.ApplicationWindow):
 			click_controller = Gtk.GestureClick()
 			click_controller.connect(
 				"pressed",
-				lambda gesture,
-				n_press,
-				x,
-				y,
-				widget=label_widget: self.__on_label_clicked(
+				lambda gesture, n_press, x, y, widget=label_widget: self.__on_tab_clicked(
 					gesture, n_press, x, y, widget
 				),
 			)
@@ -316,7 +307,7 @@ class ProfileWindow(Gtk.ApplicationWindow):
 				valign=Gtk.Align.START,
 				width_request=1000,
 			)
-			self.main_content = self._create_overview_page()
+			self.main_content = self.create_overview_page()
 			self.box.append(self.main_content)
 
 		vbox.append(self.box)
