@@ -63,6 +63,7 @@ class TitlebarController:
 			start_box (Gtk.Box): Left-side header container
 			end_box (Gtk.Box): Right-side header container
 			back_btn (Gtk.Button): Navigation back button
+			home_btn (Gtk.Button): Home navigation button
 			user_data (dict): User profile data retrieved from Reddit API
 		"""
 		self.header_bar = header_bar
@@ -72,6 +73,7 @@ class TitlebarController:
 		self.start_box: Gtk.Box | None = None
 		self.end_box: Gtk.Box | None = None
 		self.back_btn: Gtk.Button | None = None
+		self.home_btn: Gtk.Button | None = None
 		self.user_data = None
 
 		self.home_window.application.loop.create_task(self.retrieve_user_data())
@@ -111,8 +113,8 @@ class TitlebarController:
 		self.end_box = Gtk.Box(halign=True, orientation=Gtk.Orientation.HORIZONTAL)
 
 		# Sort menu button
-		menu_btn_child = self.__add_menu_button_child()
-		popover_child = self.__add_sort_popover_child()
+		menu_btn_child = self.add_menu_button_child()
+		popover_child = self.add_sort_popover_child()
 		self.end_box.append(
 			Gtk.MenuButton(
 				child=menu_btn_child,
@@ -132,7 +134,7 @@ class TitlebarController:
 		)
 
 		# Profile popover
-		popover_child = self.__add_profile_popover_child()
+		popover_child = self.add_profile_popover_child()
 		self.end_box.append(
 			Gtk.MenuButton(
 				icon_name="xyz.daimones.Telex.profile",
@@ -155,15 +157,28 @@ class TitlebarController:
 	def add_back_button(self) -> Gtk.Button:
 		"""Inserts a single back-arrow button at the left of the header."""
 		self.back_btn = Gtk.Button(
+			name="back",
 			icon_name="xyz.daimones.Telex.arrow-pointing-left",
 			tooltip_text=_("Back to Home"),
 			margin_start=5,
 		)
-		self.back_btn.connect("clicked", self.__on_back_clicked)
+		self.back_btn.connect("clicked", self.__on_home_clicked)
 		self.header_bar.pack_start(self.back_btn)
 		return self.back_btn
 
-	def __add_profile_popover_child(self) -> Gtk.Box:
+	def add_home_button(self) -> Gtk.Button:
+		"""Inserts a home button at the left of the header."""
+		self.home_btn = Gtk.Button(
+			name="home",
+			icon_name="xyz.daimones.Telex.homepage",
+			tooltip_text=_("Home"),
+			margin_start=5,
+		)
+		self.home_btn.connect("clicked", self.__on_home_clicked)
+		self.header_bar.pack_start(self.home_btn)
+		return self.home_btn
+
+	def add_profile_popover_child(self) -> Gtk.Box:
 		"""Creates profile popover child widget.
 
 		Creates a box containing the user profile information (profile picture,
@@ -243,7 +258,7 @@ class TitlebarController:
 
 		return popover_child
 
-	def __add_sort_popover_child(self) -> Gtk.Box:
+	def add_sort_popover_child(self) -> Gtk.Box:
 		"""Creates sort popover child widget.
 
 		Creates a box containing radio buttons for post sorting options
@@ -307,7 +322,7 @@ class TitlebarController:
 
 		return popover_child
 
-	def __add_menu_button_child(self) -> Gtk.Box:
+	def add_menu_button_child(self) -> Gtk.Box:
 		"""Creates menu button child widget.
 
 		Creates a box containing the sort menu button's label showing the
@@ -382,26 +397,23 @@ class TitlebarController:
 			self.header_bar.remove(self.end_box)
 			self.setup_titlebar()
 
-	def __on_back_clicked(self, _button: Gtk.Button) -> None:
-		"""Handles back button click events.
+	def __on_home_clicked(self, button: Gtk.Button) -> None:
+		"""Handles home button click events.
 
 		Returns to the home view by restoring the HomeWindow view
-		and clearing the current post detail view.
+		and clearing the current scrolled window view.
 
 		Args:
-			_button (Gtk.Button): The button that triggered the event
+			button (Gtk.Button): The button that triggered the event
 
 		Returns:
 			None: This method does not return a value.
 		"""
-		# Remove the back button from header bar
-		self.header_bar.remove(self.back_btn)
+		self.header_bar.remove(button)
 
-		# Remove post detail content
 		if self.home_window.scrolled_window.get_child():
 			self.home_window.scrolled_window.set_child(None)
 
-		# Restore home window components
 		self.home_window.application.loop.create_task(
 			self.home_window.render_page(setup_titlebar=False, set_current_window=True)
 		)

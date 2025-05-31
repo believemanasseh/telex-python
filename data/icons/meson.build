@@ -21,7 +21,8 @@ pngs = [
   ('@0@.reload.png').format(application_id),
   ('@0@.logo.png').format(application_id),
   ('@0@.sort-down.png').format(application_id),
-  ('@0@.arrow-pointing-left.png').format(application_id)
+  ('@0@.arrow-pointing-left.png').format(application_id),
+  ('@0@.homepage.png').format(application_id)
 ]
 
 foreach png : pngs

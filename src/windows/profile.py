@@ -186,9 +186,9 @@ class ProfileWindow(Gtk.ApplicationWindow):
 			store.current_profile_tab = "downvoted"
 
 		self.box.append(self.main_content)
-		self.application.loop.create_task(self.render_page())
+		self.application.loop.create_task(self.render_page(add_home_btn=False))
 
-	async def render_page(self):
+	async def render_page(self, add_home_btn: bool = True) -> None:
 		"""Renders the profile page.
 
 		This method fetches the user profile data and constructs the UI
@@ -196,6 +196,13 @@ class ProfileWindow(Gtk.ApplicationWindow):
 		overview, posts, comments, upvoted, and downvoted content.
 		It sets up the main content area and adds it to the scrolled window
 		of the base window.
+
+		Args:
+			add_home_btn (bool): Whether to add a home button to the title bar.
+				Default is True, which adds the home button.
+
+		Returns:
+			None: This method does not return a value.
 		"""
 		self.data = await self.fetch_data()
 
@@ -317,3 +324,6 @@ class ProfileWindow(Gtk.ApplicationWindow):
 		viewport.set_child(clamp)
 
 		self.base.scrolled_window.set_child(viewport)
+
+		if add_home_btn:
+			self.base.titlebar_controller.add_home_button()

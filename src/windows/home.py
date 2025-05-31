@@ -92,16 +92,6 @@ class HomeWindow(Gtk.ApplicationWindow):
 			header_bar=self.base.header_bar, home_window=self, api=self.api
 		)
 
-		self.box = Gtk.Box(
-			orientation=Gtk.Orientation.VERTICAL,
-			spacing=20,
-			css_classes=["box"],
-			halign=Gtk.Align.CENTER,
-			valign=Gtk.Align.START,
-			hexpand=True,
-			vexpand=True,
-		)
-
 	async def fetch_data(self, category: str) -> dict[str, int | dict] | None:
 		"""Retrieves post listings from Reddit API.
 
@@ -353,14 +343,23 @@ class HomeWindow(Gtk.ApplicationWindow):
 		await self.reload_data()
 
 		if set_current_window:
-			set_current_window_func("home")
+			set_current_window_func("home", self)
 
 		if setup_titlebar:
 			self.titlebar_controller.setup_titlebar()
 
-		clamp = Adw.Clamp(child=self.box, maximum_size=1000)
+		box = Gtk.Box(
+			orientation=Gtk.Orientation.VERTICAL,
+			spacing=20,
+			css_classes=["box"],
+			halign=Gtk.Align.CENTER,
+			valign=Gtk.Align.START,
+			hexpand=True,
+			vexpand=True,
+		)
+		clamp = Adw.Clamp(child=box, maximum_size=1000)
 
-		add_style_context(self.box, self.css_provider)
+		add_style_context(box, self.css_provider)
 
 		for index, data in enumerate(self.data["json"]["data"]["children"]):
 			post_container = Gtk.Box(
@@ -389,7 +388,7 @@ class HomeWindow(Gtk.ApplicationWindow):
 			)
 			post_container.add_controller(click_controller)
 
-			self.box.append(post_container)
+			box.append(post_container)
 
 			vote_btns_box = self.add_vote_buttons(data["data"]["score"])
 			post_container.append(vote_btns_box)
