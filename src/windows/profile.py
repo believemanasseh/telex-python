@@ -327,3 +327,5 @@ class ProfileWindow(Gtk.ApplicationWindow):
 
 		if add_home_btn:
 			self.base.titlebar_controller.add_home_button()
+
+		self.base.titlebar_controller.processing_click = False

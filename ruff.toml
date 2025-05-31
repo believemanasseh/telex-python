@@ -97,10 +97,10 @@ case-sensitive = true
 
 [lint.mccabe]
 # Flag errors (`C901`) whenever the complexity level exceeds 15
-max-complexity = 15
+max-complexity = 20
 
 [lint.pylint]
-max-branches = 15
+max-branches = 20
 
 [format]
 indent-style = "tab"

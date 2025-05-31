@@ -20,7 +20,8 @@ import gi
 
 import store
 
-gi.require_versions({"Adw": "1", "Gtk": "4.0"})
+gi.require_versions({"Gtk": "4.0", "Adw": "1", "Gio": "2.0", "GLib": "2.0"})
+
 
 from gi.repository import Adw, Gtk
 
@@ -65,6 +66,7 @@ class TitlebarController:
 			back_btn (Gtk.Button): Navigation back button
 			home_btn (Gtk.Button): Home navigation button
 			user_data (dict): User profile data retrieved from Reddit API
+			processing_click (bool): Flag to prevent multiple clicks during processing
 		"""
 		self.header_bar = header_bar
 		self.api = api
@@ -75,6 +77,7 @@ class TitlebarController:
 		self.back_btn: Gtk.Button | None = None
 		self.home_btn: Gtk.Button | None = None
 		self.user_data = None
+		self.processing_click = False
 
 		self.home_window.application.loop.create_task(self.retrieve_user_data())
 
@@ -409,16 +412,30 @@ class TitlebarController:
 		Returns:
 			None: This method does not return a value.
 		"""
-		self.header_bar.remove(button)
+		if self.processing_click:
+			return
 
-		if self.home_window.scrolled_window.get_child():
-			self.home_window.scrolled_window.set_child(None)
+		try:
+			self.processing_click = True
+			button.set_sensitive(False)
 
-		self.home_window.application.loop.create_task(
-			self.home_window.render_page(setup_titlebar=False, set_current_window=True)
-		)
+			self.header_bar.remove(button)
+			self.home_btn = None
+			self.back_btn = None
 
-	def __on_logout_clicked(self, _button: Gtk.Button) -> None:
+			if self.home_window.scrolled_window.get_child():
+				self.home_window.scrolled_window.set_child(None)
+
+			self.home_window.application.loop.create_task(
+				self.home_window.render_page(
+					setup_titlebar=False, set_current_window=True
+				)
+			)
+		finally:
+			self.processing_click = False
+			button.set_sensitive(True)
+
+	def __on_logout_clicked(self, button: Gtk.Button) -> None:
 		"""Handles logout button click events.
 
 		Logs out the user by:
@@ -427,28 +444,49 @@ class TitlebarController:
 		- Restoring the auth screen with login button
 
 		Args:
-			_button (Gtk.Button): The button that triggered the event
+			button (Gtk.Button): The button that triggered the event
 
 		Returns:
 			None: This method does not return a value.
 		"""
-		self.home_window.base.aws_client.delete_secret("telex-access-token")
-		self.home_window.base.close()
-		AuthWindow(application=self.home_window.application).present()
+		if self.processing_click:
+			return
 
-	def __on_view_profile_clicked(self, _button: Gtk.Button) -> None:
+		try:
+			self.processing_click = True
+			button.set_sensitive(False)
+			self.home_window.base.aws_client.delete_secret("telex-access-token")
+			self.home_window.base.close()
+			AuthWindow(application=self.home_window.application).present()
+		finally:
+			self.processing_click = False
+			button.set_sensitive(True)
+
+	def __on_view_profile_clicked(self, button: Gtk.Button) -> None:
 		"""Handles view profile button click events.
 
 		Opens the user profile window to display the user's Reddit profile
 		and settings.
 
 		Args:
-			_button (Gtk.Button): The button that triggered the event
+			button (Gtk.Button): The button that triggered the event
 
 		Returns:
 			None: This method does not return a value.
 		"""
-		from windows.profile import ProfileWindow
+		if self.processing_click:
+			return
 
-		profile_window = ProfileWindow(base_window=self.home_window, api=self.api)
-		self.home_window.application.loop.create_task(profile_window.render_page())
+		try:
+			self.processing_click = True
+			button.set_sensitive(False)
+
+			from windows.profile import ProfileWindow
+
+			add_home_btn = self.home_btn is None
+			profile_window = ProfileWindow(base_window=self.home_window, api=self.api)
+			self.home_window.application.loop.create_task(
+				profile_window.render_page(add_home_btn=add_home_btn)
+			)
+		finally:
+			button.set_sensitive(True)

@@ -102,7 +102,7 @@ class Telex(Adw.Application):
 
 		Args:
 			_action: The Gio.SimpleAction that was activated
-			_param: Parameter passed to the action (None in this case)
+			_param: Parameter passed to the action
 
 		Returns:
 			None: This method does not return a value.
@@ -110,19 +110,22 @@ class Telex(Adw.Application):
 		self.quit()
 
 	def on_about_action(
-		self, _action: Gio.SimpleAction, _param: GLib.Variant | None = None
+		self, widget: Gio.SimpleAction | Gtk.Button, _param: GLib.Variant | None = None
 	) -> None:
 		"""Callback for the app.about action.
 
 		Creates and displays the application's about dialog.
 
 		Args:
-			_action: The Gio.SimpleAction that was activated
-			_param: Parameter passed to the action (None in this case)
+			widget: The widget that triggered the action
+			_param: Parameter passed to the action
 
 		Returns:
 			None: This method does not return a value.
 		"""
+		if isinstance(widget, Gtk.Button):
+			widget.set_sensitive(False)
+
 		about = Gtk.AboutDialog(
 			version="0.1.0",
 			authors=["Illucid Mind"],
@@ -135,6 +138,9 @@ class Telex(Adw.Application):
 		)
 		about.present()
 
+		if isinstance(widget, Gtk.Button):
+			about.connect("close-request", lambda _: widget.set_sensitive(True))
+
 	def on_prefs_action(
 		self, _action: Gio.SimpleAction, _param: GLib.Variant | None = None
 	) -> None:
@@ -144,7 +150,7 @@ class Telex(Adw.Application):
 
 		Args:
 			_action: The Gio.SimpleAction that was activated
-			_param: Parameter passed to the action (None in this case)
+			_param: Parameter passed to the action
 
 		Returns:
 			None: This method does not return a value.
@@ -216,7 +222,6 @@ class Telex(Adw.Application):
 						)
 
 		if store.profile_window:
-			logging.info(store.profile_window.tabs_hbox.observe_children())
 			for child in store.profile_window.tabs_hbox.observe_children():
 				if isinstance(child, Gtk.Label):
 					current_classes = child.get_css_classes()
