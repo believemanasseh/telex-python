@@ -11,11 +11,18 @@ import store
 
 gi.require_versions({"Gtk": "4.0", "Adw": "1"})
 
+
 from gi.repository import Adw, Gtk
 
 from services import Reddit
 from utils import _
-from utils.common import add_style_contexts, create_cursor, load_css, load_image
+from utils.common import (
+	add_style_contexts,
+	create_cursor,
+	load_css,
+	load_image,
+	set_current_window,
+)
 from windows.home import HomeWindow
 
 
@@ -42,6 +49,7 @@ class ProfileWindow(Gtk.ApplicationWindow):
 			css_provider (Gtk.CssProvider): CSS styles provider for the window.
 			cursor (Gtk.Cursor): Custom cursor for clickable elements in the window.
 		"""
+		set_current_window("profile", self)
 		super().__init__(application=base_window.application)
 
 		self.application = base_window.application
@@ -59,7 +67,7 @@ class ProfileWindow(Gtk.ApplicationWindow):
 		profile window with user information.
 		"""
 		try:
-			return await self.api.retrieve_about_details(store.current_user)
+			return await self.api.retrieve_profile_details(store.current_user, "about")
 		except httpx.RequestError as e:
 			msg = "Failed to fetch user profile data"
 			raise httpx.RequestError(msg) from e
@@ -139,20 +147,36 @@ class ProfileWindow(Gtk.ApplicationWindow):
 			None: This method does not return a value.
 		"""
 		tab_name = label.get_label().lower()
-		self.box.remove(self.main_content)
+
+		# Update CSS classes
+		if self.current_tab_widget:
+			self.current_tab_widget.remove_css_class("current-tab")
+
+		# Set new current tab
+		label.add_css_class("current-tab")
+		self.current_tab_widget = label
+
+		if self.main_content.get_parent() == self.box:
+			self.box.remove(self.main_content)
 
 		if tab_name == "overview":
 			self.main_content = self._create_overview_page()
+			store.current_profile_tab = "overview"
 		elif tab_name == "posts":
 			self.main_content = self._create_posts_page()
+			store.current_profile_tab = "posts"
 		elif tab_name == "comments":
 			self.main_content = self._create_comments_page()
+			store.current_profile_tab = "comments"
 		elif tab_name == "upvoted":
 			self.main_content = self._create_upvoted_page()
+			store.current_profile_tab = "upvoted"
 		elif tab_name == "downvoted":
 			self.main_content = self._create_downvoted_page()
+			store.current_profile_tab = "downvoted"
 
 		self.box.append(self.main_content)
+		self.application.loop.create_task(self.render_page())
 
 	def __on_label_clicked(
 		self,
@@ -179,6 +203,8 @@ class ProfileWindow(Gtk.ApplicationWindow):
 	async def render_page(self):
 		"""Renders the profile page."""
 		self.data = await self.fetch_data()
+
+		self.base.scrolled_window.set_child(None)
 
 		vbox = Gtk.Box(
 			orientation=Gtk.Orientation.VERTICAL,
@@ -232,7 +258,7 @@ class ProfileWindow(Gtk.ApplicationWindow):
 		hbox.append(box)
 		vbox.append(hbox)
 
-		tabs_hbox = Gtk.Box(
+		self.tabs_hbox = Gtk.Box(
 			orientation=Gtk.Orientation.HORIZONTAL,
 			spacing=10,
 			halign=Gtk.Align.START,
@@ -249,13 +275,22 @@ class ProfileWindow(Gtk.ApplicationWindow):
 		]
 
 		for label in labels:
+			is_dark = self.application.settings.get_boolean("dark-mode")
+			is_current = store.current_profile_tab == label.lower()
+
+			css_classes = ["profile-tab-dark" if is_dark else "profile-tab"]
+
 			label_widget = Gtk.Label(
 				label=label,
-				css_classes=["profile-tab-label"],
-				margin_end=20,
+				css_classes=css_classes,
 				cursor=self.cursor,
 			)
 			label_widget.set_tooltip_text(_("Click to view {}").format(label.lower()))
+
+			if is_current:
+				label_widget.add_css_class("current-tab")
+				self.current_tab_widget = label_widget
+
 			click_controller = Gtk.GestureClick()
 			click_controller.connect(
 				"pressed",
@@ -268,24 +303,26 @@ class ProfileWindow(Gtk.ApplicationWindow):
 				),
 			)
 			label_widget.add_controller(click_controller)
-			tabs_hbox.append(label_widget)
+			self.tabs_hbox.append(label_widget)
+			add_style_contexts([label_widget], self.css_provider)
 
-		vbox.append(tabs_hbox)
+		vbox.append(self.tabs_hbox)
 
-		self.box = Gtk.Box(
-			orientation=Gtk.Orientation.VERTICAL,
-			spacing=10,
-			halign=Gtk.Align.CENTER,
-			valign=Gtk.Align.START,
-			width_request=1000,
-		)
-		self.main_content = self._create_overview_page()
-		self.box.append(self.main_content)
+		if store.current_profile_tab == "overview":
+			self.box = Gtk.Box(
+				orientation=Gtk.Orientation.VERTICAL,
+				spacing=10,
+				halign=Gtk.Align.CENTER,
+				valign=Gtk.Align.START,
+				width_request=1000,
+			)
+			self.main_content = self._create_overview_page()
+			self.box.append(self.main_content)
+
 		vbox.append(self.box)
 
 		clamp = Adw.Clamp(child=vbox, maximum_size=1000)
 		viewport = Gtk.Viewport()
 		viewport.set_child(clamp)
 
-		self.base.scrolled_window.set_child(None)
 		self.base.scrolled_window.set_child(viewport)

@@ -136,11 +136,14 @@ class Reddit:
 			msg = "Failed to retrieve comments"
 			raise requests.RequestException(msg) from e
 
-	async def retrieve_about_details(self, username: str) -> dict[str, int | dict]:
-		"""Returns about details for a user.
+	async def retrieve_profile_details(
+		self, username: str, category: str
+	) -> dict[str, int | dict]:
+		"""Returns profile details for a user.
 
 		Args:
 			username (str): Reddit username
+			category (str): Category of profile data to retrieve (e.g. 'comment', 'posts')
 
 		Returns:
 			dict[str, int | dict]: Response containing status code and user data
@@ -149,7 +152,7 @@ class Reddit:
 			httpx.RequestError: If the request to Reddit API fails
 		"""
 		try:
-			url = self.domain.format("oauth") + f"/user/{username}/about"
+			url = self.domain.format("oauth") + f"/user/{username}/{category}"
 			async with httpx.AsyncClient() as client:
 				res = await client.get(url, headers=self.headers, timeout=30)
 				return {"status_code": res.status_code, "json": res.json()}

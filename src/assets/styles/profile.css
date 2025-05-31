@@ -2,3 +2,27 @@
     font-size: 30px;
     font-weight: bold;
 }
+
+.profile-tab {
+    background-color: whitesmoke;
+    color: #2a2a2a;
+    border-radius: 15px;
+    padding: 5px 10px;
+}
+
+.profile-tab.current-tab {
+    background-color: #ff4500;  /* Reddit's orangered color */
+    color: white;
+}
+
+.profile-tab-dark {
+    background-color: @theme_base_color;
+    color: @theme_fg_color;
+    border-radius: 15px;
+    padding: 5px 10px;
+}
+
+.profile-tab-dark.current-tab {
+    background-color: #ff4500;
+    color: white;
+}

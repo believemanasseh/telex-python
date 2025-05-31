@@ -7,3 +7,6 @@ current_user = None
 auth_window = None
 home_window = None
 post_detail_window = None
+profile_window = None
+current_profile_tab = "overview"
+previous_profile_tab = None

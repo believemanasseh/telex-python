@@ -262,6 +262,9 @@ def set_current_window(window_name: str, widget: Gtk.Widget) -> None:
 	elif window_name == "home":
 		store.current_window = window_name
 		store.home_window = widget
-	else:
+	elif window_name == "post_detail":
 		store.current_window = window_name
 		store.post_detail_window = widget
+	else:
+		store.current_window = window_name
+		store.profile_window = widget

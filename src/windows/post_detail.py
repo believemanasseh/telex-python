@@ -103,7 +103,7 @@ class PostDetailWindow(Gtk.ApplicationWindow):
 		"""
 		return await self.api.retrieve_comments(post_id)
 
-	def __load_comments(
+	def load_comments(
 		self, parent_box: Gtk.Box, comment_data: dict, nesting_level: int = 0
 	) -> None:
 		"""Loads and renders comments recursively with proper nesting.
@@ -237,7 +237,7 @@ class PostDetailWindow(Gtk.ApplicationWindow):
 		if replies_data and "data" in replies_data:
 			children = replies_data["data"].get("children", [])
 			for reply in children:
-				self.__load_comments(parent_box, reply, nesting_level + 1)
+				self.load_comments(parent_box, reply, nesting_level + 1)
 
 	async def render_page(self):
 		"""Renders the post detail page with post content and comments.
@@ -311,4 +311,4 @@ class PostDetailWindow(Gtk.ApplicationWindow):
 		# Load comments
 		comments_data = data["json"][1]["data"]["children"]
 		for comment in comments_data:
-			self.__load_comments(comments_container, comment, 0)
+			self.load_comments(comments_container, comment, 0)

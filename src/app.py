@@ -215,6 +215,18 @@ class Telex(Adw.Application):
 							"comment-score-dark" if is_dark else "comment-score"
 						)
 
+		if store.profile_window:
+			logging.info(store.profile_window.tabs_hbox.observe_children())
+			for child in store.profile_window.tabs_hbox.observe_children():
+				if isinstance(child, Gtk.Label):
+					current_classes = child.get_css_classes()
+					if any(cls.startswith("profile-tab") for cls in current_classes):
+						child.remove_css_class("profile-tab")
+						child.remove_css_class("profile-tab-dark")
+						child.add_css_class(
+							"profile-tab-dark" if is_dark else "profile-tab"
+						)
+
 	def create_action(
 		self,
 		name: str,
