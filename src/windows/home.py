@@ -321,9 +321,7 @@ class HomeWindow(Gtk.ApplicationWindow):
 		self.application.loop.create_task(post_detail.render_page())
 
 	async def render_page(
-		self,
-		setup_titlebar: bool = True,
-		set_current_window: bool = False,
+		self, setup_titlebar: bool = True, set_current_window: bool = False
 	) -> None:
 		"""Creates the main layout for the homepage with a vertical box container.
 

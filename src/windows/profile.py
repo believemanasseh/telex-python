@@ -188,7 +188,9 @@ class ProfileWindow(Gtk.ApplicationWindow):
 		self.box.append(self.main_content)
 		self.application.loop.create_task(self.render_page(add_home_btn=False))
 
-	async def render_page(self, add_home_btn: bool = True) -> None:
+	async def render_page(
+		self, add_home_btn: bool = True, view_profile_btn: Gtk.Button | None = None
+	) -> None:
 		"""Renders the profile page.
 
 		This method fetches the user profile data and constructs the UI
@@ -200,6 +202,7 @@ class ProfileWindow(Gtk.ApplicationWindow):
 		Args:
 			add_home_btn (bool): Whether to add a home button to the title bar.
 				Default is True, which adds the home button.
+			view_profile_btn (Gtk.Button, optional): The button to view the profile.
 
 		Returns:
 			None: This method does not return a value.
@@ -328,4 +331,5 @@ class ProfileWindow(Gtk.ApplicationWindow):
 		if add_home_btn:
 			self.base.titlebar_controller.add_home_button()
 
-		self.base.titlebar_controller.processing_click = False
+		if view_profile_btn:
+			view_profile_btn.set_sensitive(True)

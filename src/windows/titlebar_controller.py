@@ -66,7 +66,6 @@ class TitlebarController:
 			back_btn (Gtk.Button): Navigation back button
 			home_btn (Gtk.Button): Home navigation button
 			user_data (dict): User profile data retrieved from Reddit API
-			processing_click (bool): Flag to prevent multiple clicks during processing
 		"""
 		self.header_bar = header_bar
 		self.api = api
@@ -77,7 +76,6 @@ class TitlebarController:
 		self.back_btn: Gtk.Button | None = None
 		self.home_btn: Gtk.Button | None = None
 		self.user_data = None
-		self.processing_click = False
 
 		self.home_window.application.loop.create_task(self.retrieve_user_data())
 
@@ -412,28 +410,16 @@ class TitlebarController:
 		Returns:
 			None: This method does not return a value.
 		"""
-		if self.processing_click:
-			return
+		self.header_bar.remove(button)
+		self.home_btn = None
+		self.back_btn = None
 
-		try:
-			self.processing_click = True
-			button.set_sensitive(False)
+		if self.home_window.scrolled_window.get_child():
+			self.home_window.scrolled_window.set_child(None)
 
-			self.header_bar.remove(button)
-			self.home_btn = None
-			self.back_btn = None
-
-			if self.home_window.scrolled_window.get_child():
-				self.home_window.scrolled_window.set_child(None)
-
-			self.home_window.application.loop.create_task(
-				self.home_window.render_page(
-					setup_titlebar=False, set_current_window=True
-				)
-			)
-		finally:
-			self.processing_click = False
-			button.set_sensitive(True)
+		self.home_window.application.loop.create_task(
+			self.home_window.render_page(setup_titlebar=False, set_current_window=True)
+		)
 
 	def __on_logout_clicked(self, button: Gtk.Button) -> None:
 		"""Handles logout button click events.
@@ -449,18 +435,10 @@ class TitlebarController:
 		Returns:
 			None: This method does not return a value.
 		"""
-		if self.processing_click:
-			return
-
-		try:
-			self.processing_click = True
-			button.set_sensitive(False)
-			self.home_window.base.aws_client.delete_secret("telex-access-token")
-			self.home_window.base.close()
-			AuthWindow(application=self.home_window.application).present()
-		finally:
-			self.processing_click = False
-			button.set_sensitive(True)
+		button.set_sensitive(False)
+		self.home_window.base.aws_client.delete_secret("telex-access-token")
+		self.home_window.base.close()
+		AuthWindow(application=self.home_window.application).present()
 
 	def __on_view_profile_clicked(self, button: Gtk.Button) -> None:
 		"""Handles view profile button click events.
@@ -474,19 +452,12 @@ class TitlebarController:
 		Returns:
 			None: This method does not return a value.
 		"""
-		if self.processing_click:
-			return
+		button.set_sensitive(False)
 
-		try:
-			self.processing_click = True
-			button.set_sensitive(False)
+		from windows.profile import ProfileWindow
 
-			from windows.profile import ProfileWindow
-
-			add_home_btn = self.home_btn is None
-			profile_window = ProfileWindow(base_window=self.home_window, api=self.api)
-			self.home_window.application.loop.create_task(
-				profile_window.render_page(add_home_btn=add_home_btn)
-			)
-		finally:
-			button.set_sensitive(True)
+		add_home_btn = self.home_btn is None
+		profile_window = ProfileWindow(base_window=self.home_window, api=self.api)
+		self.home_window.application.loop.create_task(
+			profile_window.render_page(add_home_btn=add_home_btn, view_profile_btn=button)
+		)
