@@ -66,6 +66,7 @@ class TitlebarController:
 			back_btn (Gtk.Button): Navigation back button
 			home_btn (Gtk.Button): Home navigation button
 			user_data (dict): User profile data retrieved from Reddit API
+			profile_data (dict): User profile data for specific categories
 		"""
 		self.header_bar = header_bar
 		self.api = api
@@ -76,18 +77,16 @@ class TitlebarController:
 		self.back_btn: Gtk.Button | None = None
 		self.home_btn: Gtk.Button | None = None
 		self.user_data = None
+		self.profile_data = None
 
 		self.home_window.application.loop.create_task(self.retrieve_user_data())
 
-	async def retrieve_user_data(self) -> dict:
+	async def retrieve_user_data(self) -> None:
 		"""Fetches user profile data from Reddit API.
 
 		Retrieves the current user's profile information including
 		display name and karma points. This data is used to populate
 		the profile menu in the header bar.
-
-		Returns:
-			dict: User profile data retrieved from Reddit API
 		"""
 		self.user_data = await self.api.retrieve_user_details()
 		store.current_user = self.user_data["json"]["name"]
@@ -198,7 +197,7 @@ class TitlebarController:
 
 		user_profile_img = load_image(
 			"/assets/images/reddit-placeholder.png",
-			_("placeholder"),
+			"placeholder",
 			css_classes=["user-profile-img"],
 		)
 		add_style_context(user_profile_img, self.css_provider)

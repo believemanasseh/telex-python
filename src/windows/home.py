@@ -85,6 +85,15 @@ class HomeWindow(Gtk.ApplicationWindow):
 		self.api = api
 		self.cursor = create_cursor("pointer")
 		self.css_provider = load_css("/assets/styles/home.css")
+		self.box = Gtk.Box(
+			orientation=Gtk.Orientation.VERTICAL,
+			spacing=20,
+			css_classes=["box"],
+			halign=Gtk.Align.CENTER,
+			valign=Gtk.Align.START,
+			hexpand=True,
+			vexpand=True,
+		)
 
 		from windows.titlebar_controller import TitlebarController
 
@@ -129,7 +138,7 @@ class HomeWindow(Gtk.ApplicationWindow):
 
 		post_image = load_image(
 			"/assets/images/reddit-placeholder.png",
-			_("Reddit placeholder"),
+			"Reddit placeholder",
 			css_classes=["post-image"],
 			css_provider=self.css_provider,
 		)
@@ -346,18 +355,9 @@ class HomeWindow(Gtk.ApplicationWindow):
 		if setup_titlebar:
 			self.titlebar_controller.setup_titlebar()
 
-		box = Gtk.Box(
-			orientation=Gtk.Orientation.VERTICAL,
-			spacing=20,
-			css_classes=["box"],
-			halign=Gtk.Align.CENTER,
-			valign=Gtk.Align.START,
-			hexpand=True,
-			vexpand=True,
-		)
-		clamp = Adw.Clamp(child=box, maximum_size=1000)
+		clamp = Adw.Clamp(child=self.box, maximum_size=1000)
 
-		add_style_context(box, self.css_provider)
+		add_style_context(self.box, self.css_provider)
 
 		for index, data in enumerate(self.data["json"]["data"]["children"]):
 			post_container = Gtk.Box(
@@ -386,7 +386,7 @@ class HomeWindow(Gtk.ApplicationWindow):
 			)
 			post_container.add_controller(click_controller)
 
-			box.append(post_container)
+			self.box.append(post_container)
 
 			vote_btns_box = self.add_vote_buttons(data["data"]["score"])
 			post_container.append(vote_btns_box)

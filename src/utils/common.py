@@ -41,6 +41,7 @@ def load_image(
 	can_shrink: bool = True,
 	css_classes: list[str] | None = None,
 	css_provider: Gtk.CssProvider | None = None,
+	tooltip_text: str | None = None,
 	valign: Gtk.Align = Gtk.Align.CENTER,
 ) -> Gtk.Picture:
 	"""Load and configure an image widget from a file.
@@ -49,15 +50,16 @@ def load_image(
 	layout options. Handles loading from relative paths in assets directory.
 
 	Args:
-	    img_path: Relative path to image file from assets directory
-	    alt_text: Alternative text description of the image
-	    can_shrink: Whether image can shrink below natural size
-	    css_classes: Optional list of CSS classes to apply
-	    css_provider: Optional CSS provider for additional styling
-	    valign: Vertical alignment of image within container
+		img_path: Relative path to image file from assets directory
+		alt_text: Alternative text description of the image
+		can_shrink: Whether image can shrink below natural size
+		css_classes: Optional list of CSS classes to apply
+		css_provider: Optional CSS provider for additional styling
+		valign: Vertical alignment of image within container
+		tooltip_text: Optional tooltip text for the image
 
 	Returns:
-	    Gtk.Picture: Configured picture widget containing the loaded image
+		Gtk.Picture: Configured picture widget containing the loaded image
 	"""
 	abspath = os.path.abspath(__file__)
 	post_image = Gtk.Picture(
@@ -72,6 +74,9 @@ def load_image(
 			css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
 		)
 
+	if tooltip_text:
+		post_image.set_tooltip_text(_("%s") % tooltip_text)
+
 	return post_image
 
 
@@ -82,10 +87,10 @@ def load_css(css_path: str) -> Gtk.CssProvider:
 	Handles relative paths from the assets directory.
 
 	Args:
-	    css_path: Relative path to CSS file from assets directory
+		css_path: Relative path to CSS file from assets directory
 
 	Returns:
-	    Gtk.CssProvider: Configured CSS provider with loaded styles
+		Gtk.CssProvider: Configured CSS provider with loaded styles
 	"""
 	css_provider = Gtk.CssProvider()
 	abspath = os.path.abspath(__file__)
@@ -99,8 +104,8 @@ def add_style_context(widget: Gtk.Widget, css_provider: Gtk.CssProvider) -> None
 	Adds a CSS provider to a widget's style context for custom styling.
 
 	Args:
-	    widget: Widget to style
-	    css_provider: CSS provider containing styles to apply
+		widget: Widget to style
+		css_provider: CSS provider containing styles to apply
 	"""
 	widget.get_style_context().add_provider(
 		css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
@@ -113,8 +118,8 @@ def add_style_contexts(widgets: list[Gtk.Widget], css_provider: Gtk.CssProvider)
 	Adds the same CSS provider to multiple widgets' style contexts.
 
 	Args:
-	    widgets: List of widgets to style
-	    css_provider: CSS provider containing styles to apply
+		widgets: List of widgets to style
+		css_provider: CSS provider containing styles to apply
 	"""
 	for widget in widgets:
 		widget.get_style_context().add_provider(
@@ -126,10 +131,10 @@ def create_cursor(name: str) -> Gdk.Cursor | None:
 	"""Create a cursor object from a named cursor type.
 
 	Args:
-	    name: Standard cursor name (e.g. 'pointer', 'text')
+		name: Standard cursor name (e.g. 'pointer', 'text')
 
 	Returns:
-	    Gdk.Cursor | None: Cursor object or None if name is invalid
+		Gdk.Cursor | None: Cursor object or None if name is invalid
 	"""
 	return Gdk.Cursor.new_from_name(name)
 
@@ -140,8 +145,8 @@ def append_all(box: Gtk.Box, widgets: list[Gtk.Widget]) -> None:
 	Appends a list of widgets to a GTK box container in sequence.
 
 	Args:
-	    box: Container box to add widgets to
-	    widgets: List of widgets to append
+		box: Container box to add widgets to
+		widgets: List of widgets to append
 	"""
 	for widget in widgets:
 		box.append(widget)
@@ -156,11 +161,11 @@ def load_image_from_url_async(
 	Calls provided callback with resulting pixbuf when complete.
 
 	Args:
-	    url: URL of image to download
-	    callback: Function to call with loaded pixbuf or None on error
+		url: URL of image to download
+		callback: Function to call with loaded pixbuf or None on error
 
 	Raises:
-	    requests.RequestException: If download fails
+		requests.RequestException: If download fails
 	"""
 
 	def on_data_received(loader: GdkPixbuf.PixbufLoader, data: Sequence[int]):
@@ -191,7 +196,7 @@ def create_image_widget(pixbuf: GdkPixbuf.Pixbuf | None = None) -> None:
 	falls back to a placeholder image if pixbuf is None.
 
 	Args:
-	    pixbuf: Optional pixbuf to create image from
+		pixbuf: Optional pixbuf to create image from
 	"""
 	if pixbuf:
 		Gtk.Picture.new_for_pixbuf(pixbuf)
@@ -211,10 +216,10 @@ def get_submission_time(utc_timestamp: int) -> str:
 	(e.g. "5 minutes ago", "2 hours ago", "3 days ago").
 
 	Args:
-	    utc_timestamp: UTC timestamp in seconds since epoch
+		utc_timestamp: UTC timestamp in seconds since epoch
 
 	Returns:
-	    str: Formatted relative time string
+		str: Formatted relative time string
 	"""
 	current_time = datetime.now(tz=UTC)
 	event_time = datetime.fromtimestamp(utc_timestamp, tz=UTC)

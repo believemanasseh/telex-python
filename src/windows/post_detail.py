@@ -155,7 +155,7 @@ class PostDetailWindow(Gtk.ApplicationWindow):
 		# Add user avatar
 		avatar = load_image(
 			"/assets/images/reddit-placeholder.png",
-			_("User avatar"),
+			"User avatar",
 			css_classes=["comment-avatar"],
 			css_provider=self.css_provider,
 		)

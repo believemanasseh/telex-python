@@ -222,7 +222,7 @@ class Telex(Adw.Application):
 						)
 
 		if store.profile_window:
-			for child in store.profile_window.tabs_hbox.observe_children():
+			for child in store.profile_window.vbox.observe_children():
 				if isinstance(child, Gtk.Label):
 					current_classes = child.get_css_classes()
 					if any(cls.startswith("profile-tab") for cls in current_classes):
