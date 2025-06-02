@@ -344,7 +344,7 @@ class ProfileWindow(Gtk.ApplicationWindow):
 
 		return box
 
-	def create_overview_page(self) -> Gtk.Box:
+	def create_overview_content(self) -> Gtk.Box:
 		"""Creates the overview tab content."""
 		box = Gtk.Box(
 			orientation=Gtk.Orientation.VERTICAL,
@@ -387,20 +387,38 @@ class ProfileWindow(Gtk.ApplicationWindow):
 
 		return box
 
-	def create_posts_page(self) -> Gtk.Box:
+	def create_posts_content(self) -> Gtk.Box:
 		"""Creates the posts tab content."""
 		box = Gtk.Box(
 			orientation=Gtk.Orientation.VERTICAL,
 			spacing=10,
-			margin_start=20,
-			margin_end=20,
 			margin_top=20,
 			margin_bottom=20,
+			width_request=1000,
 		)
-		box.append(Gtk.Label(label="Posts will be displayed here."))
+
+		for child in self.profile_data["json"]["data"]["children"]:
+			subreddit_name = child["data"]["subreddit_name_prefixed"]
+			title = child["data"]["title"]
+			num_of_comments = child["data"]["num_comments"]
+			score = child["data"]["score"]
+			selftext = child["data"]["selftext"]
+			date = get_submission_time(child["data"]["created_utc"])
+
+			post_box = self.load_post(
+				subreddit_name=subreddit_name,
+				title=title,
+				selftext=selftext,
+				score=score,
+				num_of_comments=num_of_comments,
+				date=date,
+			)
+
+			box.append(post_box)
+
 		return box
 
-	def create_comments_page(self) -> Gtk.Box:
+	def create_comments_content(self) -> Gtk.Box:
 		"""Creates the comments tab content."""
 		box = Gtk.Box(
 			orientation=Gtk.Orientation.VERTICAL,
@@ -413,7 +431,7 @@ class ProfileWindow(Gtk.ApplicationWindow):
 		box.append(Gtk.Label(label="Comments will be displayed here."))
 		return box
 
-	def create_upvoted_page(self) -> Gtk.Box:
+	def create_upvoted_content(self) -> Gtk.Box:
 		"""Creates the upvoted posts tab content."""
 		box = Gtk.Box(
 			orientation=Gtk.Orientation.VERTICAL,
@@ -426,7 +444,7 @@ class ProfileWindow(Gtk.ApplicationWindow):
 		box.append(Gtk.Label(label="Upvoted posts will be displayed here."))
 		return box
 
-	def create_downvoted_page(self) -> Gtk.Box:
+	def create_downvoted_content(self) -> Gtk.Box:
 		"""Creates the downvoted posts tab content."""
 		box = Gtk.Box(
 			orientation=Gtk.Orientation.VERTICAL,
@@ -482,19 +500,19 @@ class ProfileWindow(Gtk.ApplicationWindow):
 
 		match tab_name:
 			case "overview":
-				self.main_content = self.create_overview_page()
+				self.main_content = self.create_overview_content()
 				store.current_profile_tab = "overview"
 			case "submitted":
-				self.main_content = self.create_posts_page()
+				self.main_content = self.create_posts_content()
 				store.current_profile_tab = "submitted"
 			case "comments":
-				self.main_content = self.create_comments_page()
+				self.main_content = self.create_comments_content()
 				store.current_profile_tab = "comments"
 			case "upvoted":
-				self.main_content = self.create_upvoted_page()
+				self.main_content = self.create_upvoted_content()
 				store.current_profile_tab = "upvoted"
 			case "downvoted":
-				self.main_content = self.create_downvoted_page()
+				self.main_content = self.create_downvoted_content()
 				store.current_profile_tab = "downvoted"
 			case _:
 				logging.info("No match found")
@@ -642,7 +660,7 @@ class ProfileWindow(Gtk.ApplicationWindow):
 				valign=Gtk.Align.START,
 				width_request=1000,
 			)
-			self.main_content = self.create_overview_page()
+			self.main_content = self.create_overview_content()
 			self.box.append(self.main_content)
 
 		self.vbox.append(self.box)
