@@ -388,7 +388,7 @@ class ProfileWindow(Gtk.ApplicationWindow):
 		return box
 
 	def create_posts_content(self) -> Gtk.Box:
-		"""Creates the posts tab content."""
+		"""Creates the posts (including upvoted and downvoted) tab content."""
 		box = Gtk.Box(
 			orientation=Gtk.Orientation.VERTICAL,
 			spacing=10,
@@ -423,38 +423,28 @@ class ProfileWindow(Gtk.ApplicationWindow):
 		box = Gtk.Box(
 			orientation=Gtk.Orientation.VERTICAL,
 			spacing=10,
-			margin_start=20,
-			margin_end=20,
 			margin_top=20,
 			margin_bottom=20,
+			width_request=1000,
 		)
-		box.append(Gtk.Label(label="Comments will be displayed here."))
-		return box
 
-	def create_upvoted_content(self) -> Gtk.Box:
-		"""Creates the upvoted posts tab content."""
-		box = Gtk.Box(
-			orientation=Gtk.Orientation.VERTICAL,
-			spacing=10,
-			margin_start=20,
-			margin_end=20,
-			margin_top=20,
-			margin_bottom=20,
-		)
-		box.append(Gtk.Label(label="Upvoted posts will be displayed here."))
-		return box
+		for child in self.profile_data["json"]["data"]["children"]:
+			subreddit_name = child["data"]["subreddit_name_prefixed"]
+			date = get_submission_time(child["data"]["created_utc"])
+			score = child["data"]["score"]
+			link_title = child["data"]["link_title"]
+			body = child["data"]["body"]
 
-	def create_downvoted_content(self) -> Gtk.Box:
-		"""Creates the downvoted posts tab content."""
-		box = Gtk.Box(
-			orientation=Gtk.Orientation.VERTICAL,
-			spacing=10,
-			margin_start=20,
-			margin_end=20,
-			margin_top=20,
-			margin_bottom=20,
-		)
-		box.append(Gtk.Label(label="Downvoted posts will be displayed here."))
+			comment_box = self.load_comment(
+				subreddit_name=subreddit_name,
+				link_title=link_title,
+				body=body,
+				score=score,
+				date=date,
+			)
+
+			box.append(comment_box)
+
 		return box
 
 	async def __on_tab_clicked(
@@ -509,13 +499,14 @@ class ProfileWindow(Gtk.ApplicationWindow):
 				self.main_content = self.create_comments_content()
 				store.current_profile_tab = "comments"
 			case "upvoted":
-				self.main_content = self.create_upvoted_content()
+				self.main_content = self.create_posts_content()
 				store.current_profile_tab = "upvoted"
 			case "downvoted":
-				self.main_content = self.create_downvoted_content()
+				self.main_content = self.create_posts_content()
 				store.current_profile_tab = "downvoted"
 			case _:
-				logging.info("No match found")
+				logging.info("Tab not found")
+				raise ValueError(_("Unknown tab name: {}").format(tab_name))
 
 		self.box.append(self.main_content)
 
