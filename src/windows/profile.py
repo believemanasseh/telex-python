@@ -653,8 +653,7 @@ class ProfileWindow(Gtk.ApplicationWindow):
 			)
 			self.main_content = self.create_overview_content()
 			self.box.append(self.main_content)
-
-		self.vbox.append(self.box)
+			self.vbox.append(self.box)
 
 		clamp = Adw.Clamp(child=self.vbox, maximum_size=1000)
 		viewport = Gtk.Viewport(child=clamp)
