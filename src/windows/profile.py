@@ -53,6 +53,9 @@ class ProfileWindow(Gtk.ApplicationWindow):
 			profile_data (dict): Stores detailed profile data for the user.
 			css_provider (Gtk.CssProvider): CSS styles provider for the window.
 			cursor (Gtk.Cursor): Custom cursor for clickable elements in the window.
+			main_content (Gtk.Box): Main content area for displaying profile information.
+			tabs_hbox (Gtk.Box): Horizontal box containing profile tabs.
+			box (Gtk.Box): Vertical box for layout of the profile window.
 		"""
 		set_current_window("profile", self)
 		super().__init__(application=base_window.application)
@@ -64,12 +67,10 @@ class ProfileWindow(Gtk.ApplicationWindow):
 		self.profile_data = None
 		self.css_provider = load_css("/assets/styles/profile.css")
 		self.cursor = create_cursor("pointer")
-		self.vbox = Gtk.Box(
+		self.main_content = Gtk.Box(
 			orientation=Gtk.Orientation.VERTICAL,
-			spacing=20,
-			margin_start=20,
-			margin_end=20,
-			margin_top=50,
+			spacing=10,
+			margin_top=20,
 			margin_bottom=20,
 			width_request=1000,
 		)
@@ -78,7 +79,7 @@ class ProfileWindow(Gtk.ApplicationWindow):
 		"""Fetches user profile data from Reddit API.
 
 		Args:
-			category (str): The category of profile data to fetch (e.g., 'overview', 'posts').
+			category (str): The category of profile data to fetch.
 
 		Returns:
 			dict[str, int | dict]: The user profile data retrieved from the API.
@@ -92,26 +93,14 @@ class ProfileWindow(Gtk.ApplicationWindow):
 			msg = "Failed to fetch user profile data"
 			raise httpx.RequestError(msg) from e
 
-	def refresh_vbox(self) -> None:
-		"""Refreshes the vertical box by removing all children."""
-		self.vbox = Gtk.Box(
-			orientation=Gtk.Orientation.VERTICAL,
-			spacing=20,
-			margin_start=20,
-			margin_end=20,
-			margin_top=50,
-			margin_bottom=20,
-			width_request=1000,
-		)
-
 	def load_actions_box(
 		self, score: int, num_of_comments: int | None = None, alt_reply: bool = False
 	) -> Gtk.Box:
 		"""Creates a horizontal box for action buttons related to comments or posts.
 
 		Args:
-			score (int): The score of the comment or post, used for displaying upvote/downvote buttons.
-			num_of_comments (int, optional): The number of comments associated with the post.
+			score (int): The score of the comment or post.
+			num_of_comments (int, optional): The number of comments associated with post.
 			alt_reply (bool, optional): If True, uses an alternative reply button style.
 
 		Returns:
@@ -447,7 +436,7 @@ class ProfileWindow(Gtk.ApplicationWindow):
 
 		return box
 
-	async def __on_tab_clicked(
+	def __on_tab_clicked(
 		self,
 		_gesture: Gtk.GestureClick,
 		_n_press: int,
@@ -483,9 +472,23 @@ class ProfileWindow(Gtk.ApplicationWindow):
 
 		self.current_tab_widget = widget
 
-		if self.main_content.get_parent() == self.box:
+		if self.main_content and self.main_content.get_parent() == self.box:
 			self.box.remove(self.main_content)
+			self.loading_spinner = Gtk.Spinner(spinning=True, halign=Gtk.Align.CENTER)
+			self.box.append(self.loading_spinner)
 
+		self.application.loop.create_task(self.render_tab_content(tab_name, widget))
+
+	async def render_tab_content(self, tab_name: str, widget: Gtk.Label) -> None:
+		"""Renders the content for the specified tab.
+
+		Args:
+			tab_name (str): The name of the tab to render (e.g., 'overview', 'submitted').
+			widget (Gtk.Label): The label widget that was clicked to change the tab.
+
+		Returns:
+			None: This method does not return a value.
+		"""
 		self.profile_data = await self.fetch_data(tab_name)
 
 		match tab_name:
@@ -508,18 +511,18 @@ class ProfileWindow(Gtk.ApplicationWindow):
 				logging.info("Tab not found")
 				raise ValueError(_("Unknown tab name: {}").format(tab_name))
 
-		self.box.append(self.main_content)
+		# Re-enable other tab buttons
+		parent = widget.get_parent()
+		if parent:
+			for child in parent.observe_children():
+				if isinstance(child, Gtk.Label) and child.get_name() != tab_name:
+					child.set_sensitive(True)
 
-		self.application.loop.create_task(
-			self.render_page(add_home_btn=False, fetch_profile_data=False)
-		)
+		if self.main_content:
+			self.box.remove(self.loading_spinner)
+			self.box.append(self.main_content)
 
-	async def render_page(
-		self,
-		add_home_btn: bool = True,
-		view_profile_btn: Gtk.Button | None = None,
-		fetch_profile_data: bool = True,
-	) -> None:
+	async def render_page(self, view_profile_btn: Gtk.Button | None = None) -> None:
 		"""Renders the profile page.
 
 		This method fetches the user profile data and constructs the UI
@@ -529,10 +532,7 @@ class ProfileWindow(Gtk.ApplicationWindow):
 		of the base window.
 
 		Args:
-			add_home_btn (bool, optional): Whether to add a home button to the title bar.
-				Default is True, which adds the home button.
 			view_profile_btn (Gtk.Button, optional): The button to view the profile.
-			fetch_profile_data (bool, optional): Whether to fetch profile data.
 
 		Returns:
 			None: This method does not return a value.
@@ -541,10 +541,17 @@ class ProfileWindow(Gtk.ApplicationWindow):
 
 		self.base.scrolled_window.set_child(None)
 
-		if fetch_profile_data:
-			self.profile_data = await self.fetch_data(store.current_profile_tab)
-		else:
-			self.refresh_vbox()
+		self.profile_data = await self.fetch_data(store.current_profile_tab)
+
+		vbox = Gtk.Box(
+			orientation=Gtk.Orientation.VERTICAL,
+			spacing=20,
+			margin_start=20,
+			margin_end=20,
+			margin_top=50,
+			margin_bottom=20,
+			width_request=1000,
+		)
 
 		# Create a horizontal box for user avatar and name
 		hbox = Gtk.Box(
@@ -585,9 +592,9 @@ class ProfileWindow(Gtk.ApplicationWindow):
 		box.append(profile_display_name)
 
 		hbox.append(box)
-		self.vbox.append(hbox)
+		vbox.append(hbox)
 
-		tabs_hbox = Gtk.Box(
+		self.tabs_hbox = Gtk.Box(
 			orientation=Gtk.Orientation.HORIZONTAL,
 			spacing=10,
 			halign=Gtk.Align.START,
@@ -628,20 +635,16 @@ class ProfileWindow(Gtk.ApplicationWindow):
 			click_controller = Gtk.GestureClick()
 			click_controller.connect(
 				"pressed",
-				lambda gesture,
-				n_press,
-				x,
-				y,
-				widget=tab_widget: self.application.loop.create_task(
-					self.__on_tab_clicked(gesture, n_press, x, y, widget)
+				lambda gesture, n_press, x, y, widget=tab_widget: self.__on_tab_clicked(
+					gesture, n_press, x, y, widget
 				),
 			)
 			tab_widget.add_controller(click_controller)
-			tabs_hbox.append(tab_widget)
+			self.tabs_hbox.append(tab_widget)
 
 			add_style_context(tab_widget, self.css_provider)
 
-		self.vbox.append(tabs_hbox)
+		vbox.append(self.tabs_hbox)
 
 		if store.current_profile_tab == "overview":
 			self.box = Gtk.Box(
@@ -653,17 +656,16 @@ class ProfileWindow(Gtk.ApplicationWindow):
 			)
 			self.main_content = self.create_overview_content()
 			self.box.append(self.main_content)
-			self.vbox.append(self.box)
+			vbox.append(self.box)
 
-		clamp = Adw.Clamp(child=self.vbox, maximum_size=1000)
+		clamp = Adw.Clamp(child=vbox, maximum_size=1000)
 		viewport = Gtk.Viewport(child=clamp)
 
 		self.base.scrolled_window.set_child(viewport)
 
 		add_style_contexts([profile_name, profile_display_name], self.css_provider)
 
-		if add_home_btn:
-			self.base.titlebar_controller.add_home_button()
+		self.base.titlebar_controller.add_home_button()
 
 		if view_profile_btn:
 			view_profile_btn.set_sensitive(True)
