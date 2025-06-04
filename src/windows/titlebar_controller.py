@@ -412,6 +412,7 @@ class TitlebarController:
 		self.header_bar.remove(button)
 		self.home_btn = None
 		self.back_btn = None
+		store.back_btn_set = False
 
 		if self.home_window.scrolled_window.get_child():
 			self.home_window.scrolled_window.set_child(None)
@@ -455,8 +456,7 @@ class TitlebarController:
 
 		from windows.profile import ProfileWindow
 
-		add_home_btn = self.home_btn is None
 		profile_window = ProfileWindow(base_window=self.home_window, api=self.api)
 		self.home_window.application.loop.create_task(
-			profile_window.render_page(add_home_btn=add_home_btn, view_profile_btn=button)
+			profile_window.render_page(view_profile_btn=button)
 		)

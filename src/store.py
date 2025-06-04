@@ -10,3 +10,4 @@ post_detail_window = None
 profile_window = None
 current_profile_tab = "overview"
 previous_profile_tab = None
+back_btn_set = False

@@ -77,6 +77,10 @@ class HomeWindow(Gtk.ApplicationWindow):
 			cursor: Custom pointer cursor
 			css_provider: CSS styles provider
 			data: Fetched Reddit posts data based on current sort category
+			box: Main vertical box container for the home page content
+			titlebar_controller: Controller for the title bar functionality
+			scrolled_window (Gtk.ScrolledWindow): Main scrollable container for posts
+			viewport (Gtk.Viewport): Viewport containing the posts
 		"""
 		set_current_window_func("home", self)
 		super().__init__(application=application)
@@ -318,9 +322,11 @@ class HomeWindow(Gtk.ApplicationWindow):
 		"""
 		from windows.post_detail import PostDetailWindow
 
+		widget.set_sensitive(False)
+
 		index = widget.get_name()
 		post_id = self.data["json"]["data"]["children"][int(index)]["data"]["id"]
-		self.scrolled_window.set_child(None)
+
 		post_detail = PostDetailWindow(
 			application=self.application,
 			base_window=self,
@@ -349,13 +355,21 @@ class HomeWindow(Gtk.ApplicationWindow):
 		"""
 		await self.reload_data()
 
+		self.box = Gtk.Box(
+			orientation=Gtk.Orientation.VERTICAL,
+			spacing=20,
+			css_classes=["box"],
+			halign=Gtk.Align.CENTER,
+			valign=Gtk.Align.START,
+			hexpand=True,
+			vexpand=True,
+		)
+
 		if set_current_window:
 			set_current_window_func("home", self)
 
 		if setup_titlebar:
 			self.titlebar_controller.setup_titlebar()
-
-		clamp = Adw.Clamp(child=self.box, maximum_size=1000)
 
 		add_style_context(self.box, self.css_provider)
 
@@ -403,14 +417,12 @@ class HomeWindow(Gtk.ApplicationWindow):
 			)
 			post_container.append(post_metadata_box)
 
-		self.viewport = Gtk.Viewport()
-		self.viewport.set_child(clamp)
-
+		clamp = Adw.Clamp(child=self.box, maximum_size=1000)
+		self.viewport = Gtk.Viewport(child=clamp)
 		self.scrolled_window = Gtk.ScrolledWindow(
+			child=self.viewport,
 			hscrollbar_policy=Gtk.PolicyType.NEVER,
 			vscrollbar_policy=Gtk.PolicyType.AUTOMATIC,
 		)
-		self.scrolled_window.set_child(self.viewport)
-
 		self.base.set_child(self.scrolled_window)
 		self.base.maximize()

@@ -19,6 +19,8 @@ Classes:
 
 import gi
 
+import store
+
 gi.require_versions({"Gtk": "4.0", "Adw": "1"})
 
 from gi.repository import Adw, Gtk
@@ -86,7 +88,10 @@ class PostDetailWindow(Gtk.ApplicationWindow):
 		)
 		self.clamp = Adw.Clamp(child=self.box, maximum_size=1000)
 
-		self.base.titlebar_controller.add_back_button()
+		if not store.back_btn_set:
+			self.base.titlebar_controller.add_back_button()
+			store.back_btn_set = True
+
 		self.base.titlebar_controller.inject_post_detail(self)
 
 	async def fetch_data(self, post_id: str) -> dict[str, int | dict]:
@@ -281,7 +286,6 @@ class PostDetailWindow(Gtk.ApplicationWindow):
 			get_submission_time(post_data["data"]["created_utc"]),
 		)
 		post_container.append(post_metadata_box)
-		add_style_contexts([self.box, post_container], self.css_provider)
 
 		self.base.viewport.set_child(self.clamp)
 		self.base.scrolled_window.set_child(self.base.viewport)
@@ -306,7 +310,10 @@ class PostDetailWindow(Gtk.ApplicationWindow):
 			width_request=1000,
 		)
 		self.box.append(comments_container)
-		add_style_contexts([comments_header, comments_container], self.css_provider)
+		add_style_contexts(
+			[self.box, post_container, comments_header, comments_container],
+			self.css_provider,
+		)
 
 		# Load comments
 		comments_data = data["json"][1]["data"]["children"]
