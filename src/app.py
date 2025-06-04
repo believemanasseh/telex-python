@@ -175,6 +175,7 @@ class Telex(Adw.Application):
 			None: This method does not return a value.
 		"""
 		if store.auth_window:
+			logging.info("Updating auth window styles")
 			for child in store.auth_window.box.observe_children():
 				if isinstance(child, Gtk.Button):
 					current_classes = child.get_css_classes()
@@ -186,6 +187,7 @@ class Telex(Adw.Application):
 						)
 
 		if store.home_window:
+			logging.info("Updating home window styles")
 			for child in store.home_window.box.observe_children():
 				if isinstance(child, Gtk.Box):
 					current_classes = child.get_css_classes()
@@ -197,6 +199,7 @@ class Telex(Adw.Application):
 						)
 
 		if store.post_detail_window:
+			logging.info("Updating post detail window styles")
 			for child in store.post_detail_window.box.observe_children():
 				if isinstance(child, Gtk.Box):
 					current_classes = child.get_css_classes()
@@ -222,15 +225,29 @@ class Telex(Adw.Application):
 						)
 
 		if store.profile_window:
-			for child in store.profile_window.vbox.observe_children():
-				if isinstance(child, Gtk.Label):
-					current_classes = child.get_css_classes()
-					if any(cls.startswith("profile-tab") for cls in current_classes):
-						child.remove_css_class("profile-tab")
-						child.remove_css_class("profile-tab-dark")
-						child.add_css_class(
-							"profile-tab-dark" if is_dark else "profile-tab"
-						)
+			logging.info("Updating profile window styles")
+			for child in store.profile_window.tabs_hbox.observe_children():
+				current_classes = child.get_css_classes()
+				if isinstance(child, Gtk.Label) and any(
+					cls.startswith("profile-tab") for cls in current_classes
+				):
+					child.remove_css_class("profile-tab")
+					child.remove_css_class("profile-tab-dark")
+					child.add_css_class("profile-tab-dark" if is_dark else "profile-tab")
+
+			for child in store.profile_window.main_content.observe_children():
+				current_classes = child.get_css_classes()
+				if any(cls.startswith("post-item") for cls in current_classes):
+					child.remove_css_class("post-item")
+					child.remove_css_class("post-item-dark")
+					child.add_css_class("post-item-dark" if is_dark else "post-item")
+
+				if any(cls.startswith("comment-item") for cls in current_classes):
+					child.remove_css_class("comment-item")
+					child.remove_css_class("comment-item-dark")
+					child.add_css_class(
+						"comment-item-dark" if is_dark else "comment-item"
+					)
 
 	def create_action(
 		self,
