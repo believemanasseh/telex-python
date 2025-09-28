@@ -32,6 +32,7 @@ from utils.constants import SortType
 
 from .auth import AuthWindow
 from .home import HomeWindow
+from .new_post import NewPostDialog
 
 
 class TitlebarController:
@@ -100,12 +101,19 @@ class TitlebarController:
 		"""
 		# Left─side |reload|
 		self.start_box = Gtk.Box(halign=True, orientation=Gtk.Orientation.HORIZONTAL)
+		create_post_btn = Gtk.Button(
+			icon_name="xyz.daimones.Telex.create-post",
+			margin_start=5,
+			tooltip_text=_("Create Post"),
+		)
 		reload_btn = Gtk.Button(
 			icon_name="xyz.daimones.Telex.reload",
 			margin_start=5,
 			tooltip_text=_("Reload"),
 		)
+		create_post_btn.connect("clicked", self.__on_create_post_clicked)
 		reload_btn.connect("clicked", self.__on_reload_clicked)
+		self.start_box.append(create_post_btn)
 		self.start_box.append(reload_btn)
 		self.header_bar.pack_start(self.start_box)
 
@@ -356,6 +364,20 @@ class TitlebarController:
 		add_style_context(label, self.css_provider)
 
 		return menu_btn_child
+
+	def __on_create_post_clicked(self, _widget: Gtk.Button) -> None:
+		"""Handles create post button click events.
+
+		Creates new posts such as text, image or links.
+
+		Args:
+			_widget (Gtk.Button): The create post button that was clicked
+
+		Returns:
+			None: This method does not return a value
+		"""
+		new_post_dialog = NewPostDialog()
+		new_post_dialog.present()
 
 	def __on_reload_clicked(self, _widget: Gtk.Button) -> None:
 		"""Handles reload button click events.

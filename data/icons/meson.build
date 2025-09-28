@@ -14,15 +14,17 @@ install_data(
 
 fourty_eight_pixels_dir = join_paths('hicolor', '48x48', 'apps')
 pngs = [
-  ('@0@.upvote.png').format(application_id), 
-  ('@0@.downvote.png').format(application_id), 
+  ('@0@.upvote.png').format(application_id),
+  ('@0@.downvote.png').format(application_id),
   ('@0@.profile.png').format(application_id),
   ('@0@.search.png').format(application_id),
   ('@0@.reload.png').format(application_id),
   ('@0@.logo.png').format(application_id),
   ('@0@.sort-down.png').format(application_id),
   ('@0@.arrow-pointing-left.png').format(application_id),
-  ('@0@.homepage.png').format(application_id)
+  ('@0@.homepage.png').format(application_id),
+  ('@0@.create-post.png').format(application_id),
+  ('@0@.close.png').format(application_id),
 ]
 
 foreach png : pngs
