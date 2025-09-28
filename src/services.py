@@ -33,13 +33,13 @@ class Reddit:
 	def __init__(self) -> None:
 		"""Initialises request headers for Reddit API authentication."""
 		self.domain = "https://{0}.reddit.com"
-		self.system = platform.system()
-		base_encoded_string = base64.b64encode(b"xLfTJ9fCMdxmr5JCiNWMHQ:" + b"").decode(
+		self.system = platform.system().lower()
+		base_encoded_string = base64.b64encode(b"TAugZFgqYCtC9yjZRcWpng:" + b"").decode(
 			"utf-8"
 		)
 		self.headers = {
 			"Authorization": "Basic " + base_encoded_string,
-			"User-Agent": f"{self.system.lower()}:telex:v0.1.0 (by /u/Intrepid-Set1590)",
+			"User-Agent": f"{self.system}:telex:v0.1.0 (by /u/Intrepid-Set1590)",
 		}
 
 	def inject_token(self, token: str) -> None:
@@ -67,7 +67,7 @@ class Reddit:
 			data = {
 				"grant_type": "authorization_code",
 				"code": code,
-				"redirect_uri": "https://ab67-169-159-83-94.ngrok-free.app",
+				"redirect_uri": "https://9b4cdb6b1627.ngrok-free.app",
 			}
 			async with httpx.AsyncClient() as client:
 				res = await client.post(url, data=data, headers=self.headers, timeout=30)
