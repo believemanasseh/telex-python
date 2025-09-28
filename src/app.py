@@ -131,7 +131,7 @@ class Telex(Adw.Application):
 			authors=["Illucid Mind"],
 			program_name="Telex",
 			comments="A modern Reddit client",
-			copyright="© 2022 Illucid Mind",
+			copyright="© 2025 Illucid Mind",
 			license_type=Gtk.License.GPL_3_0,
 			website="https://telex.diamones.xyz",
 			logo_icon_name="xyz.daimones.Telex.logo",
@@ -290,7 +290,12 @@ def main(version) -> int:
 	logging.info("Starting Telex application")
 	logging.info("Version: %s", version)
 	logging.info("Python version: %s", sys.version)
-	logging.info("GTK version: %d.%d", Gtk.get_major_version(), Gtk.get_minor_version())
+	logging.info(
+		"GTK version: %d.%d.%d",
+		Gtk.get_major_version(),
+		Gtk.get_minor_version(),
+		Gtk.get_micro_version(),
+	)
 	logging.info("PyGObject version: %s", gi.__version__)
 
 	app = Telex()
