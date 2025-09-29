@@ -4,6 +4,16 @@
     padding: 2px;
 }
 
-.title-label {
+.title-label, .body-label {
     font-weight: 600;
+}
+
+.asterisk-label {
+    color: red;
+}
+
+.body-input {
+    border-radius: 10px;
+    border: 1px solid black;
+    padding: 2px;
 }
