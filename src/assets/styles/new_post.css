@@ -1,0 +1,9 @@
+.title-input {
+    border-radius: 10px;
+    border: 1px solid black;
+    padding: 2px;
+}
+
+.title-label {
+    font-weight: 600;
+}
