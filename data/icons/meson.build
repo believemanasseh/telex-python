@@ -25,6 +25,7 @@ pngs = [
   ('@0@.homepage.png').format(application_id),
   ('@0@.create-post.png').format(application_id),
   ('@0@.close.png').format(application_id),
+  ('@0@.delete.png').format(application_id),
 ]
 
 foreach png : pngs

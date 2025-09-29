@@ -8,9 +8,11 @@ import gi
 
 from utils.common import add_style_contexts, load_css
 
-gi.require_versions({"Adw": "1", "Gio": "2.0", "GObject": "2.0", "Gtk": "4.0"})
+gi.require_versions(
+	{"Adw": "1", "Gio": "2.0", "GObject": "2.0", "Gtk": "4.0", "Pango": "1.0"}
+)
 
-from gi.repository import Adw, Gtk
+from gi.repository import Adw, Gtk, Pango
 
 MAX_CHAR = 300
 
@@ -23,6 +25,8 @@ class NewPostDialog(Adw.Dialog):
 		super().__init__(**kwargs)
 
 		self.css_provider = load_css("/assets/styles/new_post.css")
+		self.media_list = []
+		self.media = []
 
 		# Set dialog properties
 		self.set_content_height(500)
@@ -112,7 +116,7 @@ class NewPostDialog(Adw.Dialog):
 				child_box.append(scrolled_window)
 			else:
 				parent = Gtk.Window()
-				button = Gtk.Button(label="Choose File…", margin_top=10)
+				button = Gtk.Button(label="Choose File…", margin_top=10, margin_bottom=10)
 				button.connect("clicked", self.__on_upload_clicked, parent, child_box)
 				child_box.append(button)
 
@@ -204,8 +208,30 @@ class NewPostDialog(Adw.Dialog):
 			filename = dialog.get_file().get_path()
 			if filename:
 				picture = Gtk.Picture.new_for_filename(filename)
-				picture.set_content_fit(Gtk.ContentFit.SCALE_DOWN)
-				picture.set_margin_top(10)
+				picture.set_halign(Gtk.Align.START)
+				picture.set_size_request(10, 10)
+				picture.set_content_fit(Gtk.ContentFit.CONTAIN)
+
+				label = Gtk.Label(
+					label=filename.split("/")[-1],
+					hexpand=True,
+					halign=Gtk.Align.CENTER,
+					ellipsize=Pango.EllipsizeMode.END,
+				)
+
+				delete_btn = Gtk.Button(
+					icon_name="xyz.daimones.Telex.delete",
+					halign=Gtk.Align.END,
+				)
+				delete_btn.connect(
+					"clicked",
+					lambda _btn: (
+						child_box.remove(lbr),
+						self.media.remove(filename),
+						self.media_list.remove(lbr),
+					),
+				)
+
 				box = Gtk.Box(
 					orientation=Gtk.Orientation.HORIZONTAL,
 					spacing=6,
@@ -215,8 +241,16 @@ class NewPostDialog(Adw.Dialog):
 					margin_end=6,
 				)
 				box.append(picture)
+				box.append(label)
+				box.append(delete_btn)
+
 				lbr = Gtk.ListBoxRow()
 				lbr.set_child(box)
-				child_box.append(lbr)
+
+				self.media_list.append(lbr)
+				self.media.append(filename)
+
+				for media in self.media_list:
+					child_box.append(media)
 
 		dialog.destroy()
