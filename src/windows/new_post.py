@@ -16,6 +16,8 @@ Classes:
 
 import gi
 
+import store
+
 gi.require_versions(
 	{"Adw": "1", "Gio": "2.0", "GObject": "2.0", "Gtk": "4.0", "Pango": "1.0"}
 )
@@ -218,6 +220,22 @@ class NewPostDialog(Adw.Dialog):
 			row.set_child(subreddit_box)
 			listbox.append(row)
 
+			click_controller = Gtk.GestureClick()
+			click_controller.connect(
+				"pressed",
+				lambda gesture,
+				n_press,
+				x,
+				y,
+				widget=subreddit_box,
+				subreddit_name=subreddit["data"][
+					"display_name_prefixed"
+				]: self.__on_subreddit_box_clicked(
+					gesture, n_press, x, y, widget, subreddit_name
+				),
+			)
+			subreddit_box.add_controller(click_controller)
+
 		scrolled_window = Gtk.ScrolledWindow(
 			child=listbox,
 			hscrollbar_policy=Gtk.PolicyType.NEVER,
@@ -230,6 +248,40 @@ class NewPostDialog(Adw.Dialog):
 		add_style_contexts([entry, listbox], self.css_provider)
 
 		return box
+
+	def __on_subreddit_box_clicked(
+		self,
+		_gesture: Gtk.GestureClick,
+		_n_press: int,
+		_x: float,
+		_y: float,
+		_widget: Gtk.Box,
+		subreddit_name: str,
+	):
+		"""Handles subreddit box click events.
+
+		Sets the current subreddit in the store, updates the MenuButton label,
+		and closes the popover.
+
+		Args:
+			_gesture (Gtk.GestureClick): The click gesture that triggered the event
+			_n_press (int): Number of presses that triggered the event
+			_x (float): x-coordinate of the event
+			_y (float): y-coordinate of the event
+			_widget (Gtk.Box): The post container widget that was clicked
+			subreddit_name (str): The name of the subreddit associated with the widget
+		"""
+		store.current_subreddit = subreddit_name
+
+		# Update the MenuButton label
+		if getattr(self, "menu_label", None):
+			self.menu_label.set_label(subreddit_name)
+
+		# Close the popover
+		if getattr(self, "menu_btn", None):
+			pop = self.menu_btn.get_popover()
+			if pop:
+				pop.popdown()
 
 	def __on_insert_text(
 		self, text_buffer: Gtk.TextBuffer, _location: Gtk.TextIter, _text: str, _len: int
@@ -368,8 +420,9 @@ class NewPostDialog(Adw.Dialog):
 		button.connect("clicked", lambda _: self.close())
 
 		popover_child = self.add_popover_child()
-		menu_btn = Gtk.MenuButton(
-			child=Gtk.Label(label="Select a subreddit"),
+		self.menu_label = Gtk.Label(label="Select a subreddit")
+		self.menu_btn = Gtk.MenuButton(
+			child=self.menu_label,
 			popover=Gtk.Popover(child=popover_child),
 			margin_top=5,
 			margin_end=50,
@@ -384,7 +437,7 @@ class NewPostDialog(Adw.Dialog):
 		grid.insert_column(3)
 		grid.attach(Gtk.Label(width_request=50), 0, 0, 1, 1)  # Spacer
 		grid.attach(Gtk.Label(width_request=30), 1, 0, 1, 1)  # Spacer
-		grid.attach(menu_btn, 2, 0, 1, 1)
+		grid.attach(self.menu_btn, 2, 0, 1, 1)
 		grid.attach(button, 3, 0, 1, 1)
 
 		box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
