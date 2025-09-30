@@ -160,6 +160,24 @@ class Reddit:
 			msg = "Failed to retrieve about details"
 			raise httpx.RequestError(msg) from e
 
+	async def retrieve_subreddits(self) -> dict[str, int | dict]:
+		"""Returns list of subreddits the user is subscribed to.
+
+		Returns:
+			dict[str, int | dict]: Response containing status code and subreddit data
+
+		Raises:
+			httpx.RequestError: If the request to Reddit API fails
+		"""
+		try:
+			url = self.domain.format("oauth") + "/subreddits/mine/subscriber"
+			async with httpx.AsyncClient() as client:
+				res = await client.get(url, headers=self.headers, timeout=30)
+				return {"status_code": res.status_code, "json": res.json()}
+		except httpx.RequestError as e:
+			msg = "Failed to retrieve subreddits"
+			raise httpx.RequestError(msg) from e
+
 
 class AWSClient:
 	"""Base class for AWS Secrets Manager service."""
