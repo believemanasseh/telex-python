@@ -100,7 +100,7 @@ class TitlebarController:
 		button with popover containing user information and account options.
 		"""
 		# Left─side |reload|
-		self.start_box = Gtk.Box(halign=True, orientation=Gtk.Orientation.HORIZONTAL)
+		self.start_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
 		create_post_btn = Gtk.Button(
 			icon_name="xyz.daimones.Telex.create-post",
 			margin_start=5,
@@ -118,7 +118,7 @@ class TitlebarController:
 		self.header_bar.pack_start(self.start_box)
 
 		# Right─side |sort|search|profile|
-		self.end_box = Gtk.Box(halign=True, orientation=Gtk.Orientation.HORIZONTAL)
+		self.end_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
 
 		# Sort menu button
 		menu_btn_child = self.add_menu_button_child()
@@ -376,8 +376,8 @@ class TitlebarController:
 		Returns:
 			None: This method does not return a value
 		"""
-		new_post_dialog = NewPostDialog()
-		new_post_dialog.present()
+		new_post_dialog = NewPostDialog(self.api, self.home_window.application)
+		self.home_window.application.loop.create_task(new_post_dialog.render_page())
 
 	def __on_reload_clicked(self, _widget: Gtk.Button) -> None:
 		"""Handles reload button click events.

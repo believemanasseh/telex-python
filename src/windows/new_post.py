@@ -16,13 +16,14 @@ Classes:
 
 import gi
 
-from utils.common import add_style_contexts, load_css
-
 gi.require_versions(
 	{"Adw": "1", "Gio": "2.0", "GObject": "2.0", "Gtk": "4.0", "Pango": "1.0"}
 )
 
 from gi.repository import Adw, Gtk, Pango
+
+from services import Reddit
+from utils.common import add_style_contexts, load_css, load_image
 
 MAX_CHAR = 300
 
@@ -30,22 +31,44 @@ MAX_CHAR = 300
 class NewPostDialog(Adw.Dialog):
 	"""New Post dialog for Telex application."""
 
-	def __init__(self, **kwargs):
+	from app import Telex
+
+	def __init__(self, api: Reddit, application: Telex, **kwargs):
 		"""Initialise the New Post dialog."""
 		super().__init__(**kwargs)
 
+		self.api = api
+		self.application = application
 		self.css_provider = load_css("/assets/styles/new_post.css")
 		self.media_list = []
 		self.media = []
+		self.subreddits = None
 
 		# Set dialog properties
 		self.set_content_height(500)
 		self.set_content_width(600)
 		self.set_title("New Post")
 
-		notebook = Gtk.Notebook(page=0)
+	async def fetch_data(self) -> None:
+		"""Retrieves subreddits the user is subscribed to.
 
-		# Add title input field for text, images and link tab pages
+		Returns:
+			dict[str, int | dict] | None: Response containing status code and listing data
+		"""
+		return await self.api.retrieve_subreddits()
+
+	def add_input_fields(self, notebook: Gtk.Notebook) -> None:
+		"""Adds input fields to the notebook for different post types.
+
+		Creates and configures input fields for title, body text, image upload,
+		and link URL, and adds them to the provided notebook.
+
+		Args:
+			notebook (Gtk.Notebook): The notebook to add input fields to
+
+		Returns:
+			None: This method does not return a value.
+		"""
 		labels = ["Text", "Images", "Link"]
 		for label in labels:
 			child_box = Gtk.Box(
@@ -140,19 +163,73 @@ class NewPostDialog(Adw.Dialog):
 				self.css_provider,
 			)
 
-		button = Gtk.Button(
-			icon_name="xyz.daimones.Telex.close",
-			halign=Gtk.Align.END,
-			margin_end=5,
-			margin_top=5,
+	def add_popover_child(self) -> Gtk.Box:
+		"""Creates and returns the popover child widget.
+
+		Returns:
+			Gtk.Box: The box containing the popover content
+		"""
+		box = Gtk.Box(
+			orientation=Gtk.Orientation.VERTICAL,
+			margin_top=10,
+			margin_bottom=10,
+			margin_start=10,
+			margin_end=10,
+			spacing=6,
 		)
-		button.connect("clicked", lambda _: self.close())
 
-		box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
-		box.append(button)
-		box.append(notebook)
+		entry = Gtk.Entry(
+			placeholder_text="Search",
+			css_classes=["search-entry"],
+			width_request=300,
+			primary_icon_name="xyz.daimones.Telex.search",
+		)
+		box.append(entry)
 
-		self.set_child(box)
+		listbox = Gtk.ListBox()
+
+		for subreddit in self.subreddits["json"]["data"]["children"]:
+			row = Gtk.ListBoxRow()
+			subreddit_box = Gtk.Box(
+				orientation=Gtk.Orientation.HORIZONTAL,
+				halign=Gtk.Align.CENTER,
+				spacing=10,
+			)
+			subreddit_icon = load_image(
+				"/assets/images/reddit-placeholder.png",
+				"Subreddit placeholder",
+				css_classes=["subreddit-icon"],
+				css_provider=self.css_provider,
+			)
+			vbox = Gtk.Box(
+				orientation=Gtk.Orientation.VERTICAL, valign=Gtk.Align.CENTER, spacing=6
+			)
+			subreddit_title = Gtk.Label(
+				label=subreddit["data"]["title"], halign=Gtk.Align.START
+			)
+			subreddit_name = Gtk.Label(
+				label=subreddit["data"]["display_name_prefixed"],
+				halign=Gtk.Align.START,
+			)
+			vbox.append(subreddit_title)
+			vbox.append(subreddit_name)
+			subreddit_box.append(subreddit_icon)
+			subreddit_box.append(vbox)
+			row.set_child(subreddit_box)
+			listbox.append(row)
+
+		scrolled_window = Gtk.ScrolledWindow(
+			child=listbox,
+			hscrollbar_policy=Gtk.PolicyType.NEVER,
+			vscrollbar_policy=Gtk.PolicyType.AUTOMATIC,
+			height_request=150,
+			width_request=200,
+		)
+		box.append(scrolled_window)
+
+		add_style_contexts([entry, listbox], self.css_provider)
+
+		return box
 
 	def __on_insert_text(
 		self, text_buffer: Gtk.TextBuffer, _location: Gtk.TextIter, _text: str, _len: int
@@ -267,3 +344,51 @@ class NewPostDialog(Adw.Dialog):
 					child_box.append(media)
 
 		dialog.destroy()
+
+	async def render_page(self) -> None:
+		"""Renders the New Post dialog.
+
+		Returns:
+			None: This method does not return a value
+		"""
+		self.present()
+
+		self.subreddits = await self.fetch_data()
+
+		notebook = Gtk.Notebook(page=0)
+
+		self.add_input_fields(notebook)
+
+		button = Gtk.Button(
+			icon_name="xyz.daimones.Telex.close",
+			halign=Gtk.Align.END,
+			margin_end=5,
+			margin_top=5,
+		)
+		button.connect("clicked", lambda _: self.close())
+
+		popover_child = self.add_popover_child()
+		menu_btn = Gtk.MenuButton(
+			child=Gtk.Label(label="Select a subreddit"),
+			popover=Gtk.Popover(child=popover_child),
+			margin_top=5,
+			margin_end=50,
+			hexpand=True,
+		)
+
+		grid = Gtk.Grid(column_spacing=30)
+		grid.insert_row(0)
+		grid.insert_column(0)
+		grid.insert_column(1)
+		grid.insert_column(2)
+		grid.insert_column(3)
+		grid.attach(Gtk.Label(width_request=50), 0, 0, 1, 1)  # Spacer
+		grid.attach(Gtk.Label(width_request=30), 1, 0, 1, 1)  # Spacer
+		grid.attach(menu_btn, 2, 0, 1, 1)
+		grid.attach(button, 3, 0, 1, 1)
+
+		box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+		box.append(grid)
+		box.append(notebook)
+
+		self.set_child(box)
