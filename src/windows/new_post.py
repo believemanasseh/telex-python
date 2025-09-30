@@ -1,7 +1,17 @@
-"""New post dialog module for the Telex application.
+"""New Post dialog implementation for Telex application.
 
-This module provides:
-- NewPostDialog: Main dialog for creating new Reddit post.
+The module provides a dialog window for creating new posts in the Telex
+application, allowing users to input text, upload images, or add links.
+It includes input validation, file selection, and dynamic UI updates.
+
+Features:
+- Title and body text input
+- Image upload and preview
+- Link input
+- Tabbed interface for different post types
+
+Classes:
+	NewPostDialog: Main dialog class for creating new posts
 """
 
 import gi
@@ -207,16 +217,19 @@ class NewPostDialog(Adw.Dialog):
 		if response == Gtk.ResponseType.ACCEPT:
 			filename = dialog.get_file().get_path()
 			if filename:
+				picture_clamp = Adw.Clamp(maximum_size=40)
 				picture = Gtk.Picture.new_for_filename(filename)
 				picture.set_halign(Gtk.Align.START)
-				picture.set_size_request(10, 10)
+				picture.set_valign(Gtk.Align.CENTER)
 				picture.set_content_fit(Gtk.ContentFit.CONTAIN)
+				picture_clamp.set_child(picture)
 
 				label = Gtk.Label(
 					label=filename.split("/")[-1],
 					hexpand=True,
 					halign=Gtk.Align.CENTER,
 					ellipsize=Pango.EllipsizeMode.END,
+					max_width_chars=30,
 				)
 
 				delete_btn = Gtk.Button(
@@ -240,7 +253,7 @@ class NewPostDialog(Adw.Dialog):
 					margin_start=6,
 					margin_end=6,
 				)
-				box.append(picture)
+				box.append(picture_clamp)
 				box.append(label)
 				box.append(delete_btn)
 
