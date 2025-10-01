@@ -45,6 +45,7 @@ class NewPostDialog(Adw.Dialog):
 		self.media_list = []
 		self.media = []
 		self.subreddits = None
+		self.subreddit_boxes = []
 
 		# Set dialog properties
 		self.set_content_height(500)
@@ -180,7 +181,11 @@ class NewPostDialog(Adw.Dialog):
 			spacing=6,
 		)
 
+		buffer = Gtk.EntryBuffer()
+		buffer.connect("inserted-text", self.__on_inserted_text)
+		buffer.connect("deleted-text", self.__on_deleted_text)
 		entry = Gtk.Entry(
+			buffer=buffer,
 			placeholder_text="Search",
 			css_classes=["search-entry"],
 			width_request=300,
@@ -219,6 +224,12 @@ class NewPostDialog(Adw.Dialog):
 			subreddit_box.append(vbox)
 			row.set_child(subreddit_box)
 			listbox.append(row)
+
+			# Store references to labels and row for filtering
+			subreddit_box.subreddit_title = subreddit_title
+			subreddit_box.subreddit_name = subreddit_name
+			subreddit_box.row = row
+			self.subreddit_boxes.append(subreddit_box)
 
 			click_controller = Gtk.GestureClick()
 			click_controller.connect(
@@ -302,6 +313,61 @@ class NewPostDialog(Adw.Dialog):
 		if text_buffer.get_char_count() >= MAX_CHAR:
 			text_buffer.stop_emission_by_name("insert-text")
 
+	def __on_inserted_text(
+		self,
+		entry_buffer: Gtk.EntryBuffer,
+		_position: int,
+		_chars: str,
+		_n_chars: int,
+	):
+		"""Handles inserted text events for Entry widget.
+
+		Filters subreddit boxes based on the search query in the entry buffer.
+
+		Args:
+			entry_buffer (Gtk.EntryBuffer): The buffer that triggered the event
+			_position (int): The position to insert text in entrybuffer
+			_chars (str): UTF-8 text to be inserted
+			_n_chars (int): The length of the inserted text in bytes
+
+		Returns:
+			None: This method does not return a value.
+		"""
+		for box in self.subreddit_boxes:
+			title_label = getattr(box, "subreddit_title", None)
+			name_label = getattr(box, "subreddit_name", None)
+			row = getattr(box, "row", None)
+			if not title_label or not name_label or not row:
+				continue
+			subreddit_title = title_label.get_label().lower()
+			subreddit_name = name_label.get_label().lower()
+			row.set_visible(
+				entry_buffer.get_text().lower() in subreddit_title
+				or entry_buffer.get_text().lower() in subreddit_name
+			)
+
+	def __on_deleted_text(
+		self, entry_buffer: Gtk.EntryBuffer, _position: int, _n_chars: int
+	):
+		"""Handles deleted text events for Entry widget.
+
+		Shows all subreddit boxes if the entry buffer is empty.
+
+		Args:
+			entry_buffer (Gtk.EntryBuffer): The buffer that triggered the event
+			_position (int): The position to delete text in entrybuffer
+			_n_chars (int): The length of the deleted text in bytes
+
+		Returns:
+			None: This method does not return a value.
+		"""
+		if entry_buffer.get_length() == 1:
+			for box in self.subreddit_boxes:
+				row = getattr(box, "row", None)
+				if not row:
+					continue
+				row.set_visible(True)
+
 	def __on_upload_clicked(
 		self, _button: Gtk.Button, parent: Gtk.Window, child_box: Gtk.Box
 	):
@@ -324,10 +390,10 @@ class NewPostDialog(Adw.Dialog):
 			accept_label="_Open",
 			cancel_label="_Cancel",
 		)
-		dialog.connect("response", self.__on_file_dialog_response, child_box)
+		dialog.connect("response", self.__on_response, child_box)
 		dialog.show()
 
-	def __on_file_dialog_response(
+	def __on_response(
 		self, dialog: Gtk.FileChooserNative, response: int, child_box: Gtk.Box
 	):
 		"""Handles file chooser dialog response event.
