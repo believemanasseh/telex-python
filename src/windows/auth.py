@@ -163,6 +163,11 @@ class AuthWindow(Gtk.ApplicationWindow):
 			start_index = uri.index("code=") + len("code=")
 			end_index = uri.index("#")
 			auth_code = uri[start_index:end_index]
+			self.dialog.set_child(
+				Gtk.Spinner(
+					spinning=True, halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER
+				)
+			)
 			self.application.loop.create_task(self.__handle_auth_code(auth_code))
 
 	def __on_close_webview(self, _widget: WebKit.WebView) -> None:
