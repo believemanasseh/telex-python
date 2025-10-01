@@ -59,6 +59,8 @@ class NewPostDialog(Adw.Dialog):
 		self.media = []
 		self.subreddits = None
 		self.subreddit_boxes = []
+		self.menu_btn = None
+		self.menu_label = None
 
 		# Set dialog properties
 		self.set_content_height(500)
