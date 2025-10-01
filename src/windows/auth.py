@@ -134,7 +134,6 @@ class AuthWindow(Gtk.ApplicationWindow):
 
 			self.dialog.close()
 
-			self.box.remove(self.reddit_btn)
 			self.box.set_visible(False)
 
 			from windows.home import HomeWindow
@@ -168,6 +167,7 @@ class AuthWindow(Gtk.ApplicationWindow):
 					spinning=True, halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER
 				)
 			)
+			self.box.remove(self.reddit_btn)
 			self.application.loop.create_task(self.__handle_auth_code(auth_code))
 
 	def __on_close_webview(self, _widget: WebKit.WebView) -> None:
