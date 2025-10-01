@@ -35,12 +35,25 @@ class NewPostDialog(Adw.Dialog):
 
 	from app import Telex
 
-	def __init__(self, api: Reddit, application: Telex, **kwargs):
-		"""Initialise the New Post dialog."""
-		super().__init__(**kwargs)
+	def __init__(self, api: Reddit):
+		"""Initialise the New Post dialog.
 
+		Args:
+			api (Reddit): Instance of Reddit API handler
+
+		Attributes:
+			api (Reddit): Instance of Reddit API handler
+			css_provider (Gtk.CssProvider): CSS provider for styling
+			media_list (list): List of media file widgets
+			media (list): List of media file paths
+			subreddits (dict | None): Subreddit data fetched from Reddit API
+			subreddit_boxes (list): List of subreddit box widgets for filtering
+			spinner (Gtk.Spinner): Spinner widget for loading indication
+			menu_btn (Gtk.MenuButton | None): Menu button for subreddit selection
+			menu_label (Gtk.Label | None): Label displaying selected subreddit
+		"""
+		super().__init__()
 		self.api = api
-		self.application = application
 		self.css_provider = load_css("/assets/styles/new_post.css")
 		self.media_list = []
 		self.media = []
@@ -51,6 +64,10 @@ class NewPostDialog(Adw.Dialog):
 		self.set_content_height(500)
 		self.set_content_width(600)
 		self.set_title("New Post")
+		self.spinner = Gtk.Spinner(
+			spinning=True, halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER
+		)
+		self.set_child(self.spinner)
 
 	async def fetch_data(self) -> None:
 		"""Retrieves subreddits the user is subscribed to.

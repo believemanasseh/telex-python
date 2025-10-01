@@ -376,7 +376,7 @@ class TitlebarController:
 		Returns:
 			None: This method does not return a value
 		"""
-		new_post_dialog = NewPostDialog(self.api, self.home_window.application)
+		new_post_dialog = NewPostDialog(self.api)
 		self.home_window.application.loop.create_task(new_post_dialog.render_page())
 
 	def __on_reload_clicked(self, _widget: Gtk.Button) -> None:
