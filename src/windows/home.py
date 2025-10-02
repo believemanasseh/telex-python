@@ -426,3 +426,4 @@ class HomeWindow(Gtk.ApplicationWindow):
 		)
 		self.base.set_child(self.scrolled_window)
 		self.base.maximize()
+		self.base.set_visible(True)
