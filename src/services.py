@@ -178,6 +178,26 @@ class Reddit:
 			msg = "Failed to retrieve subreddits"
 			raise httpx.RequestError(msg) from e
 
+	def submit_post(self, data: dict) -> dict[str, int | dict]:
+		"""Submits a new post to Reddit.
+
+		Args:
+			data (dict): Post data including title, subreddit, kind, etc.
+
+		Returns:
+			dict[str, int | dict]: Response containing status code and submission result
+
+		Raises:
+			requests.RequestException: If the request to Reddit API fails
+		"""
+		try:
+			url = self.domain.format("oauth") + "/api/submit"
+			res = requests.post(url, headers=self.headers, data=data, timeout=30)
+			return {"status_code": res.status_code, "json": res.json()}
+		except requests.RequestException as e:
+			msg = "Failed to submit post"
+			raise requests.RequestException(msg) from e
+
 
 class AWSClient:
 	"""Base class for AWS Secrets Manager service."""
