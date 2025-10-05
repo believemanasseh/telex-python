@@ -71,13 +71,13 @@ class NewPostDialog(Adw.Dialog):
 		)
 		self.set_child(self.spinner)
 
-	async def fetch_data(self) -> None:
+	async def fetch_data(self) -> dict[str, int | dict] | None:
 		"""Retrieves subreddits the user is subscribed to.
 
 		Returns:
 			dict[str, int | dict] | None: Response containing status code and listing data
 		"""
-		return await self.api.retrieve_subreddits()
+		return await self.api.retrieve_subscribed_subreddits()
 
 	def add_input_fields(self, notebook: Gtk.Notebook) -> None:
 		"""Adds input fields to the notebook for different post types.
