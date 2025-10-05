@@ -34,12 +34,12 @@ class Reddit:
 		"""Initialises request headers for Reddit API authentication."""
 		self.domain = "https://{0}.reddit.com"
 		self.system = platform.system().lower()
-		base_encoded_string = base64.b64encode(b"TAugZFgqYCtC9yjZRcWpng:" + b"").decode(
+		base_encoded_string = base64.b64encode(b"JqPKA86bn41opjXFwEr2sw:" + b"").decode(
 			"utf-8"
 		)
 		self.headers = {
 			"Authorization": "Basic " + base_encoded_string,
-			"User-Agent": f"{self.system}:telex:v0.1.0 (by /u/Intrepid-Set1590)",
+			"User-Agent": f"{self.system}:telex:v0.1.0 (by /u/illucidmind98)",
 		}
 
 	def inject_token(self, token: str) -> None:
@@ -67,7 +67,7 @@ class Reddit:
 			data = {
 				"grant_type": "authorization_code",
 				"code": code,
-				"redirect_uri": "https://9b4cdb6b1627.ngrok-free.app",
+				"redirect_uri": "https://639b4dd00b5b.ngrok-free.app",
 			}
 			async with httpx.AsyncClient() as client:
 				res = await client.post(url, data=data, headers=self.headers, timeout=30)
@@ -160,7 +160,49 @@ class Reddit:
 			msg = "Failed to retrieve about details"
 			raise httpx.RequestError(msg) from e
 
-	async def retrieve_subreddits(self) -> dict[str, int | dict]:
+	async def retrieve_user_profiles(self, query: str) -> dict[str, int | dict]:
+		"""Returns list of users that begin with a query string.
+
+		Args:
+			query (str): Query string to search for users
+
+		Returns:
+			dict[str, int | dict]: Response containing status code and user data
+
+		Raises:
+			httpx.RequestError: If the request to Reddit API fails
+		"""
+		try:
+			url = self.domain.format("oauth") + f"/users/search?q={query}"
+			async with httpx.AsyncClient() as client:
+				res = await client.get(url, headers=self.headers, timeout=30)
+				return {"status_code": res.status_code, "json": res.json()}
+		except httpx.RequestError as e:
+			msg = "Failed to retrieve users"
+			raise httpx.RequestError(msg) from e
+
+	async def retrieve_subreddits(self, query: str) -> dict[str, int | dict]:
+		"""Returns list of subreddits that begin with a query string.
+
+		Args:
+			query (str): Query string to search for subreddits
+
+		Returns:
+			dict[str, int | dict]: Response containing status code and subreddit data
+
+		Raises:
+			httpx.RequestError: If the request to Reddit API fails
+		"""
+		try:
+			url = self.domain.format("oauth") + f"/subreddits/search?q={query}"
+			async with httpx.AsyncClient() as client:
+				res = await client.get(url, headers=self.headers, timeout=30)
+				return {"status_code": res.status_code, "json": res.json()}
+		except httpx.RequestError as e:
+			msg = "Failed to retrieve subreddits"
+			raise httpx.RequestError(msg) from e
+
+	async def retrieve_subscribed_subreddits(self) -> dict[str, int | dict]:
 		"""Returns list of subreddits the user is subscribed to.
 
 		Returns:
