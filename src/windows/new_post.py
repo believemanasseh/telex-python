@@ -218,7 +218,6 @@ class NewPostDialog(Adw.Dialog):
 			row = Gtk.ListBoxRow()
 			subreddit_box = Gtk.Box(
 				orientation=Gtk.Orientation.HORIZONTAL,
-				halign=Gtk.Align.CENTER,
 				spacing=10,
 			)
 			subreddit_icon = load_image(
