@@ -88,10 +88,6 @@ class PostDetailWindow(Gtk.ApplicationWindow):
 		)
 		self.clamp = Adw.Clamp(child=self.box, maximum_size=1000)
 
-		if not store.back_btn_set:
-			self.base.titlebar_controller.add_back_button()
-			store.back_btn_set = True
-
 		self.base.titlebar_controller.inject_post_detail(self)
 
 	async def fetch_data(self, post_id: str) -> dict[str, int | dict]:
@@ -288,7 +284,6 @@ class PostDetailWindow(Gtk.ApplicationWindow):
 		post_container.append(post_metadata_box)
 
 		self.base.viewport.set_child(self.clamp)
-		self.base.scrolled_window.set_child(self.base.viewport)
 
 		# Create a comments section header
 		comments_header = Gtk.Label(
@@ -319,3 +314,7 @@ class PostDetailWindow(Gtk.ApplicationWindow):
 		comments_data = data["json"][1]["data"]["children"]
 		for comment in comments_data:
 			self.load_comments(comments_container, comment, 0)
+
+		if not store.back_btn_set:
+			self.base.titlebar_controller.add_back_button()
+			store.back_btn_set = True
