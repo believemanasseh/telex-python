@@ -65,9 +65,11 @@ class TitlebarController:
 			css_provider (Gtk.CssProvider): Styling provider
 			start_box (Gtk.Box): Left-side header container
 			end_box (Gtk.Box): Right-side header container
+			search_box (Gtk.Box): Search button container
 			back_btn (Gtk.Button): Navigation back button
 			home_btn (Gtk.Button): Home navigation button
 			sort_btn (Gtk.MenuButton): Post sorting menu button
+			switcher (Adw.ViewSwitcher): View switcher for search results
 			user_data (dict): User profile data retrieved from Reddit API
 			profile_data (dict): User profile data for specific categories
 			subreddits (dict): List of subreddits the user is subscribed to
@@ -79,9 +81,11 @@ class TitlebarController:
 		self.css_provider = load_css("/assets/styles/home.css")
 		self.start_box: Gtk.Box | None = None
 		self.end_box: Gtk.Box | None = None
+		self.search_box: Gtk.Box | None = None
 		self.back_btn: Gtk.Button | None = None
 		self.home_btn: Gtk.Button | None = None
 		self.sort_btn: Gtk.MenuButton | None = None
+		self.switcher: Adw.ViewSwitcher | None = None
 		self.user_data = None
 		self.profile_data = None
 		self.subreddits = None
@@ -421,7 +425,43 @@ class TitlebarController:
 		)
 		self.end_box.remove(self.sort_btn)
 
+		if not store.switcher_set:
+			stack = Adw.ViewStack(vexpand=True)
+			stack.add_titled(
+				Gtk.Label(label="Subreddits"), "subreddits", _("Subreddits")
+			).set_icon_name("xyz.daimones.Telex.logo")
+			stack.add_titled(Gtk.Label(label="Users"), "users", _("Users")).set_icon_name(
+				"xyz.daimones.Telex.profile"
+			)
+			stack.connect("notify::visible-child-name", self.__on_page_switched)
+
+			self.switcher = Adw.ViewSwitcher(margin_end=5)
+			self.switcher.set_stack(stack)
+			self.switcher.insert_before(self.end_box, self.search_btn)
+			store.switcher_set = True
+
 		self.home_window.base.set_child(None)
+
+	def __on_page_switched(self, stack: Adw.ViewStack, _):
+		"""Handles page switch events in the view stack.
+
+		Loads and renders the appropriate content based on the selected page
+		(subreddits or users).
+
+		Args:
+			stack (Adw.ViewStack): The view stack that triggered the event
+			_ : Unused parameter for compatibility
+
+		Returns:
+			None: This method does not return a value.
+		"""
+		page = stack.get_visible_child_name()
+		if page == "subreddits":
+			# TODO Render subreddits
+			pass
+		elif page == "users":
+			# TODO Render users
+			pass
 
 	def __on_deleted_text(
 		self,
@@ -443,6 +483,8 @@ class TitlebarController:
 			None: This method does not return a value.
 		"""
 		if entry_buffer.get_length() == 1:
+			self.end_box.remove(self.switcher)
+			store.switcher_set = False
 			self.sort_btn.insert_before(self.end_box, self.search_btn)
 			if store.current_window == "post_detail":
 				self.home_window.application.loop.create_task(
