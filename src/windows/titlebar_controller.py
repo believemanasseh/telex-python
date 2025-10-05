@@ -66,8 +66,11 @@ class TitlebarController:
 			end_box (Gtk.Box): Right-side header container
 			back_btn (Gtk.Button): Navigation back button
 			home_btn (Gtk.Button): Home navigation button
+			sort_btn (Gtk.MenuButton): Post sorting menu button
 			user_data (dict): User profile data retrieved from Reddit API
 			profile_data (dict): User profile data for specific categories
+			subreddits (dict): List of subreddits the user is subscribed to
+			user_profiles (dict): List of user profiles the user follows
 		"""
 		self.header_bar = header_bar
 		self.api = api
@@ -77,8 +80,11 @@ class TitlebarController:
 		self.end_box: Gtk.Box | None = None
 		self.back_btn: Gtk.Button | None = None
 		self.home_btn: Gtk.Button | None = None
+		self.sort_btn: Gtk.MenuButton | None = None
 		self.user_data = None
 		self.profile_data = None
+		self.subreddits = None
+		self.user_profiles = None
 
 		self.home_window.application.loop.create_task(self.retrieve_user_data())
 
@@ -91,6 +97,20 @@ class TitlebarController:
 		"""
 		self.user_data = await self.api.retrieve_user_details()
 		store.current_user = self.user_data["json"]["name"]
+
+	async def retrieve_subreddits_and_users(self, query) -> None:
+		"""Fetches list of subreddits the user is subscribed to.
+
+		Args:
+			query (str): Search query to filter subreddits
+
+		Returns:
+			dict[str, int | dict] | None: Response containing status code and subreddit data
+		"""
+		res = await self.api.retrieve_subreddits(query=query)
+		self.subreddits = res["json"]["data"]["children"]
+		res = await self.api.retrieve_user_profiles(query=query)
+		self.user_profiles = res["json"]["data"]["children"]
 
 	def setup_titlebar(self) -> None:
 		"""Customises the application headerbar.
@@ -123,21 +143,31 @@ class TitlebarController:
 		# Sort menu button
 		menu_btn_child = self.add_menu_button_child()
 		popover_child = self.add_sort_popover_child()
-		self.end_box.append(
-			Gtk.MenuButton(
-				child=menu_btn_child,
-				tooltip_text=_("Sort posts"),
-				popover=Gtk.Popover(child=popover_child),
-				margin_end=5,
-			)
+		self.sort_btn = Gtk.MenuButton(
+			child=menu_btn_child,
+			tooltip_text=_("Sort posts"),
+			popover=Gtk.Popover(child=popover_child),
+			margin_end=5,
 		)
+		self.end_box.append(self.sort_btn)
 
 		# Search
+		buffer = Gtk.EntryBuffer()
+		entry = Gtk.Entry(
+			buffer=buffer,
+			placeholder_text="Search Reddit",
+			css_classes=["search-entry"],
+			width_request=300,
+			primary_icon_name="xyz.daimones.Telex.search",
+		)
+		buffer.connect("inserted-text", self.__on_inserted_text)
+		buffer.connect("deleted-text", self.__on_deleted_text)
 		self.end_box.append(
-			Gtk.Button(
+			Gtk.MenuButton(
 				icon_name="xyz.daimones.Telex.search",
 				margin_end=5,
 				tooltip_text=_("Search"),
+				popover=Gtk.Popover(child=entry),
 			)
 		)
 
@@ -364,6 +394,56 @@ class TitlebarController:
 		add_style_context(label, self.css_provider)
 
 		return menu_btn_child
+
+	def __on_inserted_text(
+		self,
+		entry_buffer: Gtk.EntryBuffer,
+		_position: int,
+		_chars: str,
+		_n_chars: int,
+	):
+		"""Handles inserted text events for Entry widget.
+
+		Filters subreddit boxes based on the search query in the entry buffer.
+
+		Args:
+			_entry_buffer (Gtk.EntryBuffer): The buffer that triggered the event
+			_position (int): The position to insert text in entrybuffer
+			_chars (str): UTF-8 text to be inserted
+			_n_chars (int): The length of the inserted text in bytes
+			popover_listbox: Popover listbox to toggle visibility
+
+		Returns:
+			None: This method does not return a value.
+		"""
+		self.home_window.application.loop.create_task(
+			self.retrieve_subreddits_and_users(query=entry_buffer.get_text())
+		)
+		self.end_box.remove(self.sort_btn)
+
+	def __on_deleted_text(
+		self,
+		entry_buffer: Gtk.EntryBuffer,
+		_position: int,
+		_n_chars: int,
+	):
+		"""Handles deleted text events for Entry widget.
+
+		Shows all subreddit boxes if the entry buffer is empty.
+
+		Args:
+			entry_buffer (Gtk.EntryBuffer): The buffer that triggered the event
+			_position (int): The position to delete text in entrybuffer
+			_n_chars (int): The length of the deleted text in bytes
+			popover_listbox: Popover listbox to toggle visibility
+
+		Returns:
+			None: This method does not return a value.
+		"""
+		if entry_buffer.get_length() == 1:
+			self.home_window.application.loop.create_task(
+				self.retrieve_subreddits_and_users(query="")
+			)
 
 	def __on_create_post_clicked(self, _widget: Gtk.Button) -> None:
 		"""Handles create post button click events.
