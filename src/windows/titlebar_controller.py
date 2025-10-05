@@ -61,6 +61,7 @@ class TitlebarController:
 			header_bar (Adw.HeaderBar): Main header bar widget
 			api (Reddit): Reddit API service instance
 			home_window (HomeWindow): Reference to main window
+			post_detail_window (PostDetailWindow): Reference to post detail view
 			css_provider (Gtk.CssProvider): Styling provider
 			start_box (Gtk.Box): Left-side header container
 			end_box (Gtk.Box): Right-side header container
@@ -162,14 +163,13 @@ class TitlebarController:
 		)
 		buffer.connect("inserted-text", self.__on_inserted_text)
 		buffer.connect("deleted-text", self.__on_deleted_text)
-		self.end_box.append(
-			Gtk.MenuButton(
-				icon_name="xyz.daimones.Telex.search",
-				margin_end=5,
-				tooltip_text=_("Search"),
-				popover=Gtk.Popover(child=entry),
-			)
+		self.search_btn = Gtk.MenuButton(
+			icon_name="xyz.daimones.Telex.search",
+			margin_end=5,
+			tooltip_text=_("Search"),
+			popover=Gtk.Popover(child=entry),
 		)
+		self.end_box.append(self.search_btn)
 
 		# Profile popover
 		popover_child = self.add_profile_popover_child()
@@ -421,6 +421,8 @@ class TitlebarController:
 		)
 		self.end_box.remove(self.sort_btn)
 
+		self.home_window.base.set_child(None)
+
 	def __on_deleted_text(
 		self,
 		entry_buffer: Gtk.EntryBuffer,
@@ -441,9 +443,15 @@ class TitlebarController:
 			None: This method does not return a value.
 		"""
 		if entry_buffer.get_length() == 1:
-			self.home_window.application.loop.create_task(
-				self.retrieve_subreddits_and_users(query="")
-			)
+			self.sort_btn.insert_before(self.end_box, self.search_btn)
+			if store.current_window == "post_detail":
+				self.home_window.application.loop.create_task(
+					self.post_detail_window.render_page()
+				)
+			else:
+				self.home_window.application.loop.create_task(
+					self.home_window.render_page(setup_titlebar=False)
+				)
 
 	def __on_create_post_clicked(self, _widget: Gtk.Button) -> None:
 		"""Handles create post button click events.
