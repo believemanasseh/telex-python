@@ -19,3 +19,8 @@
     font-size: 14px;
     font-weight: 400;
 }
+
+.listbox {
+    border-radius: 8px;
+    padding: 10px;
+}
