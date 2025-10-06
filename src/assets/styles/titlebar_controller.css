@@ -1,0 +1,21 @@
+.subreddit-title {
+    font-weight: 600;
+}
+
+.menu-btn {
+    background-color:  @theme_base_color;
+    font-weight: 500;
+}
+
+.menu-btn:hover {
+    background-color: mix(@theme_fg_color, @theme_base_color, 0.95);
+}
+
+.user-profile-img {
+    min-width: 1px;
+}
+
+.menu-btn-label {
+    font-size: 14px;
+    font-weight: 400;
+}

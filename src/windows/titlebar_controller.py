@@ -27,7 +27,7 @@ from gi.repository import Adw, Gtk
 
 from services import Reddit
 from utils import _
-from utils.common import add_style_context, load_css, load_image
+from utils.common import add_style_context, add_style_contexts, load_css, load_image
 from utils.constants import SortType
 
 from .auth import AuthWindow
@@ -78,7 +78,7 @@ class TitlebarController:
 		self.header_bar = header_bar
 		self.api = api
 		self.home_window = home_window
-		self.css_provider = load_css("/assets/styles/home.css")
+		self.css_provider = load_css("/assets/styles/titlebar_controller.css")
 		self.start_box: Gtk.Box | None = None
 		self.end_box: Gtk.Box | None = None
 		self.search_box: Gtk.Box | None = None
@@ -116,6 +116,48 @@ class TitlebarController:
 		self.subreddits = res["json"]["data"]["children"]
 		res = await self.api.retrieve_user_profiles(query=query)
 		self.user_profiles = res["json"]["data"]["children"]
+
+		listbox = Gtk.ListBox(margin_top=20, margin_bottom=20)
+
+		for subreddit in self.subreddits:
+			row = Gtk.ListBoxRow()
+			box = Gtk.Box(
+				orientation=Gtk.Orientation.HORIZONTAL,
+				spacing=10,
+				margin_top=5,
+				margin_bottom=5,
+				margin_start=5,
+				margin_end=5,
+			)
+			subreddit_icon = load_image(
+				"/assets/images/reddit-placeholder.png",
+				"placeholder",
+				css_classes=["subreddit-icon"],
+			)
+			box.append(subreddit_icon)
+
+			subreddit_info = Gtk.Box(
+				orientation=Gtk.Orientation.VERTICAL,
+				halign=Gtk.Align.START,
+			)
+			subreddit_title = Gtk.Label(
+				label=subreddit["data"]["title"],
+				halign=Gtk.Align.START,
+				css_classes=["subreddit-title"],
+			)
+			subreddit_name = Gtk.Label(
+				label=subreddit["data"]["display_name_prefixed"],
+				halign=Gtk.Align.START,
+			)
+			add_style_contexts([subreddit_icon, subreddit_title], self.css_provider)
+			subreddit_info.append(subreddit_title)
+			subreddit_info.append(subreddit_name)
+
+			box.append(subreddit_info)
+			row.set_child(box)
+			listbox.append(row)
+
+		self.home_window.clamp.set_child(listbox)
 
 	def setup_titlebar(self) -> None:
 		"""Customises the application headerbar.
@@ -440,7 +482,9 @@ class TitlebarController:
 			self.switcher.insert_before(self.end_box, self.search_btn)
 			store.switcher_set = True
 
-		self.home_window.base.set_child(None)
+		self.home_window.clamp.set_child(
+			Gtk.Spinner(spinning=True, halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER)
+		)
 
 	def __on_page_switched(self, stack: Adw.ViewStack, _):
 		"""Handles page switch events in the view stack.
@@ -456,12 +500,81 @@ class TitlebarController:
 			None: This method does not return a value.
 		"""
 		page = stack.get_visible_child_name()
-		if page == "subreddits":
-			# TODO Render subreddits
-			pass
-		elif page == "users":
-			# TODO Render users
-			pass
+
+		listbox = Gtk.ListBox(margin_top=20, margin_bottom=20)
+
+		if page == "subreddits" and self.subreddits:
+			for subreddit in self.subreddits:
+				row = Gtk.ListBoxRow()
+				box = Gtk.Box(
+					orientation=Gtk.Orientation.HORIZONTAL,
+					spacing=10,
+					margin_top=5,
+					margin_bottom=5,
+					margin_start=5,
+					margin_end=5,
+				)
+				subreddit_icon = load_image(
+					"/assets/images/reddit-placeholder.png",
+					"placeholder",
+					css_classes=["subreddit-icon"],
+				)
+				box.append(subreddit_icon)
+
+				subreddit_info = Gtk.Box(
+					orientation=Gtk.Orientation.VERTICAL,
+					halign=Gtk.Align.START,
+				)
+				subreddit_title = Gtk.Label(
+					label=subreddit["data"]["title"],
+					halign=Gtk.Align.START,
+					css_classes=["subreddit-title"],
+				)
+				subreddit_name = Gtk.Label(
+					label=subreddit["data"]["display_name_prefixed"],
+					halign=Gtk.Align.START,
+				)
+				subreddit_info.append(subreddit_title)
+				subreddit_info.append(subreddit_name)
+
+				box.append(subreddit_info)
+				row.set_child(box)
+				listbox.append(row)
+		elif page == "users" and self.user_profiles:
+			for user in self.user_profiles:
+				row = Gtk.ListBoxRow()
+				box = Gtk.Box(
+					orientation=Gtk.Orientation.HORIZONTAL,
+					spacing=10,
+					margin_top=5,
+					margin_bottom=5,
+					margin_start=5,
+					margin_end=5,
+				)
+				user_icon = load_image(
+					"/assets/images/reddit-placeholder.png",
+					"placeholder",
+					css_classes=["user-icon"],
+				)
+				box.append(user_icon)
+
+				user_info = Gtk.Box(
+					orientation=Gtk.Orientation.VERTICAL,
+					halign=Gtk.Align.START,
+				)
+				user_name = Gtk.Label(
+					label=f"u/{user['data']['name']}", halign=Gtk.Align.START
+				)
+				user_info.append(user_name)
+
+				box.append(user_info)
+				row.set_child(box)
+				listbox.append(row)
+
+		self.home_window.clamp.set_child(listbox)
+		add_style_contexts(
+			[subreddit_icon, subreddit_title, user_icon], self.css_provider
+		)
 
 	def __on_deleted_text(
 		self,
