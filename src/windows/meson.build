@@ -10,6 +10,7 @@ telex_python_sources = [
     'preferences.py',
     'profile.py',
     'new_post.py',
+    'search.py',
 ]
 
 install_data(telex_python_sources, install_dir: moduledir)
