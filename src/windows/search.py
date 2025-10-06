@@ -84,7 +84,8 @@ class SearchWindow(Gtk.ApplicationWindow):
 		Creates a list of subreddits matching the search query and displays
 		them in the window.
 		"""
-		listbox = Gtk.ListBox(margin_top=20, margin_bottom=20)
+		listbox = Gtk.ListBox(margin_top=20, margin_bottom=20, css_classes=["listbox"])
+		add_style_context(listbox, self.css_provider)
 
 		for subreddit in self.subreddits:
 			row = Gtk.ListBoxRow()
@@ -132,7 +133,8 @@ class SearchWindow(Gtk.ApplicationWindow):
 		Creates a list of user profiles matching the search query and displays
 		them in the window.
 		"""
-		listbox = Gtk.ListBox(margin_top=20, margin_bottom=20)
+		listbox = Gtk.ListBox(margin_top=20, margin_bottom=20, css_classes=["listbox"])
+		add_style_context(listbox, self.css_provider)
 
 		for user in self.user_profiles:
 			row = Gtk.ListBoxRow()
