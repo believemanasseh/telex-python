@@ -25,6 +25,7 @@ gi.require_versions(
 from gi.repository import Adw, Gtk, Pango
 
 from services import Reddit
+from utils import _
 from utils.common import add_style_contexts, load_css, load_image
 
 MAX_CHAR = 300
@@ -65,7 +66,7 @@ class NewPostDialog(Adw.Dialog):
 		# Set dialog properties
 		self.set_content_height(500)
 		self.set_content_width(600)
-		self.set_title("New Post")
+		self.set_title(_("New Post"))
 		self.spinner = Gtk.Spinner(
 			spinning=True, halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER
 		)
@@ -101,12 +102,12 @@ class NewPostDialog(Adw.Dialog):
 			)
 			box = Gtk.Box(margin_top=20)
 			title_label = Gtk.Label(
-				label="Title",
+				label=_("Title"),
 				halign=Gtk.Align.START,
 				css_classes=["title-label"],
 			)
 			asterisk_label = Gtk.Label(
-				label="*", css_classes=["asterisk-label"], margin_bottom=5
+				label=_("*"), css_classes=["asterisk-label"], margin_bottom=5
 			)
 			box.append(title_label)
 			box.append(asterisk_label)
@@ -130,14 +131,14 @@ class NewPostDialog(Adw.Dialog):
 				# Add body text and link input field
 				box = Gtk.Box(margin_top=20)
 				body_link_label = Gtk.Label(
-					label="Body text (optional)" if label == "Text" else "Link URL",
+					label=_("Body text (optional)") if label == "Text" else _("Link URL"),
 					halign=Gtk.Align.START,
 					css_classes=["body-label"],
 				)
 				box.append(body_link_label)
 				if label == "Link":
 					asterisk_label = Gtk.Label(
-						label="*", css_classes=["asterisk-label"], margin_bottom=5
+						label=_("*"), css_classes=["asterisk-label"], margin_bottom=5
 					)
 					box.append(asterisk_label)
 
@@ -171,7 +172,9 @@ class NewPostDialog(Adw.Dialog):
 				child_box.append(scrolled_window)
 			else:
 				parent = Gtk.Window()
-				button = Gtk.Button(label="Choose File…", margin_top=10, margin_bottom=10)
+				button = Gtk.Button(
+					label=_("Choose File…"), margin_top=10, margin_bottom=10
+				)
 				button.connect("clicked", self.__on_upload_clicked, parent, child_box)
 				child_box.append(button)
 
@@ -205,7 +208,7 @@ class NewPostDialog(Adw.Dialog):
 		buffer.connect("deleted-text", self.__on_deleted_text)
 		entry = Gtk.Entry(
 			buffer=buffer,
-			placeholder_text="Search",
+			placeholder_text=_("Search"),
 			css_classes=["search-entry"],
 			width_request=300,
 			primary_icon_name="xyz.daimones.Telex.search",
@@ -222,7 +225,7 @@ class NewPostDialog(Adw.Dialog):
 			)
 			subreddit_icon = load_image(
 				"/assets/images/reddit-placeholder.png",
-				"Subreddit placeholder",
+				_("Subreddit placeholder"),
 				css_classes=["subreddit-icon"],
 				css_provider=self.css_provider,
 			)
@@ -402,7 +405,7 @@ class NewPostDialog(Adw.Dialog):
 			None: This method does not return a value.
 		"""
 		dialog = Gtk.FileChooserNative(
-			title="Select a file",
+			title=_("Select a file"),
 			transient_for=parent,
 			action=Gtk.FileChooserAction.OPEN,
 			accept_label="_Open",
@@ -504,7 +507,7 @@ class NewPostDialog(Adw.Dialog):
 		button.connect("clicked", lambda _: self.close())
 
 		popover_child = self.add_popover_child()
-		self.menu_label = Gtk.Label(label="Select a subreddit")
+		self.menu_label = Gtk.Label(label=_("Select a subreddit"))
 		self.menu_btn = Gtk.MenuButton(
 			child=self.menu_label,
 			popover=Gtk.Popover(child=popover_child),

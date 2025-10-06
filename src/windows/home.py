@@ -142,7 +142,7 @@ class HomeWindow(Gtk.ApplicationWindow):
 
 		post_image = load_image(
 			"/assets/images/reddit-placeholder.png",
-			"Reddit placeholder",
+			_("Reddit placeholder"),
 			css_classes=["post-image"],
 			css_provider=self.css_provider,
 		)

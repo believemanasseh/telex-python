@@ -160,7 +160,7 @@ class TitlebarController:
 		buffer = Gtk.EntryBuffer()
 		entry = Gtk.Entry(
 			buffer=buffer,
-			placeholder_text="Search Reddit",
+			placeholder_text=_("Search Reddit"),
 			css_classes=["search-entry"],
 			width_request=300,
 			primary_icon_name="xyz.daimones.Telex.search",
@@ -428,11 +428,11 @@ class TitlebarController:
 		if not store.switcher_set:
 			stack = Adw.ViewStack(vexpand=True)
 			stack.add_titled(
-				Gtk.Label(label="Subreddits"), "subreddits", _("Subreddits")
+				Gtk.Label(label=_("Subreddits")), "subreddits", _("Subreddits")
 			).set_icon_name("xyz.daimones.Telex.logo")
-			stack.add_titled(Gtk.Label(label="Users"), "users", _("Users")).set_icon_name(
-				"xyz.daimones.Telex.profile"
-			)
+			stack.add_titled(
+				Gtk.Label(label=_("Users")), "users", _("Users")
+			).set_icon_name("xyz.daimones.Telex.profile")
 			stack.connect("notify::visible-child-name", self.__on_page_switched)
 
 			self.switcher = Adw.ViewSwitcher(margin_end=5)
