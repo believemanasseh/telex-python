@@ -353,6 +353,21 @@ class HomeWindow(Gtk.ApplicationWindow):
 		Returns:
 			None: This method does not return a value.
 		"""
+		spinner = Gtk.Spinner(
+			spinning=True, halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER
+		)
+
+		clamp = Adw.Clamp(child=spinner, maximum_size=1000)
+		self.viewport = Gtk.Viewport(child=clamp)
+		self.scrolled_window = Gtk.ScrolledWindow(
+			child=self.viewport,
+			hscrollbar_policy=Gtk.PolicyType.NEVER,
+			vscrollbar_policy=Gtk.PolicyType.AUTOMATIC,
+		)
+		self.base.set_child(self.scrolled_window)
+		self.base.maximize()
+		self.base.set_visible(True)
+
 		await self.reload_data()
 
 		self.box = Gtk.Box(
@@ -417,13 +432,4 @@ class HomeWindow(Gtk.ApplicationWindow):
 			)
 			post_container.append(post_metadata_box)
 
-		clamp = Adw.Clamp(child=self.box, maximum_size=1000)
-		self.viewport = Gtk.Viewport(child=clamp)
-		self.scrolled_window = Gtk.ScrolledWindow(
-			child=self.viewport,
-			hscrollbar_policy=Gtk.PolicyType.NEVER,
-			vscrollbar_policy=Gtk.PolicyType.AUTOMATIC,
-		)
-		self.base.set_child(self.scrolled_window)
-		self.base.maximize()
-		self.base.set_visible(True)
+			clamp.set_child(self.box)
