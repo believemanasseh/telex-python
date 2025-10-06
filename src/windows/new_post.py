@@ -205,7 +205,7 @@ class NewPostDialog(Adw.Dialog):
 
 		buffer = Gtk.EntryBuffer()
 		buffer.connect("inserted-text", self.__on_inserted_text)
-		buffer.connect("deleted-text", self.__on_deleted_text)
+		buffer.connect_after("deleted-text", self.__on_deleted_text)
 		entry = Gtk.Entry(
 			buffer=buffer,
 			placeholder_text=_("Search"),
@@ -382,7 +382,7 @@ class NewPostDialog(Adw.Dialog):
 		Returns:
 			None: This method does not return a value.
 		"""
-		if entry_buffer.get_length() == 1:
+		if entry_buffer.get_length() == 0:
 			for box in self.subreddit_boxes:
 				row = getattr(box, "row", None)
 				if not row:

@@ -151,7 +151,7 @@ class TitlebarController:
 			primary_icon_name="xyz.daimones.Telex.search",
 		)
 		buffer.connect("inserted-text", self.__on_inserted_text)
-		buffer.connect("deleted-text", self.__on_deleted_text)
+		buffer.connect_after("deleted-text", self.__on_deleted_text)
 		self.search_btn = Gtk.MenuButton(
 			icon_name="xyz.daimones.Telex.search",
 			margin_end=5,
@@ -400,7 +400,6 @@ class TitlebarController:
 			_position (int): The position to insert text in entrybuffer
 			_chars (str): UTF-8 text to be inserted
 			_n_chars (int): The length of the inserted text in bytes
-			popover_listbox: Popover listbox to toggle visibility
 
 		Returns:
 			None: This method does not return a value.
@@ -463,12 +462,11 @@ class TitlebarController:
 			entry_buffer (Gtk.EntryBuffer): The buffer that triggered the event
 			_position (int): The position to delete text in entrybuffer
 			_n_chars (int): The length of the deleted text in bytes
-			popover_listbox: Popover listbox to toggle visibility
 
 		Returns:
 			None: This method does not return a value.
 		"""
-		if entry_buffer.get_length() == 1:
+		if entry_buffer.get_length() == 0:
 			self.end_box.remove(self.switcher)
 			store.switcher_set = False
 			self.sort_btn.insert_before(self.end_box, self.search_btn)
