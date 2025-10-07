@@ -142,6 +142,15 @@ class AuthWindow(Gtk.ApplicationWindow):
 				application=self.application, base_window=self, api=self.api
 			)
 			self.application.loop.create_task(home_window.render_page())
+		elif res["status_code"] == HTTPStatus.UNAUTHORIZED:
+			logger.error("Unauthorised: Invalid auth code")
+			self.dialog.set_child(
+				Gtk.Label(
+					label=_("Unauthorised: Invalid auth code"),
+					valign=Gtk.Align.CENTER,
+					halign=Gtk.Align.CENTER,
+				)
+			)
 
 	def __on_load_changed(self, widget: WebKit.WebView, event: WebKit.LoadEvent) -> None:
 		"""Handler for URI load change signals.
@@ -162,6 +171,7 @@ class AuthWindow(Gtk.ApplicationWindow):
 			start_index = uri.index("code=") + len("code=")
 			end_index = uri.index("#")
 			auth_code = uri[start_index:end_index]
+
 			self.dialog.set_child(
 				Gtk.Spinner(
 					spinning=True, halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER
