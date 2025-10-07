@@ -277,6 +277,9 @@ class TitlebarController:
 				if "Profile" in label:
 					menu_btn.connect("clicked", self.__on_view_profile_clicked)
 
+				if "Subreddits" in label:
+					menu_btn.connect("clicked", self.__on_subreddits_clicked)
+
 			if menu_btn.get_child():
 				menu_btn.get_child().set_halign(Gtk.Align.START)
 
@@ -592,7 +595,28 @@ class TitlebarController:
 
 		from windows.profile import ProfileWindow
 
-		profile_window = ProfileWindow(base_window=self.home_window, api=self.api)
+		profile_window = ProfileWindow(home_window=self.home_window, api=self.api)
 		self.home_window.application.loop.create_task(
 			profile_window.render_page(view_profile_btn=button)
+		)
+
+	def __on_subreddits_clicked(self, button: Gtk.Button) -> None:
+		"""Handles subreddits button click events.
+
+		Opens the subreddits window to display the list of subreddits
+		the user is subscribed to.
+
+		Args:
+			button (Gtk.Button): The button that triggered the event
+
+		Returns:
+			None: This method does not return a value.
+		"""
+		button.set_sensitive(False)
+
+		from windows.subreddits import SubredditsWindow
+
+		subreddits_window = SubredditsWindow(home_window=self.home_window, api=self.api)
+		self.home_window.application.loop.create_task(
+			subreddits_window.render_page(subreddits_btn=button)
 		)

@@ -8,6 +8,7 @@ css_source_files = [
     'profile.css',
     'new_post.css',
     'search.css',
+    'subreddits.css',
 ]
 
 install_data(css_source_files, install_dir: moduledir)

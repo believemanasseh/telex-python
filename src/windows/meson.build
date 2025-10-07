@@ -11,6 +11,7 @@ telex_python_sources = [
     'profile.py',
     'new_post.py',
     'search.py',
+    'subreddits.py',
 ]
 
 install_data(telex_python_sources, install_dir: moduledir)
