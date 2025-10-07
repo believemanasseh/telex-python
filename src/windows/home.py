@@ -79,6 +79,7 @@ class HomeWindow(Gtk.ApplicationWindow):
 			data: Fetched Reddit posts data based on current sort category
 			box: Main vertical box container for the home page content
 			titlebar_controller: Controller for the title bar functionality
+			clamp (Adw.Clamp): Width constraint container
 			scrolled_window (Gtk.ScrolledWindow): Main scrollable container for posts
 			viewport (Gtk.Viewport): Viewport containing the posts
 		"""
@@ -357,8 +358,8 @@ class HomeWindow(Gtk.ApplicationWindow):
 			spinning=True, halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER
 		)
 
-		clamp = Adw.Clamp(child=spinner, maximum_size=1000)
-		self.viewport = Gtk.Viewport(child=clamp)
+		self.clamp = Adw.Clamp(child=spinner, maximum_size=1000)
+		self.viewport = Gtk.Viewport(child=self.clamp)
 		self.scrolled_window = Gtk.ScrolledWindow(
 			child=self.viewport,
 			hscrollbar_policy=Gtk.PolicyType.NEVER,
@@ -432,4 +433,4 @@ class HomeWindow(Gtk.ApplicationWindow):
 			)
 			post_container.append(post_metadata_box)
 
-			clamp.set_child(self.box)
+			self.clamp.set_child(self.box)
