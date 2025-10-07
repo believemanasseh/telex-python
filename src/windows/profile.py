@@ -14,7 +14,7 @@ import store
 gi.require_versions({"Gtk": "4.0", "Adw": "1"})
 
 
-from gi.repository import Adw, Gtk
+from gi.repository import Gtk
 
 from services import Reddit
 from utils import _
@@ -537,9 +537,12 @@ class ProfileWindow(Gtk.ApplicationWindow):
 		Returns:
 			None: This method does not return a value.
 		"""
-		self.about_data = await self.fetch_data("about")
+		spinner = Gtk.Spinner(
+			spinning=True, halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER
+		)
+		self.base.clamp.set_child(spinner)
 
-		self.base.scrolled_window.set_child(None)
+		self.about_data = await self.fetch_data("about")
 
 		self.profile_data = await self.fetch_data(store.current_profile_tab)
 
@@ -658,10 +661,7 @@ class ProfileWindow(Gtk.ApplicationWindow):
 			self.box.append(self.main_content)
 			vbox.append(self.box)
 
-		clamp = Adw.Clamp(child=vbox, maximum_size=1000)
-		viewport = Gtk.Viewport(child=clamp)
-
-		self.base.scrolled_window.set_child(viewport)
+		self.base.clamp.set_child(vbox)
 
 		add_style_contexts([profile_name, profile_display_name], self.css_provider)
 
