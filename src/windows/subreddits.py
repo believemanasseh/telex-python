@@ -161,17 +161,16 @@ class SubredditsWindow(Gtk.ApplicationWindow):
 		)
 		box.append(entry)
 
-		listbox = Gtk.ListBox()
+		listbox = Gtk.ListBox(css_classes=["listbox"])
+		add_style_context(listbox, self.css_provider)
 
 		for subreddit in self.subreddits["json"]["data"]["children"]:
 			row = Gtk.ListBoxRow()
 			subreddit_box = Gtk.Box(
 				orientation=Gtk.Orientation.HORIZONTAL,
 				spacing=10,
-				css_classes=["subreddit-box"],
 				cursor=self.cursor,
 			)
-			add_style_context(subreddit_box, self.css_provider)
 			subreddit_icon = load_image(
 				"/assets/images/reddit-placeholder.png",
 				_("Subreddit placeholder"),
